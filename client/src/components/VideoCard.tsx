@@ -24,13 +24,16 @@ export default function VideoCard({
       )}
     >
       <CardContent className="p-3">
-        <div className="aspect-video relative overflow-hidden rounded-md">
+        <div 
+          className="aspect-video relative overflow-hidden rounded-md"
+          onClick={onClick}
+        >
           <img 
             src={video.thumbnail || ''} 
             alt={video.title}
             className="object-cover w-full h-full"
           />
-          <div className="absolute top-2 right-2">
+          <div className="absolute top-2 right-2" onClick={e => e.stopPropagation()}>
             <WatchlistButton 
               video={video} 
               onAuthRequired={onAuthRequired}
@@ -38,7 +41,7 @@ export default function VideoCard({
           </div>
         </div>
         <div 
-          className="mt-3"
+          className="mt-3 cursor-pointer"
           onClick={onClick}
         >
           <h3 className="font-semibold line-clamp-2">{video.title}</h3>
