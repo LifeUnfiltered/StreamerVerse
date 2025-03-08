@@ -33,6 +33,51 @@ export const TEST_TV_SHOWS: Video[] = [
       embedUrl: 'https://vidsrc.to/embed/tv/tt1520211'
     },
     chapters: null
+  },
+  {
+    id: 2,
+    sourceId: 'tt0903747',
+    source: 'vidsrc',
+    title: 'Breaking Bad',
+    description: 'A high school chemistry teacher turned methamphetamine manufacturer partners with a former student to secure his family\'s financial future as he battles terminal lung cancer.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg',
+    metadata: {
+      imdbId: 'tt0903747',
+      type: 'tv',
+      tmdbId: 1396,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0903747'
+    },
+    chapters: null
+  },
+  {
+    id: 3,
+    sourceId: 'tt4574334',
+    source: 'vidsrc',
+    title: 'Stranger Things',
+    description: 'When a young boy disappears, his mother, a police chief, and his friends must confront terrifying supernatural forces in order to get him back.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg',
+    metadata: {
+      imdbId: 'tt4574334',
+      type: 'tv',
+      tmdbId: 66732,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt4574334'
+    },
+    chapters: null
+  },
+  {
+    id: 4,
+    sourceId: 'tt8111088',
+    source: 'vidsrc',
+    title: 'The Mandalorian',
+    description: 'The travels of a lone bounty hunter in the outer reaches of the galaxy, far from the authority of the New Republic.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/eU1i6eHXlzMOlEq0ku1Rzq7Y4wA.jpg',
+    metadata: {
+      imdbId: 'tt8111088',
+      type: 'tv',
+      tmdbId: 82856,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt8111088'
+    },
+    chapters: null
   }
 ];
 
@@ -243,6 +288,113 @@ export const TEST_EPISODES: Video[] = [
       embedUrl: 'https://vidsrc.to/embed/tv/tt1520211/2-3',
       season: 2,
       episode: 3
+    },
+    chapters: null
+  },
+  // Breaking Bad Season 1
+  {
+    id: 15,
+    sourceId: 'tt0903747',
+    source: 'vidsrc',
+    title: 'Breaking Bad S1E1 - Pilot',
+    description: 'Walter White, a struggling high school chemistry teacher, is diagnosed with advanced lung cancer. He turns to a life of crime, producing and selling methamphetamine.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg',
+    metadata: {
+      imdbId: 'tt0903747',
+      type: 'tv',
+      tmdbId: 1396,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0903747/1-1',
+      season: 1,
+      episode: 1
+    },
+    chapters: null
+  },
+  {
+    id: 16,
+    sourceId: 'tt0903747',
+    source: 'vidsrc',
+    title: 'Breaking Bad S1E2 - Cat\'s in the Bag...',
+    description: 'Walt and Jesse must deal with the aftermath of their first drug deal gone wrong.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg',
+    metadata: {
+      imdbId: 'tt0903747',
+      type: 'tv',
+      tmdbId: 1396,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0903747/1-2',
+      season: 1,
+      episode: 2
+    },
+    chapters: null
+  },
+
+  // Stranger Things Season 1
+  {
+    id: 17,
+    sourceId: 'tt4574334',
+    source: 'vidsrc',
+    title: 'Stranger Things S1E1 - Chapter One: The Vanishing of Will Byers',
+    description: 'On his way home from a friend\'s house, young Will sees something terrifying. Nearby, a sinister secret lurks in the depths of a government lab.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg',
+    metadata: {
+      imdbId: 'tt4574334',
+      type: 'tv',
+      tmdbId: 66732,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt4574334/1-1',
+      season: 1,
+      episode: 1
+    },
+    chapters: null
+  },
+  {
+    id: 18,
+    sourceId: 'tt4574334',
+    source: 'vidsrc',
+    title: 'Stranger Things S1E2 - Chapter Two: The Weirdo on Maple Street',
+    description: 'Lucas, Mike and Dustin try to talk to the girl they found in the woods. Hopper questions an anxious Joyce about an unsettling phone call.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg',
+    metadata: {
+      imdbId: 'tt4574334',
+      type: 'tv',
+      tmdbId: 66732,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt4574334/1-2',
+      season: 1,
+      episode: 2
+    },
+    chapters: null
+  },
+
+  // The Mandalorian Season 1
+  {
+    id: 19,
+    sourceId: 'tt8111088',
+    source: 'vidsrc',
+    title: 'The Mandalorian S1E1 - Chapter 1: The Mandalorian',
+    description: 'A Mandalorian bounty hunter tracks a target for a well-paying client.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/eU1i6eHXlzMOlEq0ku1Rzq7Y4wA.jpg',
+    metadata: {
+      imdbId: 'tt8111088',
+      type: 'tv',
+      tmdbId: 82856,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt8111088/1-1',
+      season: 1,
+      episode: 1
+    },
+    chapters: null
+  },
+  {
+    id: 20,
+    sourceId: 'tt8111088',
+    source: 'vidsrc',
+    title: 'The Mandalorian S1E2 - Chapter 2: The Child',
+    description: 'Target in hand, the Mandalorian must now contend with scavengers.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/eU1i6eHXlzMOlEq0ku1Rzq7Y4wA.jpg',
+    metadata: {
+      imdbId: 'tt8111088',
+      type: 'tv',
+      tmdbId: 82856,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt8111088/1-2',
+      season: 1,
+      episode: 2
     },
     chapters: null
   }
