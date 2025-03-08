@@ -23,8 +23,8 @@ function movieToVideo(movie: any): Video {
 }
 
 // Convert TMDB TV show to our Video type
-function tvShowToVideo(show: any): Video {
-  return {
+function tvShowToVideo(show: any, episode?: any): Video {
+  const baseVideo = {
     id: 0,
     sourceId: show.external_ids?.imdb_id || `tmdb-${show.id}`,
     source: 'vidsrc',
@@ -35,9 +35,38 @@ function tvShowToVideo(show: any): Video {
       imdbId: show.external_ids?.imdb_id,
       type: 'tv',
       tmdbId: show.id,
-      embedUrl: show.external_ids?.imdb_id ? `https://vidsrc.xyz/embed/tv/${show.external_ids.imdb_id}` : null
     },
     chapters: []
+  };
+
+  if (episode) {
+    const seasonNum = episode.season_number;
+    const episodeNum = episode.episode_number;
+    return {
+      ...baseVideo,
+      title: `${show.name} S${seasonNum}E${episodeNum} - ${episode.name}`,
+      description: episode.overview || show.overview,
+      thumbnail: episode.still_path ? `https://image.tmdb.org/t/p/w500${episode.still_path}` : baseVideo.thumbnail,
+      metadata: {
+        ...baseVideo.metadata,
+        season: seasonNum,
+        episode: episodeNum,
+        embedUrl: show.external_ids?.imdb_id 
+          ? `https://vidsrc.xyz/embed/tv/${show.external_ids.imdb_id}/${seasonNum}-${episodeNum}`
+          : null
+      }
+    };
+  }
+
+  // For show without specific episode
+  return {
+    ...baseVideo,
+    metadata: {
+      ...baseVideo.metadata,
+      embedUrl: show.external_ids?.imdb_id 
+        ? `https://vidsrc.xyz/embed/tv/${show.external_ids.imdb_id}`
+        : null
+    }
   };
 }
 
@@ -48,14 +77,12 @@ export async function searchContent(query: string): Promise<Video[]> {
 
     for (const result of results.results || []) {
       if (result.media_type === 'movie') {
-        // Fetch additional movie details to get IMDB ID
         const movieDetails = await tmdb.movieInfo({ 
           id: result.id as number, 
           append_to_response: 'external_ids' 
         });
         videos.push(movieToVideo(movieDetails));
       } else if (result.media_type === 'tv') {
-        // Fetch additional TV show details to get IMDB ID
         const showDetails = await tmdb.tvInfo({ 
           id: result.id as number, 
           append_to_response: 'external_ids' 
@@ -107,6 +134,29 @@ export async function fetchLatestTVShows(): Promise<Video[]> {
     return videos;
   } catch (error) {
     console.error('TMDB latest TV shows error:', error);
+    return [];
+  }
+}
+
+export async function fetchLatestEpisodes(): Promise<Video[]> {
+  try {
+    const airingToday = await tmdb.tvAiringToday();
+    const videos: Video[] = [];
+
+    for (const show of airingToday.results || []) {
+      const showDetails = await tmdb.tvInfo({ 
+        id: show.id as number, 
+        append_to_response: 'external_ids,last_episode_to_air' 
+      });
+
+      if (showDetails.last_episode_to_air) {
+        videos.push(tvShowToVideo(showDetails, showDetails.last_episode_to_air));
+      }
+    }
+
+    return videos;
+  } catch (error) {
+    console.error('TMDB latest episodes error:', error);
     return [];
   }
 }

@@ -1,5 +1,5 @@
 import type { Video } from "@shared/schema";
-import { searchContent, fetchLatestMovies, fetchLatestTVShows } from './tmdb';
+import { searchContent, fetchLatestMovies, fetchLatestTVShows, fetchLatestEpisodes } from './tmdb';
 
 const VIDSRC_BASE_URL = "https://vidsrc.xyz";
 
@@ -63,28 +63,15 @@ export async function searchVidSrc(query: string): Promise<Video[]> {
 
 // Fetch latest movies from TMDB
 export async function getLatestMovies(page: number = 1): Promise<Video[]> {
-  const movies = await fetchLatestMovies();
-  return movies;
+  return fetchLatestMovies();
 }
 
 // Fetch latest TV shows from TMDB
 export async function getLatestTVShows(page: number = 1): Promise<Video[]> {
-  const shows = await fetchLatestTVShows();
-  return shows;
+  return fetchLatestTVShows();
 }
 
-// Fetch latest episodes (using latest TV shows)
+// Fetch latest episodes
 export async function getLatestEpisodes(page: number = 1): Promise<Video[]> {
-  const shows = await fetchLatestTVShows();
-  return shows.map(show => ({
-    ...show,
-    metadata: {
-      ...show.metadata,
-      season: 1,
-      episode: 1,
-      embedUrl: show.metadata?.imdbId 
-        ? `${VIDSRC_BASE_URL}/embed/tv/${show.metadata.imdbId}/1-1`
-        : null
-    }
-  }));
+  return fetchLatestEpisodes();
 }
