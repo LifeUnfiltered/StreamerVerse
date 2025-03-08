@@ -3,6 +3,8 @@ import type { Video } from "@shared/schema";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import FloatingActionButton from "./FloatingActionButton";
+import LoadingSpinner from "./LoadingSpinner";
+import { AnimatePresence } from "framer-motion";
 
 interface VideoPlayerProps {
   video: Video;
@@ -10,6 +12,7 @@ interface VideoPlayerProps {
 
 export default function VideoPlayer({ video }: VideoPlayerProps) {
   const [currentTime, setCurrentTime] = useState(0);
+  const [isBuffering, setIsBuffering] = useState(true);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerRef = useRef<any>(null);
 
@@ -31,6 +34,9 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
       playerRef.current = new (window as any).YT.Player(iframeRef.current, {
         events: {
           onStateChange: (event: any) => {
+            // Update buffering state based on player state
+            setIsBuffering(event.data === (window as any).YT.PlayerState.BUFFERING);
+
             if (event.data === (window as any).YT.PlayerState.PLAYING) {
               const updateTime = () => {
                 if (playerRef.current?.getCurrentTime) {
@@ -42,6 +48,9 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
               };
               updateTime();
             }
+          },
+          onReady: () => {
+            setIsBuffering(false);
           }
         }
       });
@@ -69,7 +78,7 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <AspectRatio ratio={16 / 9}>
+            <AspectRatio ratio={16 / 9} className="relative">
               <iframe
                 ref={iframeRef}
                 src={embedUrl}
@@ -78,6 +87,9 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
                 allowFullScreen
                 className="w-full h-full rounded-md"
               />
+              <AnimatePresence>
+                {isBuffering && <LoadingSpinner />}
+              </AnimatePresence>
             </AspectRatio>
             <p className="text-sm text-muted-foreground">
               {video.description}
