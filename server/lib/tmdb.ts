@@ -78,6 +78,51 @@ export const TEST_TV_SHOWS: Video[] = [
       embedUrl: 'https://vidsrc.to/embed/tv/tt8111088'
     },
     chapters: null
+  },
+  {
+    id: 5,
+    sourceId: 'tt0411008',
+    source: 'vidsrc',
+    title: 'Lost',
+    description: 'The survivors of a plane crash are forced to work together in order to survive on a seemingly deserted tropical island.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/og6S0aTZU6YUJAbqxeKjCa3kY1E.jpg',
+    metadata: {
+      imdbId: 'tt0411008',
+      type: 'tv',
+      tmdbId: 4607,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0411008'
+    },
+    chapters: null
+  },
+  {
+    id: 6,
+    sourceId: 'tt0386676',
+    source: 'vidsrc',
+    title: 'The Office',
+    description: 'A mockumentary on a group of typical office workers, where the workday consists of ego clashes, inappropriate behavior, and tedium.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/5uwJHXp8MPvwxv8VkfYM6pEsY3g.jpg',
+    metadata: {
+      imdbId: 'tt0386676',
+      type: 'tv',
+      tmdbId: 2316,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0386676'
+    },
+    chapters: null
+  },
+  {
+    id: 7,
+    sourceId: 'tt3032476',
+    source: 'vidsrc',
+    title: 'Better Call Saul',
+    description: 'The trials and tribulations of criminal lawyer Jimmy McGill in the years leading up to his fateful run-in with Walter White and Jesse Pinkman.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/fC2HDm5t0kHl7mTm7jxMR31b6Qy.jpg',
+    metadata: {
+      imdbId: 'tt3032476',
+      type: 'tv',
+      tmdbId: 60059,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt3032476'
+    },
+    chapters: null
   }
 ];
 
@@ -1056,6 +1101,451 @@ export const TEST_EPISODES: Video[] = [
       embedUrl: 'https://vidsrc.to/embed/tv/tt8111088/1-8',
       season: 1,
       episode: 8
+    },
+    chapters: null
+  },
+  // Lost Season 1
+  {
+    id: 60,
+    sourceId: 'tt0411008',
+    source: 'vidsrc',
+    title: 'Lost S1E1 - Pilot Part 1',
+    description: 'Forty-eight survivors of an airline crash land in the Pacific Ocean.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/og6S0aTZU6YUJAbqxeKjCa3kY1E.jpg',
+    metadata: {
+      imdbId: 'tt0411008',
+      type: 'tv',
+      tmdbId: 4607,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0411008/1-1',
+      season: 1,
+      episode: 1
+    },
+    chapters: null
+  },
+  {
+    id: 61,
+    sourceId: 'tt0411008',
+    source: 'vidsrc',
+    title: 'Lost S1E2 - Pilot Part 2',
+    description: 'Having discovered a transceiver among the plane\'s wreckage, the survivors attempt to broadcast a signal.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/og6S0aTZU6YUJAbqxeKjCa3kY1E.jpg',
+    metadata: {
+      imdbId: 'tt0411008',
+      type: 'tv',
+      tmdbId: 4607,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0411008/1-2',
+      season: 1,
+      episode: 2
+    },
+    chapters: null
+  },
+  {
+    id: 62,
+    sourceId: 'tt0411008',
+    source: 'vidsrc',
+    title: 'Lost S1E3 - Tabula Rasa',
+    description: 'Jack tries to perform surgery on a wounded passenger while Locke discovers a mysterious hatch.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/og6S0aTZU6YUJAbqxeKjCa3kY1E.jpg',
+    metadata: {
+      imdbId: 'tt0411008',
+      type: 'tv',
+      tmdbId: 4607,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0411008/1-3',
+      season: 1,
+      episode: 3
+    },
+    chapters: null
+  },
+  {
+    id: 63,
+    sourceId: 'tt0411008',
+    source: 'vidsrc',
+    title: 'Lost S1E4 - Walkabout',
+    description: 'Locke struggles with his past while Kate helps a mysterious figure.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/og6S0aTZU6YUJAbqxeKjCa3kY1E.jpg',
+    metadata: {
+      imdbId: 'tt0411008',
+      type: 'tv',
+      tmdbId: 4607,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0411008/1-4',
+      season: 1,
+      episode: 4
+    },
+    chapters: null
+  },
+  {
+    id: 64,
+    sourceId: 'tt0411008',
+    source: 'vidsrc',
+    title: 'Lost S1E5 - White Rabbit',
+    description: 'Jack faces his past while Locke explores the island.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/og6S0aTZU6YUJAbqxeKjCa3kY1E.jpg',
+    metadata: {
+      imdbId: 'tt0411008',
+      type: 'tv',
+      tmdbId: 4607,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0411008/1-5',
+      season: 1,
+      episode: 5
+    },
+    chapters: null
+  },
+  {
+    id: 65,
+    sourceId: 'tt0411008',
+    source: 'vidsrc',
+    title: 'Lost S1E6 - House of the Rising Sun',
+    description: 'The survivors discover a hidden bunker.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/og6S0aTZU6YUJAbqxeKjCa3kY1E.jpg',
+    metadata: {
+      imdbId: 'tt0411008',
+      type: 'tv',
+      tmdbId: 4607,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0411008/1-6',
+      season: 1,
+      episode: 6
+    },
+    chapters: null
+  },
+  {
+    id: 66,
+    sourceId: 'tt0411008',
+    source: 'vidsrc',
+    title: 'Lost S1E7 - The Moth',
+    description: 'Kate and Sawyer work together while Jack struggles with his demons.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/og6S0aTZU6YUJAbqxeKjCa3kY1E.jpg',
+    metadata: {
+      imdbId: 'tt0411008',
+      type: 'tv',
+      tmdbId: 4607,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0411008/1-7',
+      season: 1,
+      episode: 7
+    },
+    chapters: null
+  },
+  {
+    id: 67,
+    sourceId: 'tt0411008',
+    source: 'vidsrc',
+    title: 'Lost S1E8 - Confidence Man',
+    description: 'Sawyer\'s past is revealed.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/og6S0aTZU6YUJAbqxeKjCa3kY1E.jpg',
+    metadata: {
+      imdbId: 'tt0411008',
+      type: 'tv',
+      tmdbId: 4607,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0411008/1-8',
+      season: 1,
+      episode: 8
+    },
+    chapters: null
+  },
+  // The Office Season 1
+  {
+    id: 70,
+    sourceId: 'tt0386676',
+    source: 'vidsrc',
+    title: 'The Office S1E1 - Pilot',
+    description: 'The premiere episode introduces the boss and staff of the Scranton branch of paper distributor Dunder Mifflin.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/5uwJHXp8MPvwxv8VkfYM6pEsY3g.jpg',
+    metadata: {
+      imdbId: 'tt0386676',
+      type: 'tv',
+      tmdbId: 2316,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0386676/1-1',
+      season: 1,
+      episode: 1
+    },
+    chapters: null
+  },
+  {
+    id: 71,
+    sourceId: 'tt0386676',
+    source: 'vidsrc',
+    title: 'The Office S1E2 - Diversity Day',
+    description: 'Michael\'s off-color remark puts a sensitivity trainer in the office for a presentation.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/5uwJHXp8MPvwxv8VkfYM6pEsY3g.jpg',
+    metadata: {
+      imdbId: 'tt0386676',
+      type: 'tv',
+      tmdbId: 2316,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0386676/1-2',
+      season: 1,
+      episode: 2
+    },
+    chapters: null
+  },
+  {
+    id: 72,
+    sourceId: 'tt0386676',
+    source: 'vidsrc',
+    title: 'The Office S1E3 - Health Care',
+    description: 'Michael tries to convince his employees to get health insurance.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/5uwJHXp8MPvwxv8VkfYM6pEsY3g.jpg',
+    metadata: {
+      imdbId: 'tt0386676',
+      type: 'tv',
+      tmdbId: 2316,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0386676/1-3',
+      season: 1,
+      episode: 3
+    },
+    chapters: null
+  },
+  {
+    id: 73,
+    sourceId: 'tt0386676',
+    source: 'vidsrc',
+    title: 'The Office S1E4 - The Alliance',
+    description: 'Jim and Pam form an unlikely alliance.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/5uwJHXp8MPvwxv8VkfYM6pEsY3g.jpg',
+    metadata: {
+      imdbId: 'tt0386676',
+      type: 'tv',
+      tmdbId: 2316,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0386676/1-4',
+      season: 1,
+      episode: 4
+    },
+    chapters: null
+  },
+  {
+    id: 74,
+    sourceId: 'tt0386676',
+    source: 'vidsrc',
+    title: 'The Office S1E5 - Basketball',
+    description: 'Michael organizes a basketball game between the office staff.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/5uwJHXp8MPvwxv8VkfYM6pEsY3g.jpg',
+    metadata: {
+      imdbId: 'tt0386676',
+      type: 'tv',
+      tmdbId: 2316,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0386676/1-5',
+      season: 1,
+      episode: 5
+    },
+    chapters: null
+  },
+  {
+    id: 75,
+    sourceId: 'tt0386676',
+    source: 'vidsrc',
+    title: 'The Office S1E6 - Hot Girl',
+    description: 'Michael is smitten with a new employee.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/5uwJHXp8MPvwxv8VkfYM6pEsY3g.jpg',
+    metadata: {
+      imdbId: 'tt0386676',
+      type: 'tv',
+      tmdbId: 2316,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0386676/1-6',
+      season: 1,
+      episode: 6
+    },
+    chapters: null
+  },
+  {
+    id: 76,
+    sourceId: 'tt0386676',
+    source: 'vidsrc',
+    title: 'The Office S1E7 - The Fire',
+    description: 'A fire drill turns into a chaotic situation.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/5uwJHXp8MPvwxv8VkfYM6pEsY3g.jpg',
+    metadata: {
+      imdbId: 'tt0386676',
+      type: 'tv',
+      tmdbId: 2316,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0386676/1-7',
+      season: 1,
+      episode: 7
+    },
+    chapters: null
+  },
+  {
+    id: 77,
+    sourceId: 'tt0386676',
+    source: 'vidsrc',
+    title: 'The Office S1E8 - Halloween',
+    description: 'Michael\'s Halloween party brings out the worst in everyone.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/5uwJHXp8MPvwxv8VkfYM6pEsY3g.jpg',
+    metadata: {
+      imdbId: 'tt0386676',
+      type: 'tv',
+      tmdbId: 2316,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0386676/1-8',
+      season: 1,
+      episode: 8
+    },
+    chapters: null
+  },
+  // Better Call Saul Season 1
+  {
+    id: 80,
+    sourceId: 'tt3032476',
+    source: 'vidsrc',
+    title: 'Better Call Saul S1E1 - Uno',
+    description: 'Jimmy McGill is struggling to make ends meet as a public defender in Albuquerque.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/fC2HDm5t0kHl7mTm7jxMR31b6Qy.jpg',
+    metadata: {
+      imdbId: 'tt3032476',
+      type: 'tv',
+      tmdbId: 60059,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt3032476/1-1',
+      season: 1,
+      episode: 1
+    },
+    chapters: null
+  },
+  {
+    id: 81,
+    sourceId: 'tt3032476',
+    source: 'vidsrc',
+    title: 'Better Call Saul S1E2 - Mijo',
+    description: 'Jimmy must prove his worth to a dangerous potential client.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/fC2HDm5t0kHl7mTm7jxMR31b6Qy.jpg',
+    metadata: {
+      imdbId: 'tt3032476',
+      type: 'tv',
+      tmdbId: 60059,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt3032476/1-2',
+      season: 1,
+      episode: 2
+    },
+    chapters: null
+  },
+  {
+    id: 82,
+    sourceId: 'tt3032476',
+    source: 'vidsrc',
+    title: 'Better Call Saul S1E3 - Nacho',
+    description: 'Jimmy gets involved in a dangerous situation.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/fC2HDm5t0kHl7mTm7jxMR31b6Qy.jpg',
+    metadata: {
+      imdbId: 'tt3032476',
+      type: 'tv',
+      tmdbId: 60059,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt3032476/1-3',
+      season: 1,
+      episode: 3
+    },
+    chapters: null
+  },
+  {
+    id: 83,
+    sourceId: 'tt3032476',
+    source: 'vidsrc',
+    title: 'Better Call Saul S1E4 - Hero',
+    description: 'Jimmy tries to help someone in need.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/fC2HDm5t0kHl7mTm7jxMR31b6Qy.jpg',
+    metadata: {
+      imdbId: 'tt3032476',
+      type: 'tv',
+      tmdbId: 60059,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt3032476/1-4',
+      season: 1,
+      episode: 4
+    },
+    chapters: null
+  },
+  {
+    id: 84,
+    sourceId: 'tt3032476',
+    source: 'vidsrc',
+    title: 'Better Call Saul S1E5 - Five-O',
+    description: 'Jimmy and Mike work together on a case.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/fC2HDm5t0kHl7mTm7jxMR31b6Qy.jpg',
+    metadata: {
+      imdbId: 'tt3032476',
+      type: 'tv',
+      tmdbId: 60059,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt3032476/1-5',
+      season: 1,
+      episode: 5
+    },
+    chapters: null
+  },
+  {
+    id: 85,
+    sourceId: 'tt3032476',
+    source: 'vidsrc',
+    title: 'Better Call Saul S1E6 - Bingo',
+    description: 'Jimmy and Kim work together on a case.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/fC2HDm5t0kHl7mTm7jxMR31b6Qy.jpg',
+    metadata: {
+      imdbId: 'tt3032476',
+      type: 'tv',
+      tmdbId: 60059,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt3032476/1-6',
+      season: 1,
+      episode: 6
+    },
+    chapters: null
+  },
+  {
+    id: 86,
+    sourceId: 'tt3032476',
+    source: 'vidsrc',
+    title: 'Better Call Saul S1E7 - Pimento',
+    description: 'Jimmy and Kim face a challenge.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/fC2HDm5t0kHl7mTm7jxMR31b6Qy.jpg',
+    metadata: {
+      imdbId: 'tt3032476',
+      type: 'tv',
+      tmdbId: 60059,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt3032476/1-7',
+      season: 1,
+      episode: 7
+    },
+    chapters: null
+  },
+  {
+    id: 87,
+    sourceId: 'tt3032476',
+    source: 'vidsrc',
+    title: 'Better Call Saul S1E8 - Rico',
+    description: 'Jimmy and Mike face a dangerous situation.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/fC2HDm5t0kHl7mTm7jxMR31b6Qy.jpg',
+    metadata: {
+      imdbId: 'tt3032476',
+      type: 'tv',
+      tmdbId: 60059,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt3032476/1-8',
+      season: 1,
+      episode: 8
+    },
+    chapters: null
+  },
+  {
+    id: 88,
+    sourceId: 'tt3032476',
+    source: 'vidsrc',
+    title: 'Better Call Saul S1E9 - ...And the Bag\'s in the River',
+    description: 'Jimmy and Kim face the consequences of their actions.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/fC2HDm5t0kHl7mTm7jxMR31b6Qy.jpg',
+    metadata: {
+      imdbId: 'tt3032476',
+      type: 'tv',
+      tmdbId: 60059,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt3032476/1-9',
+      season: 1,
+      episode: 9
+    },
+    chapters: null
+  },
+  {
+    id: 89,
+    sourceId: 'tt3032476',
+    source: 'vidsrc',
+    title: 'Better Call Saul S1E10 - Marco',
+    description: 'The season finale.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/fC2HDm5t0kHl7mTm7jxMR31b6Qy.jpg',
+    metadata: {
+      imdbId: 'tt3032476',
+      type: 'tv',
+      tmdbId: 60059,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt3032476/1-10',
+      season: 1,
+      episode: 10
     },
     chapters: null
   }
