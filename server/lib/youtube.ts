@@ -3,19 +3,21 @@ import type { Video, Chapter } from "@shared/schema";
 function parseChaptersFromDescription(description: string): Chapter[] {
   const lines = description.split('\n');
   const chapters: Chapter[] = [];
-  const timeRegex = /^(?:(?:([01]?\d|2[0-3]):)?([0-5]?\d):)?([0-5]?\d)/;
+  // Support both single and double-digit formats: 0:00, 00:00, 1:23:45
+  const timeRegex = /^(?:(\d{1,2}):)?([0-5]?\d):([0-5]\d)/;
 
   console.log('Parsing description for chapters:', description);
 
   for (const line of lines) {
     const timeMatch = line.match(timeRegex);
     if (timeMatch) {
-      const [fullTime, hours = "0", minutes = "0", seconds = "0"] = timeMatch;
+      const [_, hours = "0", minutes, seconds] = timeMatch;
       const timestamp = parseInt(hours) * 3600 + parseInt(minutes) * 60 + parseInt(seconds);
 
       // Get the chapter title (everything after the timestamp)
-      const title = line.substring(fullTime.length).trim();
-      if (title) {
+      const titleMatch = line.match(/^\d[\d:]+\s*[-\s]?\s*(.+)/);
+      if (titleMatch && titleMatch[1]) {
+        const title = titleMatch[1].trim();
         chapters.push({ timestamp, title });
       }
     }
@@ -49,18 +51,8 @@ export async function searchYouTube(query: string): Promise<Video[]> {
 
   const data = await response.json();
 
-  // For testing purposes, let's add some sample chapters to the first video
-  return data.items.map((item: any, index: number) => {
-    let chapters = parseChaptersFromDescription(item.snippet.description);
-
-    // Add sample chapters to the first video if no chapters were found
-    if (index === 0 && chapters.length === 0) {
-      chapters = [
-        { timestamp: 0, title: "Introduction" },
-        { timestamp: 30, title: "Main Content" },
-        { timestamp: 60, title: "Summary" }
-      ];
-    }
+  return data.items.map((item: any) => {
+    const chapters = parseChaptersFromDescription(item.snippet.description);
 
     return {
       id: item.id.videoId,
