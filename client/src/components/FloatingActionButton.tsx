@@ -16,7 +16,7 @@ export default function FloatingActionButton({ video, currentTime }: FloatingAct
     try {
       await navigator.share({
         title: video.title,
-        text: video.description,
+        text: video.description || '',
         url: `https://youtube.com/watch?v=${video.sourceId}`
       });
     } catch (error) {
@@ -36,9 +36,9 @@ export default function FloatingActionButton({ video, currentTime }: FloatingAct
 
   const handlePictureInPicture = async () => {
     try {
-      const video = document.querySelector('iframe');
-      if (video && document.pictureInPictureElement !== video) {
-        await (video as any).requestPictureInPicture();
+      const videoElement = document.querySelector('iframe');
+      if (videoElement && document.pictureInPictureElement !== videoElement) {
+        await (videoElement as any).requestPictureInPicture();
       } else if (document.pictureInPictureElement) {
         await document.exitPictureInPicture();
       }
@@ -62,16 +62,18 @@ export default function FloatingActionButton({ video, currentTime }: FloatingAct
               variant="secondary"
               onClick={handleShare}
               className="shadow-lg"
+              title="Share video"
             >
               <Share2 className="h-5 w-5" />
             </Button>
 
-            {currentTime && (
+            {currentTime !== undefined && (
               <Button
                 size="icon"
                 variant="secondary"
                 onClick={handleCopyTimestamp}
                 className="shadow-lg"
+                title="Copy current timestamp"
               >
                 <Clock className="h-5 w-5" />
               </Button>
@@ -82,6 +84,7 @@ export default function FloatingActionButton({ video, currentTime }: FloatingAct
               variant="secondary"
               onClick={handlePictureInPicture}
               className="shadow-lg"
+              title="Toggle picture-in-picture mode"
             >
               <MonitorPlay className="h-5 w-5" />
             </Button>
