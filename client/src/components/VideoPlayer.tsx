@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react';
+import { useState } from 'react';
 import type { Video } from "@shared/schema";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,81 +12,10 @@ interface VideoPlayerProps {
 
 export default function VideoPlayer({ video }: VideoPlayerProps) {
   const [currentTime, setCurrentTime] = useState(0);
-  const [isBuffering, setIsBuffering] = useState(true);
-  const iframeRef = useRef<HTMLIFrameElement>(null);
-  const playerRef = useRef<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    // Reset state when video changes
-    setCurrentTime(0);
-    setIsBuffering(true);
-
-    // Clean up existing player
-    if (playerRef.current?.destroy) {
-      playerRef.current.destroy();
-      playerRef.current = null;
-    }
-
-    // Load YouTube IFrame API if not already loaded
-    if (!(window as any).YT) {
-      const tag = document.createElement('script');
-      tag.src = "https://www.youtube.com/iframe_api";
-      const firstScriptTag = document.getElementsByTagName('script')[0];
-      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-    }
-
-    const initPlayer = () => {
-      if (!iframeRef.current) return;
-
-      playerRef.current = new (window as any).YT.Player(iframeRef.current, {
-        videoId: video.sourceId,
-        playerVars: {
-          autoplay: 1,
-          modestbranding: 1,
-          rel: 0,
-        },
-        events: {
-          onStateChange: (event: any) => {
-            // Update buffering state based on player state
-            setIsBuffering(event.data === (window as any).YT.PlayerState.BUFFERING);
-
-            if (event.data === (window as any).YT.PlayerState.PLAYING) {
-              const updateTime = () => {
-                if (playerRef.current?.getCurrentTime) {
-                  setCurrentTime(playerRef.current.getCurrentTime());
-                }
-                if (event.data === (window as any).YT.PlayerState.PLAYING) {
-                  requestAnimationFrame(updateTime);
-                }
-              };
-              updateTime();
-            }
-          },
-          onReady: () => {
-            setIsBuffering(false);
-          },
-          onError: (error: any) => {
-            console.error('YouTube Player Error:', error);
-            setIsBuffering(false);
-          }
-        }
-      });
-    };
-
-    // Initialize player when API is ready
-    if ((window as any).YT && (window as any).YT.Player) {
-      initPlayer();
-    } else {
-      (window as any).onYouTubeIframeAPIReady = initPlayer;
-    }
-
-    return () => {
-      if (playerRef.current?.destroy) {
-        playerRef.current.destroy();
-        playerRef.current = null;
-      }
-    };
-  }, [video.sourceId]); // Re-initialize when video changes
+  // Create a basic embed URL without the API
+  const embedUrl = `https://www.youtube.com/embed/${video.sourceId}?autoplay=1&modestbranding=1&rel=0`;
 
   return (
     <div className="w-full">
@@ -98,14 +27,16 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
           <div className="space-y-4">
             <AspectRatio ratio={16 / 9} className="relative bg-black rounded-md overflow-hidden">
               <iframe
-                ref={iframeRef}
+                key={video.sourceId} // Force remount when video changes
+                src={embedUrl}
                 title={video.title}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
                 className="absolute inset-0 w-full h-full"
+                onLoad={() => setIsLoading(false)}
               />
               <AnimatePresence>
-                {isBuffering && <LoadingSpinner />}
+                {isLoading && <LoadingSpinner />}
               </AnimatePresence>
             </AspectRatio>
             <p className="text-sm text-muted-foreground">
