@@ -11,30 +11,32 @@ interface VideoPlayerProps {
 export default function VideoPlayer({ video }: VideoPlayerProps) {
   const [currentTime, setCurrentTime] = useState(0);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const playerRef = useRef<any>(null);
 
   const embedUrl = video.source === 'youtube' 
     ? `https://www.youtube.com/embed/${video.sourceId}?enablejsapi=1`
     : '';
 
   useEffect(() => {
-    // Load YouTube IFrame API
-    const tag = document.createElement('script');
-    tag.src = "https://www.youtube.com/iframe_api";
-    const firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+    // Load YouTube IFrame API if not already loaded
+    if (!(window as any).YT) {
+      const tag = document.createElement('script');
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+    }
 
-    let player: any;
+    // Function to initialize the player
+    const initPlayer = () => {
+      if (!iframeRef.current) return;
 
-    // Initialize player when API is ready
-    (window as any).onYouTubeIframeAPIReady = () => {
-      player = new (window as any).YT.Player(iframeRef.current, {
+      playerRef.current = new (window as any).YT.Player(iframeRef.current, {
         events: {
           onStateChange: (event: any) => {
-            // Update currentTime when video is playing
             if (event.data === (window as any).YT.PlayerState.PLAYING) {
               const updateTime = () => {
-                if (player?.getCurrentTime) {
-                  setCurrentTime(player.getCurrentTime());
+                if (playerRef.current?.getCurrentTime) {
+                  setCurrentTime(playerRef.current.getCurrentTime());
                 }
                 if (event.data === (window as any).YT.PlayerState.PLAYING) {
                   requestAnimationFrame(updateTime);
@@ -47,17 +49,25 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
       });
     };
 
+    // Initialize player when API is ready
+    if ((window as any).YT && (window as any).YT.Player) {
+      initPlayer();
+    } else {
+      // If API is not ready, wait for it
+      (window as any).onYouTubeIframeAPIReady = initPlayer;
+    }
+
     return () => {
-      // Cleanup
-      player?.destroy();
+      if (playerRef.current?.destroy) {
+        playerRef.current.destroy();
+        playerRef.current = null;
+      }
     };
   }, [video.sourceId]);
 
   const handleChapterClick = (timestamp: number) => {
-    if (iframeRef.current) {
-      // Access the player through the iframe element
-      const player = new (window as any).YT.Player(iframeRef.current);
-      player.seekTo(timestamp, true);
+    if (playerRef.current?.seekTo) {
+      playerRef.current.seekTo(timestamp, true);
     }
   };
 
