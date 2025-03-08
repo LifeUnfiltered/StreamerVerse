@@ -8,6 +8,7 @@ import bcrypt from "bcryptjs";
 import session from "express-session";
 import memorystore from "memorystore";
 import { z } from "zod";
+import { getLatestMovies, getLatestTVShows, getLatestEpisodes } from './lib/vidsrc';
 
 const MemoryStore = memorystore(session);
 
@@ -15,6 +16,17 @@ declare module "express-session" {
   interface SessionData {
     userId: number;
   }
+}
+
+interface Video {
+    id: string;
+    sourceId: string;
+    source: 'youtube' | 'vidsrc';
+    title: string;
+    description: string;
+    thumbnail: string | null;
+    metadata: any;
+    chapters: any | null;
 }
 
 export async function registerRoutes(app: Express) {
@@ -213,6 +225,38 @@ export async function registerRoutes(app: Express) {
     }
   });
 
+  app.get('/api/videos/vidsrc/latest/:type', async (req, res) => {
+    try {
+      const { type } = z.object({
+        type: z.enum(['movies', 'shows', 'episodes'])
+      }).parse(req.params);
+
+      const page = parseInt(req.query.page as string) || 1;
+
+      let videos: Video[];
+      switch (type) {
+        case 'movies':
+          videos = await getLatestMovies(page);
+          break;
+        case 'shows':
+          videos = await getLatestTVShows(page);
+          break;
+        case 'episodes':
+          videos = await getLatestEpisodes(page);
+          break;
+        default:
+          throw new Error('Invalid content type');
+      }
+
+      res.json(videos);
+    } catch (error) {
+      console.error('VidSrc Latest Content Error:', error);
+      res.status(400).json({ 
+        message: error instanceof Error ? error.message : 'Failed to fetch latest content'
+      });
+    }
+  });
+
   app.get('/api/videos/vidsrc/:imdbId', async (req, res) => {
     try {
       const { imdbId } = req.params;
@@ -246,12 +290,12 @@ export async function registerRoutes(app: Express) {
 }
 
 // Placeholder functions -  Replace these with your actual implementations
-async function searchVidSrc(query: string): Promise<any[]> {
+async function searchVidSrc(query: string): Promise<Video[]> {
   //  Implement your VidSrc search logic here.  Return an array of video objects.
   return [];
 }
 
-function createVidSrcVideo(data: any): any {
+function createVidSrcVideo(data: any): Video {
   // Implement your VidSrc video creation logic here.  Return a video object.
   return {
     id: data.imdbId,

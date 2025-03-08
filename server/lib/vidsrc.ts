@@ -17,10 +17,10 @@ interface VidSrcContent {
 }
 
 export function getVidSrcEmbedUrl(imdbId: string, type: ContentType, season?: number, episode?: number): string {
-  let url = `${VIDSRC_BASE_URL}/${imdbId}`;
+  let url = `${VIDSRC_BASE_URL}/${type}/${imdbId}`;
 
   if (type === 'tv' && season && episode) {
-    url += `/${season}/${episode}`;
+    url += `/${season}-${episode}`;
   }
 
   return url;
@@ -76,4 +76,71 @@ export async function searchVidSrc(query: string): Promise<Video[]> {
 
   // Convert VidSrcContent to Video type
   return sampleMovies.map(movie => createVidSrcVideo(movie));
+}
+
+// Fetch latest movies
+export async function getLatestMovies(page: number = 1): Promise<Video[]> {
+  try {
+    const response = await fetch(`https://vidsrc.xyz/movies/latest/page-${page}.json`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch latest movies');
+    }
+    const data = await response.json();
+    return data.map((movie: any) => createVidSrcVideo({
+      imdbId: movie.imdb_id,
+      title: movie.title,
+      type: 'movie',
+      year: movie.year,
+      description: movie.overview,
+      poster: movie.poster
+    }));
+  } catch (error) {
+    console.error('Error fetching latest movies:', error);
+    return [];
+  }
+}
+
+// Fetch latest TV shows
+export async function getLatestTVShows(page: number = 1): Promise<Video[]> {
+  try {
+    const response = await fetch(`https://vidsrc.xyz/tvshows/latest/page-${page}.json`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch latest TV shows');
+    }
+    const data = await response.json();
+    return data.map((show: any) => createVidSrcVideo({
+      imdbId: show.imdb_id,
+      title: show.title,
+      type: 'tv',
+      year: show.year,
+      description: show.overview,
+      poster: show.poster
+    }));
+  } catch (error) {
+    console.error('Error fetching latest TV shows:', error);
+    return [];
+  }
+}
+
+// Fetch latest episodes
+export async function getLatestEpisodes(page: number = 1): Promise<Video[]> {
+  try {
+    const response = await fetch(`https://vidsrc.xyz/episodes/latest/page-${page}.json`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch latest episodes');
+    }
+    const data = await response.json();
+    return data.map((episode: any) => createVidSrcVideo({
+      imdbId: episode.show_imdb_id,
+      title: episode.show_title,
+      type: 'tv',
+      season: episode.season_number,
+      episode: episode.episode_number,
+      description: episode.overview,
+      poster: episode.still_path
+    }));
+  } catch (error) {
+    console.error('Error fetching latest episodes:', error);
+    return [];
+  }
 }
