@@ -5,6 +5,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { LogIn, LogOut, User as UserIcon, Bookmark } from "lucide-react";
 import type { Video } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
+import { ThemeToggle } from "./theme-toggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -63,6 +64,7 @@ export default function Header({ onAuthClick, onWatchlistClick }: HeaderProps) {
         </div>
 
         <div className="flex items-center gap-4">
+          <ThemeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="icon">
