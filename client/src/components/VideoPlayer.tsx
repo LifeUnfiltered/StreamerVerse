@@ -71,6 +71,8 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
     }
   };
 
+  console.log('Video chapters:', video.chapters); // Debug log
+
   return (
     <Card>
       <CardHeader>
