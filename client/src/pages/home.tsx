@@ -37,7 +37,7 @@ export default function Home() {
         return response.json();
       } catch (error) {
         if (error instanceof Error && error.message.includes('401')) {
-          return [];
+          return null;
         }
         throw error;
       }
@@ -63,6 +63,8 @@ export default function Home() {
     setShowWatchlist(true);
   };
 
+  const isLoggedIn = watchlist !== null;
+
   return (
     <div className="min-h-screen bg-background">
       <Header 
@@ -72,7 +74,7 @@ export default function Home() {
       <main className="container mx-auto px-4 py-6">
         <SearchBar onSearch={handleSearch} />
 
-        {showWatchlist && !searchQuery && (
+        {showWatchlist && !searchQuery && isLoggedIn && (
           <div className="mt-4 flex items-center justify-between">
             <h2 className="text-xl font-semibold">Your Watchlist</h2>
             <Button 
@@ -93,43 +95,31 @@ export default function Home() {
           ) : null}
 
           <ScrollArea className="h-[calc(100vh-200px)] lg:col-span-1">
-            {!searchQuery && !watchlist?.length && (
-              <Alert>
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  Your watchlist is empty. Search for videos and click the bookmark icon to add them to your watchlist.
-                  {watchlist === null && " Please log in to use the watchlist feature."}
-                </AlertDescription>
-              </Alert>
-            )}
-
-            {((showWatchlist && !searchQuery) || watchlist?.length === 0) && watchlist && (
-              <VideoList 
-                videos={watchlist}
-                isLoading={false}
-                error={null}
-                onVideoSelect={handleVideoSelect}
-                selectedVideo={selectedVideo}
-                onAuthRequired={() => setIsAuthDialogOpen(true)}
-              />
+            {showWatchlist && !searchQuery && isLoggedIn && (
+              <>
+                {!watchlist?.length ? (
+                  <Alert>
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>
+                      Your watchlist is empty. Search for videos and click the bookmark icon to add them to your watchlist.
+                    </AlertDescription>
+                  </Alert>
+                ) : (
+                  <VideoList 
+                    videos={watchlist}
+                    isLoading={false}
+                    error={null}
+                    onVideoSelect={handleVideoSelect}
+                    selectedVideo={selectedVideo}
+                    onAuthRequired={() => setIsAuthDialogOpen(true)}
+                  />
+                )}
+              </>
             )}
 
             {searchQuery && (
               <div>
                 <h2 className="text-xl font-semibold mb-4">Search Results</h2>
-                {watchlist && watchlist.length > 0 && (
-                  <div className="mb-6 p-4 bg-accent/10 rounded-lg">
-                    <h3 className="text-lg font-semibold mb-4">Quick Access - Your Watchlist</h3>
-                    <VideoList 
-                      videos={watchlist}
-                      isLoading={false}
-                      error={null}
-                      onVideoSelect={handleVideoSelect}
-                      selectedVideo={selectedVideo}
-                      onAuthRequired={() => setIsAuthDialogOpen(true)}
-                    />
-                  </div>
-                )}
                 <VideoList 
                   videos={videos}
                   isLoading={isLoading}
