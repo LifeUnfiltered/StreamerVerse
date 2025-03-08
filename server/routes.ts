@@ -287,25 +287,15 @@ export async function registerRoutes(app: Express) {
   });
 
   app.get('/api/videos/test-tv', (req, res) => {
-    // Test data using Game of Thrones as documented in VidSrc API
-    const video = {
-      id: 0,
-      sourceId: 'tt0944947',
-      source: 'vidsrc',
-      title: 'Game of Thrones',
-      description: 'Nine noble families fight for control over the lands of Westeros.',
-      thumbnail: 'https://image.tmdb.org/t/p/w500/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg',
-      metadata: {
-        imdbId: 'tt0944947',
-        type: 'tv',
-        tmdbId: 1399,
-        embedUrl: 'https://vidsrc.to/embed/tv/tt0944947'
-      },
-      chapters: []
-    };
+    // Import test data from tmdb.ts
+    const { TEST_TV_SHOWS } = require('./lib/tmdb');
 
-    console.log('Serving test TV show with embed URL:', video.metadata.embedUrl);
-    res.json(video);
+    console.log('Serving test TV shows:', TEST_TV_SHOWS.map(show => ({
+      title: show.title,
+      embedUrl: show.metadata.embedUrl
+    })));
+
+    res.json(TEST_TV_SHOWS);
   });
 
   return httpServer;
