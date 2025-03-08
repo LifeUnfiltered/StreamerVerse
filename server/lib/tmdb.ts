@@ -17,7 +17,7 @@ export const TEST_TV_SHOWS: Video[] = [
       tmdbId: 1399,
       embedUrl: 'https://vidsrc.to/embed/tv/tt0944947'
     },
-    chapters: []
+    chapters: null
   },
   {
     id: 1,
@@ -32,7 +32,7 @@ export const TEST_TV_SHOWS: Video[] = [
       tmdbId: 1402,
       embedUrl: 'https://vidsrc.to/embed/tv/tt1520211'
     },
-    chapters: []
+    chapters: null
   }
 ];
 
@@ -54,7 +54,7 @@ export const TEST_EPISODES: Video[] = [
       season: 1,
       episode: 1
     },
-    chapters: []
+    chapters: null
   },
   {
     id: 4,
@@ -71,7 +71,7 @@ export const TEST_EPISODES: Video[] = [
       season: 1,
       episode: 2
     },
-    chapters: []
+    chapters: null
   },
   {
     id: 5,
@@ -88,7 +88,7 @@ export const TEST_EPISODES: Video[] = [
       season: 1,
       episode: 3
     },
-    chapters: []
+    chapters: null
   },
   // Game of Thrones Season 2
   {
@@ -106,7 +106,7 @@ export const TEST_EPISODES: Video[] = [
       season: 2,
       episode: 1
     },
-    chapters: []
+    chapters: null
   },
   {
     id: 7,
@@ -123,7 +123,7 @@ export const TEST_EPISODES: Video[] = [
       season: 2,
       episode: 2
     },
-    chapters: []
+    chapters: null
   },
   {
     id: 8,
@@ -140,7 +140,7 @@ export const TEST_EPISODES: Video[] = [
       season: 2,
       episode: 3
     },
-    chapters: []
+    chapters: null
   },
   // The Walking Dead Season 1
   {
@@ -158,7 +158,7 @@ export const TEST_EPISODES: Video[] = [
       season: 1,
       episode: 1
     },
-    chapters: []
+    chapters: null
   },
   {
     id: 10,
@@ -175,7 +175,7 @@ export const TEST_EPISODES: Video[] = [
       season: 1,
       episode: 2
     },
-    chapters: []
+    chapters: null
   },
   {
     id: 11,
@@ -192,7 +192,7 @@ export const TEST_EPISODES: Video[] = [
       season: 1,
       episode: 3
     },
-    chapters: []
+    chapters: null
   },
   // The Walking Dead Season 2
   {
@@ -210,7 +210,7 @@ export const TEST_EPISODES: Video[] = [
       season: 2,
       episode: 1
     },
-    chapters: []
+    chapters: null
   },
   {
     id: 13,
@@ -227,7 +227,7 @@ export const TEST_EPISODES: Video[] = [
       season: 2,
       episode: 2
     },
-    chapters: []
+    chapters: null
   },
   {
     id: 14,
@@ -244,30 +244,26 @@ export const TEST_EPISODES: Video[] = [
       season: 2,
       episode: 3
     },
-    chapters: []
+    chapters: null
   }
 ];
 
 // Convert TMDB movie to our Video type
 function movieToVideo(movie: any): Video {
-  const embedUrl = movie.imdb_id 
-    ? `https://vidsrc.to/embed/movie/${movie.imdb_id}`
-    : null;
-
   return {
     id: 0,
     sourceId: movie.imdb_id || `tmdb-${movie.id}`,
     source: 'vidsrc',
     title: movie.title,
-    description: movie.overview || '',
+    description: movie.overview || null,
     thumbnail: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : null,
     metadata: {
       imdbId: movie.imdb_id,
       type: 'movie',
       tmdbId: movie.id,
-      embedUrl
+      embedUrl: movie.imdb_id ? `https://vidsrc.to/embed/movie/${movie.imdb_id}` : null
     },
-    chapters: []
+    chapters: null
   };
 }
 
