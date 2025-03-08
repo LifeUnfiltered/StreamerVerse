@@ -73,6 +73,23 @@ export const TEST_EPISODES: Video[] = [
   },
   {
     id: 4,
+    sourceId: 'tt0944947',
+    source: 'vidsrc',
+    title: 'Game of Thrones S1E2 - The Kingsroad',
+    description: 'While Bran recovers from his fall, Ned takes only his daughters to Kings Landing. Jon Snow goes with his uncle Benjen to The Wall.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg',
+    metadata: {
+      imdbId: 'tt0944947',
+      type: 'tv',
+      tmdbId: 1399,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0944947/1-2',
+      season: 1,
+      episode: 2
+    },
+    chapters: []
+  },
+  {
+    id: 5,
     sourceId: 'tt1520211',
     source: 'vidsrc',
     title: 'The Walking Dead S1E1 - Days Gone Bye',
@@ -85,6 +102,23 @@ export const TEST_EPISODES: Video[] = [
       embedUrl: 'https://vidsrc.to/embed/tv/tt1520211/1-1',
       season: 1,
       episode: 1
+    },
+    chapters: []
+  },
+  {
+    id: 6,
+    sourceId: 'tt1520211',
+    source: 'vidsrc',
+    title: 'The Walking Dead S1E2 - Guts',
+    description: 'Rick finds himself trapped in Atlanta, where he bands together with a group of survivors to escape the city.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/xf9wuDcqlUPWABZNeDKPbZUjWx0.jpg',
+    metadata: {
+      imdbId: 'tt1520211',
+      type: 'tv',
+      tmdbId: 1402,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt1520211/1-2',
+      season: 1,
+      episode: 2
     },
     chapters: []
   }
