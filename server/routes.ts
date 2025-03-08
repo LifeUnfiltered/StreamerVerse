@@ -9,15 +9,24 @@ export async function registerRoutes(app: Express) {
   app.get('/api/videos/search', async (req, res) => {
     try {
       const { query, source } = searchSchema.parse(req.query);
-      
+
       if (source === 'youtube') {
-        const videos = await searchYouTube(query);
-        res.json(videos);
+        try {
+          const videos = await searchYouTube(query);
+          res.json(videos);
+        } catch (error) {
+          console.error('YouTube API Error:', error);
+          res.status(500).json({ 
+            message: error instanceof Error ? error.message : 'Failed to fetch videos from YouTube'
+          });
+        }
       } else {
         res.status(400).json({ message: 'Unsupported video source' });
       }
     } catch (error) {
-      res.status(400).json({ message: error instanceof Error ? error.message : 'Invalid request' });
+      res.status(400).json({ 
+        message: error instanceof Error ? error.message : 'Invalid request parameters'
+      });
     }
   });
 
