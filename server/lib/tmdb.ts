@@ -73,9 +73,26 @@ export const TEST_EPISODES: Video[] = [
     },
     chapters: []
   },
-  // Game of Thrones Season 2
   {
     id: 5,
+    sourceId: 'tt0944947',
+    source: 'vidsrc',
+    title: 'Game of Thrones S1E3 - Lord Snow',
+    description: 'Lord Stark and his daughters arrive at King\'s Landing to take up his new duties as the King\'s Hand.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg',
+    metadata: {
+      imdbId: 'tt0944947',
+      type: 'tv',
+      tmdbId: 1399,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0944947/1-3',
+      season: 1,
+      episode: 3
+    },
+    chapters: []
+  },
+  // Game of Thrones Season 2
+  {
+    id: 6,
     sourceId: 'tt0944947',
     source: 'vidsrc',
     title: 'Game of Thrones S2E1 - The North Remembers',
@@ -91,9 +108,43 @@ export const TEST_EPISODES: Video[] = [
     },
     chapters: []
   },
+  {
+    id: 7,
+    sourceId: 'tt0944947',
+    source: 'vidsrc',
+    title: 'Game of Thrones S2E2 - The Night Lands',
+    description: 'Arya makes friends with Gendry. Tyrion tries to take control of the Small Council. Theon arrives at his home, Pyke, in order to persuade his father into helping Robb with the war.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg',
+    metadata: {
+      imdbId: 'tt0944947',
+      type: 'tv',
+      tmdbId: 1399,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0944947/2-2',
+      season: 2,
+      episode: 2
+    },
+    chapters: []
+  },
+  {
+    id: 8,
+    sourceId: 'tt0944947',
+    source: 'vidsrc',
+    title: 'Game of Thrones S2E3 - What Is Dead May Never Die',
+    description: 'Tyrion tries to prevent the news of King Joffrey\'s true parentage from reaching the kingdom.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg',
+    metadata: {
+      imdbId: 'tt0944947',
+      type: 'tv',
+      tmdbId: 1399,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0944947/2-3',
+      season: 2,
+      episode: 3
+    },
+    chapters: []
+  },
   // The Walking Dead Season 1
   {
-    id: 6,
+    id: 9,
     sourceId: 'tt1520211',
     source: 'vidsrc',
     title: 'The Walking Dead S1E1 - Days Gone Bye',
@@ -110,7 +161,7 @@ export const TEST_EPISODES: Video[] = [
     chapters: []
   },
   {
-    id: 7,
+    id: 10,
     sourceId: 'tt1520211',
     source: 'vidsrc',
     title: 'The Walking Dead S1E2 - Guts',
@@ -123,6 +174,75 @@ export const TEST_EPISODES: Video[] = [
       embedUrl: 'https://vidsrc.to/embed/tv/tt1520211/1-2',
       season: 1,
       episode: 2
+    },
+    chapters: []
+  },
+  {
+    id: 11,
+    sourceId: 'tt1520211',
+    source: 'vidsrc',
+    title: 'The Walking Dead S1E3 - Tell It to the Frogs',
+    description: 'Rick reunites with his family but has to decide whether to risk his life to help a group of survivors trapped in Atlanta.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/xf9wuDcqlUPWABZNeDKPbZUjWx0.jpg',
+    metadata: {
+      imdbId: 'tt1520211',
+      type: 'tv',
+      tmdbId: 1402,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt1520211/1-3',
+      season: 1,
+      episode: 3
+    },
+    chapters: []
+  },
+  // The Walking Dead Season 2
+  {
+    id: 12,
+    sourceId: 'tt1520211',
+    source: 'vidsrc',
+    title: 'The Walking Dead S2E1 - What Lies Ahead',
+    description: 'The group sets out for Fort Benning but encounters a threat on the highway the likes of which they\'ve never seen.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/xf9wuDcqlUPWABZNeDKPbZUjWx0.jpg',
+    metadata: {
+      imdbId: 'tt1520211',
+      type: 'tv',
+      tmdbId: 1402,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt1520211/2-1',
+      season: 2,
+      episode: 1
+    },
+    chapters: []
+  },
+  {
+    id: 13,
+    sourceId: 'tt1520211',
+    source: 'vidsrc',
+    title: 'The Walking Dead S2E2 - Bloodletting',
+    description: 'After a tragic accident, the group finds shelter at a nearby farm while searching for a missing person.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/xf9wuDcqlUPWABZNeDKPbZUjWx0.jpg',
+    metadata: {
+      imdbId: 'tt1520211',
+      type: 'tv',
+      tmdbId: 1402,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt1520211/2-2',
+      season: 2,
+      episode: 2
+    },
+    chapters: []
+  },
+  {
+    id: 14,
+    sourceId: 'tt1520211',
+    source: 'vidsrc',
+    title: 'The Walking Dead S2E3 - Save the Last One',
+    description: 'The group awaits Shane\'s return as he searches for medical supplies.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/xf9wuDcqlUPWABZNeDKPbZUjWx0.jpg',
+    metadata: {
+      imdbId: 'tt1520211',
+      type: 'tv',
+      tmdbId: 1402,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt1520211/2-3',
+      season: 2,
+      episode: 3
     },
     chapters: []
   }
