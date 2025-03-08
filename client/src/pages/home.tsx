@@ -4,13 +4,16 @@ import SearchBar from "@/components/SearchBar";
 import VideoList from "@/components/VideoList";
 import VideoPlayer from "@/components/VideoPlayer";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Video } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
+import AuthDialog from "@/components/AuthDialog";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
+  const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
+  const queryClient = useQueryClient();
 
   const { data: videos, isLoading, error } = useQuery<Video[]>({
     queryKey: ['/api/videos/search', searchQuery],
@@ -19,6 +22,21 @@ export default function Home() {
       return response.json();
     },
     enabled: searchQuery.length > 0
+  });
+
+  const { data: watchlist } = useQuery<Video[]>({
+    queryKey: ['/api/watchlist'],
+    queryFn: async () => {
+      try {
+        const response = await apiRequest('GET', '/api/watchlist');
+        return response.json();
+      } catch (error) {
+        if (error instanceof Error && error.message.includes('401')) {
+          return [];
+        }
+        throw error;
+      }
+    }
   });
 
   const handleSearch = (query: string) => {
@@ -30,9 +48,14 @@ export default function Home() {
     setSelectedVideo(video);
   };
 
+  const handleAuthSuccess = () => {
+    // Refetch watchlist after successful auth
+    queryClient.invalidateQueries({ queryKey: ['/api/watchlist'] });
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Header onAuthClick={() => setIsAuthDialogOpen(true)} />
       <main className="container mx-auto px-4 py-6">
         <SearchBar onSearch={handleSearch} />
 
@@ -44,16 +67,39 @@ export default function Home() {
           ) : null}
 
           <ScrollArea className="h-[calc(100vh-200px)] lg:col-span-1">
-            <VideoList 
-              videos={videos}
-              isLoading={isLoading}
-              error={error as Error}
-              onVideoSelect={handleVideoSelect}
-              selectedVideo={selectedVideo}
-            />
+            {!searchQuery && watchlist && watchlist.length > 0 && (
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold mb-4">Your Watchlist</h2>
+                <VideoList 
+                  videos={watchlist}
+                  isLoading={false}
+                  error={null}
+                  onVideoSelect={handleVideoSelect}
+                  selectedVideo={selectedVideo}
+                  onAuthRequired={() => setIsAuthDialogOpen(true)}
+                />
+              </div>
+            )}
+
+            {searchQuery && (
+              <VideoList 
+                videos={videos}
+                isLoading={isLoading}
+                error={error as Error}
+                onVideoSelect={handleVideoSelect}
+                selectedVideo={selectedVideo}
+                onAuthRequired={() => setIsAuthDialogOpen(true)}
+              />
+            )}
           </ScrollArea>
         </div>
       </main>
+
+      <AuthDialog 
+        isOpen={isAuthDialogOpen}
+        onOpenChange={setIsAuthDialogOpen}
+        onSuccess={handleAuthSuccess}
+      />
     </div>
   );
 }

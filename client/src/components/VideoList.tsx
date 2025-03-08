@@ -10,6 +10,7 @@ interface VideoListProps {
   error: Error | null;
   onVideoSelect: (video: Video) => void;
   selectedVideo: Video | null;
+  onAuthRequired: () => void;
 }
 
 export default function VideoList({
@@ -17,7 +18,8 @@ export default function VideoList({
   isLoading,
   error,
   onVideoSelect,
-  selectedVideo
+  selectedVideo,
+  onAuthRequired
 }: VideoListProps) {
   if (error) {
     return (
@@ -60,6 +62,7 @@ export default function VideoList({
           video={video}
           onClick={() => onVideoSelect(video)}
           isSelected={selectedVideo?.id === video.id}
+          onAuthRequired={onAuthRequired}
         />
       ))}
     </div>
