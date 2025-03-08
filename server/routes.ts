@@ -19,7 +19,7 @@ declare module "express-session" {
 }
 
 interface Video {
-    id: string;
+    id: string | number; // Updated to accommodate number
     sourceId: string;
     source: 'youtube' | 'vidsrc';
     title: string;
@@ -284,6 +284,28 @@ export async function registerRoutes(app: Express) {
         message: error instanceof Error ? error.message : 'Failed to get VidSrc video'
       });
     }
+  });
+
+  app.get('/api/videos/test-tv', (req, res) => {
+    // Test data using Game of Thrones as documented in VidSrc API
+    const video = {
+      id: 0,
+      sourceId: 'tt0944947',
+      source: 'vidsrc',
+      title: 'Game of Thrones',
+      description: 'Nine noble families fight for control over the lands of Westeros.',
+      thumbnail: 'https://image.tmdb.org/t/p/w500/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg',
+      metadata: {
+        imdbId: 'tt0944947',
+        type: 'tv',
+        tmdbId: 1399,
+        embedUrl: 'https://vidsrc.to/embed/tv/tt0944947'
+      },
+      chapters: []
+    };
+
+    console.log('Serving test TV show with embed URL:', video.metadata.embedUrl);
+    res.json(video);
   });
 
   return httpServer;

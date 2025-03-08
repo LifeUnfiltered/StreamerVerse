@@ -18,7 +18,12 @@ export async function getLatestMovies(page: number = 1): Promise<Video[]> {
 // Fetch latest TV shows from TMDB
 export async function getLatestTVShows(page: number = 1): Promise<Video[]> {
   console.log('Fetching latest TV shows, page:', page);
-  return fetchLatestTVShows();
+  const shows = await fetchLatestTVShows();
+  console.log('Retrieved TV shows:', shows.map(show => ({
+    title: show.title,
+    embedUrl: show.metadata.embedUrl
+  })));
+  return shows;
 }
 
 // Fetch latest episodes

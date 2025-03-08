@@ -28,10 +28,11 @@ export default function VidSrc() {
   });
 
   const { data: shows, isLoading: showsLoading } = useQuery<Video[]>({
-    queryKey: ['/api/videos/vidsrc/latest/shows', page],
+    queryKey: ['/api/videos/test-tv'],
     queryFn: async () => {
-      const response = await apiRequest('GET', `/api/videos/vidsrc/latest/shows?page=${page}`);
-      return response.json();
+      const response = await apiRequest('GET', '/api/videos/test-tv');
+      const video = await response.json();
+      return [video]; // Wrap single video in array
     },
     enabled: !searchQuery
   });
