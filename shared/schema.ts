@@ -2,6 +2,15 @@ import { pgTable, text, serial, json, timestamp, integer } from "drizzle-orm/pg-
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
+// Chapter schema
+export const chapterSchema = z.object({
+  timestamp: z.number(),
+  title: z.string(),
+  description: z.string().optional(),
+});
+
+export type Chapter = z.infer<typeof chapterSchema>;
+
 // Existing videos table
 export const videos = pgTable("videos", {
   id: serial("id").primaryKey(),
@@ -11,9 +20,9 @@ export const videos = pgTable("videos", {
   description: text("description"),
   thumbnail: text("thumbnail"),
   metadata: json("metadata").$type<Record<string, any>>(),
+  chapters: json("chapters").$type<Chapter[]>().default([]), // Add chapters field
 });
 
-// New users table
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
@@ -21,7 +30,6 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
-// New watchlist table
 export const watchlist = pgTable("watchlist", {
   id: serial("id").primaryKey(),
   userId: integer("user_id").notNull().references(() => users.id),
@@ -37,6 +45,7 @@ export const videoSchema = createInsertSchema(videos).pick({
   description: true,
   thumbnail: true,
   metadata: true,
+  chapters: true,
 });
 
 export const userSchema = createInsertSchema(users).pick({
