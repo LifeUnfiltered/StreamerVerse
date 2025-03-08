@@ -3,6 +3,25 @@ import type { Video } from '@shared/schema';
 
 const tmdb = new MovieDb(process.env.TMDB_API_KEY!);
 
+// Convert TMDB movie to our Video type
+function movieToVideo(movie: any): Video {
+  return {
+    id: movie.id,
+    sourceId: movie.imdb_id || `tmdb-${movie.id}`,
+    source: 'vidsrc',
+    title: movie.title,
+    description: movie.overview || null,
+    thumbnail: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : null,
+    metadata: {
+      imdbId: movie.imdb_id,
+      type: 'movie',
+      tmdbId: movie.id,
+      embedUrl: movie.imdb_id ? `https://vidsrc.to/embed/movie/${movie.imdb_id}` : null
+    },
+    chapters: null
+  };
+}
+
 // Convert TMDB TV show to our Video type
 function showToVideo(show: any): Video {
   return {
@@ -47,6 +66,32 @@ function episodeToVideo(episode: any, show: any): Video {
   };
 }
 
+// Fetch latest movies from TMDB
+export async function fetchLatestMovies(page: number = 1): Promise<Video[]> {
+  const videos: Video[] = [];
+  try {
+    const nowPlaying = await tmdb.movieNowPlaying({ page });
+
+    for (const movie of nowPlaying.results || []) {
+      try {
+        const movieDetails = await tmdb.movieInfo({
+          id: movie.id,
+          append_to_response: 'external_ids'
+        });
+
+        if (movieDetails.imdb_id) {
+          videos.push(movieToVideo(movieDetails));
+        }
+      } catch (error) {
+        console.error(`Error fetching movie details for ${movie.title}:`, error);
+      }
+    }
+  } catch (error) {
+    console.error('TMDB Now Playing Movies Error:', error);
+  }
+  return videos;
+}
+
 // Search content using TMDB
 export async function searchContent(query: string): Promise<Video[]> {
   const videos: Video[] = [];
@@ -55,19 +100,26 @@ export async function searchContent(query: string): Promise<Video[]> {
     const results = await tmdb.searchMulti({ query });
 
     for (const result of results.results || []) {
-      if (result.media_type === 'tv') {
-        try {
+      try {
+        if (result.media_type === 'movie') {
+          const movieDetails = await tmdb.movieInfo({
+            id: result.id,
+            append_to_response: 'external_ids'
+          });
+          if (movieDetails.imdb_id) {
+            videos.push(movieToVideo(movieDetails));
+          }
+        } else if (result.media_type === 'tv') {
           const showDetails = await tmdb.tvInfo({
             id: result.id,
             append_to_response: 'external_ids'
           });
-
           if (showDetails.name && showDetails.external_ids?.imdb_id) {
             videos.push(showToVideo(showDetails));
           }
-        } catch (error) {
-          console.error(`Error fetching show details for ${result.name}:`, error);
         }
+      } catch (error) {
+        console.error(`Error fetching details for ${result.title || result.name}:`, error);
       }
     }
   } catch (error) {
@@ -155,7 +207,6 @@ export async function fetchLatestEpisodes(): Promise<Video[]> {
   const videos: Video[] = [];
 
   try {
-    // Get popular shows first
     const popular = await tmdb.tvPopular();
 
     // For each show, get the latest season and its episodes
@@ -176,7 +227,6 @@ export async function fetchLatestEpisodes(): Promise<Video[]> {
           season_number: latestSeason
         });
 
-        // Get the last 3 episodes of each show
         for (const episode of season.episodes?.slice(-3) || []) {
           videos.push(episodeToVideo(episode, showDetails));
         }
@@ -189,23 +239,4 @@ export async function fetchLatestEpisodes(): Promise<Video[]> {
   }
 
   return videos;
-}
-
-// Convert TMDB movie to our Video type
-function movieToVideo(movie: any): Video {
-  return {
-    id: 0,
-    sourceId: movie.imdb_id || `tmdb-${movie.id}`,
-    source: 'vidsrc',
-    title: movie.title,
-    description: movie.overview || null,
-    thumbnail: movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : null,
-    metadata: {
-      imdbId: movie.imdb_id,
-      type: 'movie',
-      tmdbId: movie.id,
-      embedUrl: movie.imdb_id ? `https://vidsrc.to/embed/movie/${movie.imdb_id}` : null
-    },
-    chapters: null
-  };
 }

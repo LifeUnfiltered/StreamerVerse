@@ -1,14 +1,19 @@
 import type { Express } from "express";
 import { createServer } from "http";
-import { searchSchema, userSchema } from "@shared/schema";
+import { searchSchema } from "@shared/schema";
 import { searchYouTube } from "./lib/youtube";
 import { storage } from "./storage";
 import { cache } from "./lib/cache";
-import bcrypt from "bcryptjs";
 import session from "express-session";
 import memorystore from "memorystore";
 import { z } from "zod";
-import { fetchLatestTVShows, fetchLatestEpisodes, searchContent, fetchTVShowEpisodes } from './lib/tmdb';
+import { 
+  fetchLatestTVShows, 
+  fetchLatestEpisodes, 
+  searchContent, 
+  fetchTVShowEpisodes,
+  fetchLatestMovies 
+} from './lib/tmdb';
 
 const MemoryStore = memorystore(session);
 
@@ -19,14 +24,14 @@ declare module "express-session" {
 }
 
 interface Video {
-    id: string | number; 
-    sourceId: string;
-    source: 'youtube' | 'vidsrc';
-    title: string;
-    description: string;
-    thumbnail: string | null;
-    metadata: any;
-    chapters: any | null;
+  id: string | number;
+  sourceId: string;
+  source: 'youtube' | 'vidsrc';
+  title: string;
+  description: string | null;
+  thumbnail: string | null;
+  metadata: any;
+  chapters: any | null;
 }
 
 export async function registerRoutes(app: Express) {
@@ -114,13 +119,16 @@ export async function registerRoutes(app: Express) {
   app.get('/api/videos/vidsrc/latest/:type', async (req, res) => {
     try {
       const { type } = z.object({
-        type: z.enum(['shows', 'episodes'])
+        type: z.enum(['movies', 'shows', 'episodes'])
       }).parse(req.params);
 
       const page = parseInt(req.query.page as string) || 1;
 
       let videos: Video[];
       switch (type) {
+        case 'movies':
+          videos = await fetchLatestMovies(page);
+          break;
         case 'shows':
           videos = await fetchLatestTVShows(page);
           break;
