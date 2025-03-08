@@ -23,7 +23,10 @@ export default function VideoCard({
   return (
     <Card 
       className={cn(
-        "cursor-pointer transition-colors hover:bg-accent",
+        "cursor-pointer transition-all duration-300 ease-in-out",
+        "hover:scale-[1.02] hover:shadow-lg",
+        "hover:bg-accent/80 active:scale-[0.98]",
+        "transform-gpu backface-hidden",
         isSelected && "border-primary",
         isCompact && "border-0 shadow-none"
       )}
@@ -37,7 +40,8 @@ export default function VideoCard({
         >
           <div 
             className={cn(
-              "relative overflow-hidden rounded-md",
+              "relative overflow-hidden rounded-md group",
+              "transition-transform duration-300 ease-in-out",
               isCompact ? "aspect-video" : "aspect-video w-full"
             )}
             onClick={onClick}
@@ -45,9 +49,13 @@ export default function VideoCard({
             <img 
               src={video.thumbnail || ''} 
               alt={video.title}
-              className="object-cover w-full h-full"
+              className={cn(
+                "object-cover w-full h-full",
+                "transition-transform duration-300 group-hover:scale-105"
+              )}
             />
-            <div className="absolute top-2 right-2" onClick={e => e.stopPropagation()}>
+            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300" 
+                 onClick={e => e.stopPropagation()}>
               <WatchlistButton 
                 video={video} 
                 onAuthRequired={onAuthRequired}
@@ -59,13 +67,13 @@ export default function VideoCard({
             onClick={onClick}
           >
             <h3 className={cn(
-              "font-semibold",
+              "font-semibold transition-colors duration-300",
               isCompact ? "text-sm line-clamp-2" : "line-clamp-2"
             )}>
               {video.title}
             </h3>
             {!isCompact && (
-              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+              <p className="text-sm text-muted-foreground mt-1 line-clamp-2 transition-colors duration-300">
                 {video.description}
               </p>
             )}
