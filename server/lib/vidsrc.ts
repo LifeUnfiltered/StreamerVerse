@@ -1,5 +1,5 @@
 import type { Video } from "@shared/schema";
-import { searchContent, getLatestMovies, getLatestTVShows } from './tmdb';
+import { searchContent, fetchLatestMovies, fetchLatestTVShows } from './tmdb';
 
 const VIDSRC_BASE_URL = "https://vidsrc.xyz";
 
@@ -30,39 +30,8 @@ export function getVidSrcEmbedUrl(content: VidSrcContent): string {
   throw new Error('Invalid content type');
 }
 
-// Search VidSrc content using TMDB
-export async function searchVidSrc(query: string): Promise<Video[]> {
-  return searchContent(query);
-}
-
-// Fetch latest movies from TMDB
-export async function getLatestMovies(page: number = 1): Promise<Video[]> {
-  return getLatestMovies();
-}
-
-// Fetch latest TV shows from TMDB
-export async function getLatestTVShows(page: number = 1): Promise<Video[]> {
-  return getLatestTVShows();
-}
-
-// Fetch latest episodes (using latest TV shows)
-export async function getLatestEpisodes(page: number = 1): Promise<Video[]> {
-  const shows = await getLatestTVShows();
-  return shows.map(show => ({
-    ...show,
-    metadata: {
-      ...show.metadata,
-      season: 1,
-      episode: 1,
-      embedUrl: show.metadata.imdbId 
-        ? `${VIDSRC_BASE_URL}/embed/tv/${show.metadata.imdbId}/1-1`
-        : null
-    }
-  }));
-}
-
 export function createVidSrcVideo(content: VidSrcContent): Video {
-  const { imdbId, title, type, season, episode, poster, description } = content;
+  const { imdbId, title, type, season, episode } = content;
 
   // Create a display title that includes season/episode for TV shows
   const displayTitle = type === 'tv' && season && episode
@@ -74,8 +43,8 @@ export function createVidSrcVideo(content: VidSrcContent): Video {
     sourceId: imdbId,
     source: 'vidsrc',
     title: displayTitle,
-    description: description || '',
-    thumbnail: poster || null,
+    description: '',
+    thumbnail: null,
     metadata: { 
       imdbId,
       type,
@@ -85,4 +54,37 @@ export function createVidSrcVideo(content: VidSrcContent): Video {
     },
     chapters: []
   };
+}
+
+// Search VidSrc content using TMDB
+export async function searchVidSrc(query: string): Promise<Video[]> {
+  return searchContent(query);
+}
+
+// Fetch latest movies from TMDB
+export async function getLatestMovies(page: number = 1): Promise<Video[]> {
+  const movies = await fetchLatestMovies();
+  return movies;
+}
+
+// Fetch latest TV shows from TMDB
+export async function getLatestTVShows(page: number = 1): Promise<Video[]> {
+  const shows = await fetchLatestTVShows();
+  return shows;
+}
+
+// Fetch latest episodes (using latest TV shows)
+export async function getLatestEpisodes(page: number = 1): Promise<Video[]> {
+  const shows = await fetchLatestTVShows();
+  return shows.map(show => ({
+    ...show,
+    metadata: {
+      ...show.metadata,
+      season: 1,
+      episode: 1,
+      embedUrl: show.metadata?.imdbId 
+        ? `${VIDSRC_BASE_URL}/embed/tv/${show.metadata.imdbId}/1-1`
+        : null
+    }
+  }));
 }

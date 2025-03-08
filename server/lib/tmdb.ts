@@ -49,16 +49,18 @@ export async function searchContent(query: string): Promise<Video[]> {
     for (const result of results.results || []) {
       if (result.media_type === 'movie') {
         // Fetch additional movie details to get IMDB ID
-        const movieDetails = await tmdb.movieInfo({ id: result.id, append_to_response: 'external_ids' });
-        if (movieDetails.imdb_id) {
-          videos.push(movieToVideo(movieDetails));
-        }
+        const movieDetails = await tmdb.movieInfo({ 
+          id: result.id as number, 
+          append_to_response: 'external_ids' 
+        });
+        videos.push(movieToVideo(movieDetails));
       } else if (result.media_type === 'tv') {
         // Fetch additional TV show details to get IMDB ID
-        const showDetails = await tmdb.tvInfo({ id: result.id, append_to_response: 'external_ids' });
-        if (showDetails.external_ids?.imdb_id) {
-          videos.push(tvShowToVideo(showDetails));
-        }
+        const showDetails = await tmdb.tvInfo({ 
+          id: result.id as number, 
+          append_to_response: 'external_ids' 
+        });
+        videos.push(tvShowToVideo(showDetails));
       }
     }
 
@@ -69,16 +71,17 @@ export async function searchContent(query: string): Promise<Video[]> {
   }
 }
 
-export async function getLatestMovies(): Promise<Video[]> {
+export async function fetchLatestMovies(): Promise<Video[]> {
   try {
     const nowPlaying = await tmdb.movieNowPlaying();
     const videos: Video[] = [];
 
     for (const movie of nowPlaying.results || []) {
-      const movieDetails = await tmdb.movieInfo({ id: movie.id, append_to_response: 'external_ids' });
-      if (movieDetails.imdb_id) {
-        videos.push(movieToVideo(movieDetails));
-      }
+      const movieDetails = await tmdb.movieInfo({ 
+        id: movie.id as number, 
+        append_to_response: 'external_ids' 
+      });
+      videos.push(movieToVideo(movieDetails));
     }
 
     return videos;
@@ -88,16 +91,17 @@ export async function getLatestMovies(): Promise<Video[]> {
   }
 }
 
-export async function getLatestTVShows(): Promise<Video[]> {
+export async function fetchLatestTVShows(): Promise<Video[]> {
   try {
     const airingToday = await tmdb.tvAiringToday();
     const videos: Video[] = [];
 
     for (const show of airingToday.results || []) {
-      const showDetails = await tmdb.tvInfo({ id: show.id, append_to_response: 'external_ids' });
-      if (showDetails.external_ids?.imdb_id) {
-        videos.push(tvShowToVideo(showDetails));
-      }
+      const showDetails = await tmdb.tvInfo({ 
+        id: show.id as number, 
+        append_to_response: 'external_ids' 
+      });
+      videos.push(tvShowToVideo(showDetails));
     }
 
     return videos;
