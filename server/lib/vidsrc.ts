@@ -16,6 +16,45 @@ interface VidSrcContent {
   description?: string;
 }
 
+// Sample data for demonstration
+const SAMPLE_MOVIES = [
+  {
+    imdbId: 'tt9362722',
+    title: 'Spider-Man: Across the Spider-Verse',
+    type: 'movie' as ContentType,
+    year: '2023',
+    description: 'Miles Morales catapults across the Multiverse...',
+    poster: 'https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg'
+  },
+  {
+    imdbId: 'tt1517268',
+    title: 'Barbie',
+    type: 'movie' as ContentType,
+    year: '2023',
+    description: 'Barbie and Ken are having the time of their lives...',
+    poster: 'https://image.tmdb.org/t/p/w500/iuFNMS8U5cb6xfzi51Dbkovj7vM.jpg'
+  }
+];
+
+const SAMPLE_SHOWS = [
+  {
+    imdbId: 'tt1520211',
+    title: 'The Walking Dead',
+    type: 'tv' as ContentType,
+    year: '2010',
+    description: 'Sheriff Deputy Rick Grimes wakes up from a coma...',
+    poster: 'https://image.tmdb.org/t/p/w500/n8iUqhJZ8t3xG3iaUXwJXXxEyXD.jpg'
+  },
+  {
+    imdbId: 'tt0944947',
+    title: 'Game of Thrones',
+    type: 'tv' as ContentType,
+    year: '2011',
+    description: 'Nine noble families fight for control...',
+    poster: 'https://image.tmdb.org/t/p/w500/7WUHnWGx5OO145IRxPDUkQSh4C7.jpg'
+  }
+];
+
 export function getVidSrcEmbedUrl(imdbId: string, type: ContentType, season?: number, episode?: number): string {
   let url = `${VIDSRC_BASE_URL}/embed/${type}/${imdbId}`;
 
@@ -51,22 +90,31 @@ export function createVidSrcVideo(content: VidSrcContent): Video {
   };
 }
 
+// Search VidSrc content
+export async function searchVidSrc(query: string): Promise<Video[]> {
+  try {
+    // For now, search through our sample data
+    const searchTerm = query.toLowerCase();
+    const allContent = [...SAMPLE_MOVIES, ...SAMPLE_SHOWS];
+
+    const results = allContent.filter(item => 
+      item.title.toLowerCase().includes(searchTerm) ||
+      item.description?.toLowerCase().includes(searchTerm) ||
+      item.imdbId.toLowerCase() === searchTerm
+    );
+
+    return results.map(item => createVidSrcVideo(item));
+  } catch (error) {
+    console.error('Search error:', error);
+    return [];
+  }
+}
+
 // Fetch latest movies
 export async function getLatestMovies(page: number = 1): Promise<Video[]> {
   try {
-    const response = await fetch(`${VIDSRC_BASE_URL}/movies/latest/page-${page}.json`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch latest movies');
-    }
-    const data = await response.json();
-    return data.map((movie: any) => createVidSrcVideo({
-      imdbId: movie.imdb_id,
-      title: movie.title,
-      type: 'movie',
-      year: movie.year,
-      description: movie.overview,
-      poster: movie.poster
-    }));
+    // For demonstration, return sample movies
+    return SAMPLE_MOVIES.map(movie => createVidSrcVideo(movie));
   } catch (error) {
     console.error('Error fetching latest movies:', error);
     return [];
@@ -76,19 +124,8 @@ export async function getLatestMovies(page: number = 1): Promise<Video[]> {
 // Fetch latest TV shows
 export async function getLatestTVShows(page: number = 1): Promise<Video[]> {
   try {
-    const response = await fetch(`${VIDSRC_BASE_URL}/tvshows/latest/page-${page}.json`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch latest TV shows');
-    }
-    const data = await response.json();
-    return data.map((show: any) => createVidSrcVideo({
-      imdbId: show.imdb_id,
-      title: show.title,
-      type: 'tv',
-      year: show.year,
-      description: show.overview,
-      poster: show.poster
-    }));
+    // For demonstration, return sample shows
+    return SAMPLE_SHOWS.map(show => createVidSrcVideo(show));
   } catch (error) {
     console.error('Error fetching latest TV shows:', error);
     return [];
@@ -98,64 +135,15 @@ export async function getLatestTVShows(page: number = 1): Promise<Video[]> {
 // Fetch latest episodes
 export async function getLatestEpisodes(page: number = 1): Promise<Video[]> {
   try {
-    const response = await fetch(`${VIDSRC_BASE_URL}/episodes/latest/page-${page}.json`);
-    if (!response.ok) {
-      throw new Error('Failed to fetch latest episodes');
-    }
-    const data = await response.json();
-    return data.map((episode: any) => createVidSrcVideo({
-      imdbId: episode.show_imdb_id,
-      title: episode.show_title,
-      type: 'tv',
-      season: episode.season_number,
-      episode: episode.episode_number,
-      description: episode.overview,
-      poster: episode.still_path
+    // For demonstration, return sample episodes
+    return SAMPLE_SHOWS.map(show => createVidSrcVideo({
+      ...show,
+      season: 1,
+      episode: 1,
+      description: `Latest episode of ${show.title}`
     }));
   } catch (error) {
     console.error('Error fetching latest episodes:', error);
-    return [];
-  }
-}
-
-// Search VidSrc content
-export async function searchVidSrc(query: string): Promise<Video[]> {
-  try {
-    // For IMDB ID search (starts with 'tt')
-    if (query.toLowerCase().startsWith('tt')) {
-      const response = await fetch(`${VIDSRC_BASE_URL}/movie/${query}`);
-      if (!response.ok) {
-        throw new Error('Movie not found');
-      }
-      const movie = await response.json();
-      return [createVidSrcVideo({
-        imdbId: movie.imdb_id,
-        title: movie.title,
-        type: 'movie',
-        year: movie.year,
-        description: movie.overview,
-        poster: movie.poster
-      })];
-    }
-
-    // Title search
-    const encodedQuery = encodeURIComponent(query);
-    const response = await fetch(`${VIDSRC_BASE_URL}/search?query=${encodedQuery}`);
-    if (!response.ok) {
-      throw new Error('Search failed');
-    }
-    const results = await response.json();
-
-    return results.map((item: any) => createVidSrcVideo({
-      imdbId: item.imdb_id,
-      title: item.title,
-      type: item.media_type === 'movie' ? 'movie' : 'tv',
-      year: item.year,
-      description: item.overview,
-      poster: item.poster
-    }));
-  } catch (error) {
-    console.error('Search error:', error);
     return [];
   }
 }
