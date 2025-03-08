@@ -76,32 +76,35 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
       <CardHeader>
         <CardTitle>{video.title}</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
-        <AspectRatio ratio={16/9}>
-          <iframe
-            ref={iframeRef}
-            src={embedUrl}
-            title={video.title}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="w-full h-full rounded-md"
-          />
-        </AspectRatio>
-
-        {video.chapters && video.chapters.length > 0 && (
-          <div className="mt-4">
-            <h3 className="text-lg font-semibold mb-2">Chapters</h3>
-            <VideoChapters
-              chapters={video.chapters}
-              currentTime={currentTime}
-              onChapterClick={handleChapterClick}
-            />
+      <CardContent>
+        <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
+          <div className="space-y-4">
+            <AspectRatio ratio={16/9}>
+              <iframe
+                ref={iframeRef}
+                src={embedUrl}
+                title={video.title}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full rounded-md"
+              />
+            </AspectRatio>
+            <p className="text-sm text-muted-foreground">
+              {video.description}
+            </p>
           </div>
-        )}
 
-        <p className="text-sm text-muted-foreground">
-          {video.description}
-        </p>
+          {video.chapters && video.chapters.length > 0 && (
+            <div>
+              <h3 className="text-lg font-semibold mb-2">Chapters</h3>
+              <VideoChapters
+                chapters={video.chapters}
+                currentTime={currentTime}
+                onChapterClick={handleChapterClick}
+              />
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
