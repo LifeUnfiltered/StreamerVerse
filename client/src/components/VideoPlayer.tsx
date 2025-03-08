@@ -16,10 +16,6 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerRef = useRef<any>(null);
 
-  const embedUrl = video.source === 'youtube'
-    ? `https://www.youtube.com/embed/${video.sourceId}?enablejsapi=1&origin=${window.location.origin}`
-    : '';
-
   useEffect(() => {
     // Reset state when video changes
     setCurrentTime(0);
@@ -93,25 +89,21 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
   }, [video.sourceId]); // Re-initialize when video changes
 
   return (
-    <>
-      <Card className="w-full">
+    <div className="w-full">
+      <Card>
         <CardHeader>
           <CardTitle className="line-clamp-1">{video.title}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <AspectRatio ratio={16 / 9} className="relative">
-              <div id={`youtube-player-${video.sourceId}`}>
-                <iframe
-                  ref={iframeRef}
-                  id={`youtube-iframe-${video.sourceId}`}
-                  src={embedUrl}
-                  title={video.title}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="w-full h-full rounded-md"
-                />
-              </div>
+            <AspectRatio ratio={16 / 9} className="relative bg-black rounded-md overflow-hidden">
+              <iframe
+                ref={iframeRef}
+                title={video.title}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="absolute inset-0 w-full h-full"
+              />
               <AnimatePresence>
                 {isBuffering && <LoadingSpinner />}
               </AnimatePresence>
@@ -124,6 +116,6 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
       </Card>
 
       <FloatingActionButton video={video} currentTime={currentTime} />
-    </>
+    </div>
   );
 }
