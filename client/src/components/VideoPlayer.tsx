@@ -2,7 +2,6 @@ import { useRef, useState, useEffect } from 'react';
 import type { Video } from "@shared/schema";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import VideoChapters from "./VideoChapters";
 import FloatingActionButton from "./FloatingActionButton";
 
 interface VideoPlayerProps {
@@ -62,14 +61,6 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
     };
   }, [video.sourceId]);
 
-  const handleChapterClick = (timestamp: number) => {
-    if (playerRef.current?.seekTo) {
-      playerRef.current.seekTo(timestamp, true);
-    }
-  };
-
-  console.log('Video chapters:', video.chapters);
-
   return (
     <>
       <Card className="w-full">
@@ -77,33 +68,20 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
           <CardTitle className="line-clamp-1">{video.title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-6 lg:grid-cols-[3fr_1fr]">
-            <div className="space-y-4">
-              <AspectRatio ratio={16 / 9}>
-                <iframe
-                  ref={iframeRef}
-                  src={embedUrl}
-                  title={video.title}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="w-full h-full rounded-md"
-                />
-              </AspectRatio>
-              <p className="text-sm text-muted-foreground">
-                {video.description}
-              </p>
-            </div>
-
-            {video.chapters && video.chapters.length > 0 && (
-              <div className="relative min-w-[250px]">
-                <h3 className="text-lg font-semibold mb-2">Chapters</h3>
-                <VideoChapters
-                  chapters={video.chapters}
-                  currentTime={currentTime}
-                  onChapterClick={handleChapterClick}
-                />
-              </div>
-            )}
+          <div className="space-y-4">
+            <AspectRatio ratio={16 / 9}>
+              <iframe
+                ref={iframeRef}
+                src={embedUrl}
+                title={video.title}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full rounded-md"
+              />
+            </AspectRatio>
+            <p className="text-sm text-muted-foreground">
+              {video.description}
+            </p>
           </div>
         </CardContent>
       </Card>
