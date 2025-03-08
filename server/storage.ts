@@ -17,7 +17,7 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
 
   // Watchlist operations
-  addToWatchlist(userId: number, videoId: string): Promise<WatchlistItem>;
+  addToWatchlist(userId: number, videoId: string, videoData: Video): Promise<WatchlistItem>;
   removeFromWatchlist(userId: number, videoId: string): Promise<void>;
   getWatchlist(userId: number): Promise<Video[]>;
   isInWatchlist(userId: number, videoId: string): Promise<boolean>;
@@ -39,7 +39,18 @@ export class DBStorage implements IStorage {
     return result[0];
   }
 
-  async addToWatchlist(userId: number, videoId: string): Promise<WatchlistItem> {
+  async addToWatchlist(userId: number, videoId: string, videoData: Video): Promise<WatchlistItem> {
+    // First store the video data
+    await db.insert(videos).values({
+      sourceId: videoId,
+      source: videoData.source,
+      title: videoData.title,
+      description: videoData.description,
+      thumbnail: videoData.thumbnail,
+      metadata: videoData.metadata
+    }).onConflictDoNothing();
+
+    // Then add to watchlist
     const [item] = await db.insert(watchlist)
       .values({ userId, videoId })
       .returning();
@@ -57,23 +68,22 @@ export class DBStorage implements IStorage {
   }
 
   async getWatchlist(userId: number): Promise<Video[]> {
-    const items = await db.select({
-      id: watchlist.id,
-      videoId: watchlist.videoId
-    })
-    .from(watchlist)
-    .where(eq(watchlist.userId, userId));
+    // Join watchlist with videos to get full video data
+    const items = await db
+      .select({
+        id: videos.id,
+        sourceId: videos.sourceId,
+        source: videos.source,
+        title: videos.title,
+        description: videos.description,
+        thumbnail: videos.thumbnail,
+        metadata: videos.metadata
+      })
+      .from(watchlist)
+      .innerJoin(videos, eq(watchlist.videoId, videos.sourceId))
+      .where(eq(watchlist.userId, userId));
 
-    // Return videos with the correct type structure
-    return items.map(item => ({
-      id: parseInt(item.videoId),
-      sourceId: item.videoId,
-      source: 'youtube',
-      title: '', // These will be populated when displaying
-      description: '',
-      thumbnail: '',
-      metadata: null
-    }));
+    return items;
   }
 
   async isInWatchlist(userId: number, videoId: string): Promise<boolean> {

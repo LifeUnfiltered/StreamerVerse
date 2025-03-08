@@ -119,7 +119,8 @@ export async function registerRoutes(app: Express) {
   app.post('/api/watchlist/:videoId', requireAuth, async (req, res) => {
     try {
       const { videoId } = req.params;
-      await storage.addToWatchlist(req.session.userId!, videoId);
+      const videoData = req.body;
+      await storage.addToWatchlist(req.session.userId!, videoId, videoData);
       res.json({ message: 'Added to watchlist' });
     } catch (error) {
       res.status(500).json({ message: 'Failed to add to watchlist' });

@@ -51,7 +51,6 @@ export default function Home() {
   };
 
   const handleAuthSuccess = () => {
-    // Refetch watchlist after successful auth
     queryClient.invalidateQueries({ queryKey: ['/api/watchlist'] });
   };
 
@@ -79,9 +78,11 @@ export default function Home() {
               </Alert>
             )}
 
-            {!searchQuery && watchlist && watchlist.length > 0 && (
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold mb-4">Your Watchlist</h2>
+            {watchlist && watchlist.length > 0 && (
+              <div className={searchQuery ? "mb-6 p-4 bg-accent/10 rounded-lg" : "mb-6"}>
+                <h2 className="text-xl font-semibold mb-4">
+                  {searchQuery ? "Your Watchlist (Quick Access)" : "Your Watchlist"}
+                </h2>
                 <VideoList 
                   videos={watchlist}
                   isLoading={false}
@@ -94,14 +95,17 @@ export default function Home() {
             )}
 
             {searchQuery && (
-              <VideoList 
-                videos={videos}
-                isLoading={isLoading}
-                error={error as Error}
-                onVideoSelect={handleVideoSelect}
-                selectedVideo={selectedVideo}
-                onAuthRequired={() => setIsAuthDialogOpen(true)}
-              />
+              <div>
+                <h2 className="text-xl font-semibold mb-4">Search Results</h2>
+                <VideoList 
+                  videos={videos}
+                  isLoading={isLoading}
+                  error={error as Error}
+                  onVideoSelect={handleVideoSelect}
+                  selectedVideo={selectedVideo}
+                  onAuthRequired={() => setIsAuthDialogOpen(true)}
+                />
+              </div>
             )}
           </ScrollArea>
         </div>

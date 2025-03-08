@@ -36,7 +36,7 @@ export default function WatchlistButton({ video, onAuthRequired }: WatchlistButt
       if (isInWatchlist) {
         await apiRequest('DELETE', `/api/watchlist/${video.sourceId}`);
       } else {
-        await apiRequest('POST', `/api/watchlist/${video.sourceId}`);
+        await apiRequest('POST', `/api/watchlist/${video.sourceId}`, video);
       }
     },
     onError: (error) => {
