@@ -10,6 +10,8 @@ import { apiRequest } from "@/lib/queryClient";
 import AuthDialog from "@/components/AuthDialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -70,6 +72,19 @@ export default function Home() {
       <main className="container mx-auto px-4 py-6">
         <SearchBar onSearch={handleSearch} />
 
+        {showWatchlist && !searchQuery && (
+          <div className="mt-4 flex items-center justify-between">
+            <h2 className="text-xl font-semibold">Your Watchlist</h2>
+            <Button 
+              variant="ghost" 
+              onClick={() => setShowWatchlist(false)}
+              className="text-muted-foreground"
+            >
+              ← Back to Search
+            </Button>
+          </div>
+        )}
+
         <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_350px]">
           {selectedVideo ? (
             <div className="order-first lg:col-span-1">
@@ -89,17 +104,14 @@ export default function Home() {
             )}
 
             {((showWatchlist && !searchQuery) || watchlist?.length === 0) && watchlist && (
-              <div className="mb-6">
-                <h2 className="text-xl font-semibold mb-4">Your Watchlist</h2>
-                <VideoList 
-                  videos={watchlist}
-                  isLoading={false}
-                  error={null}
-                  onVideoSelect={handleVideoSelect}
-                  selectedVideo={selectedVideo}
-                  onAuthRequired={() => setIsAuthDialogOpen(true)}
-                />
-              </div>
+              <VideoList 
+                videos={watchlist}
+                isLoading={false}
+                error={null}
+                onVideoSelect={handleVideoSelect}
+                selectedVideo={selectedVideo}
+                onAuthRequired={() => setIsAuthDialogOpen(true)}
+              />
             )}
 
             {searchQuery && (
