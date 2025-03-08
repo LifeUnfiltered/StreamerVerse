@@ -9,7 +9,7 @@ import session from "express-session";
 import memorystore from "memorystore";
 import { z } from "zod";
 import { getLatestMovies, getLatestTVShows, getLatestEpisodes } from './lib/vidsrc';
-import { TEST_TV_SHOWS } from './lib/tmdb';
+//import { TEST_TV_SHOWS } from './lib/tmdb'; //Removed as no longer used
 
 const MemoryStore = memorystore(session);
 
@@ -216,13 +216,30 @@ export async function registerRoutes(app: Express) {
         query: z.string().min(1)
       }).parse(req.query);
 
-      const videos = await searchVidSrc(query);
+      const videos = await searchContent(query);
       res.json(videos);
     } catch (error) {
       console.error('VidSrc Search Error:', error);
       res.status(400).json({ 
         message: error instanceof Error ? error.message : 'Failed to search VidSrc'
       });
+    }
+  });
+
+  app.get('/api/videos/tv/:showId/episodes', async (req, res) => {
+    try {
+      const { showId } = req.params;
+      const { season } = req.query;
+
+      const episodes = await fetchTVShowEpisodes(
+        parseInt(showId),
+        season ? parseInt(season as string) : undefined
+      );
+
+      res.json(episodes);
+    } catch (error) {
+      console.error('Error fetching episodes:', error);
+      res.status(500).json({ message: 'Failed to fetch episodes' });
     }
   });
 
@@ -236,14 +253,11 @@ export async function registerRoutes(app: Express) {
 
       let videos: Video[];
       switch (type) {
-        case 'movies':
-          videos = await getLatestMovies(page);
-          break;
         case 'shows':
-          videos = await getLatestTVShows(page);
+          videos = await fetchLatestTVShows(page);
           break;
         case 'episodes':
-          videos = await getLatestEpisodes(page);
+          videos = await fetchLatestEpisodes();
           break;
         default:
           throw new Error('Invalid content type');
@@ -287,22 +301,37 @@ export async function registerRoutes(app: Express) {
     }
   });
 
-  app.get('/api/videos/test-tv', (req, res) => {
-    console.log('Serving test TV shows:', TEST_TV_SHOWS.map(show => ({
-      title: show.title,
-      embedUrl: show.metadata?.embedUrl
-    })));
-
-    res.json(TEST_TV_SHOWS);
-  });
+  //app.get('/api/videos/test-tv', (req, res) => { //Removed
+  //  console.log('Serving test TV shows:', TEST_TV_SHOWS.map(show => ({
+  //    title: show.title,
+  //    embedUrl: show.metadata?.embedUrl
+  //  })));
+  //
+  //  res.json(TEST_TV_SHOWS);
+  //});
 
   return httpServer;
 }
 
 // Placeholder functions -  Replace these with your actual implementations
-async function searchVidSrc(query: string): Promise<Video[]> {
+async function searchContent(query: string): Promise<Video[]> {
   //  Implement your VidSrc search logic here.  Return an array of video objects.
   return [];
+}
+
+async function fetchLatestTVShows(page:number = 1): Promise<Video[]> {
+    // Implement your VidSrc fetch latest TV shows logic here
+    return [];
+}
+
+async function fetchLatestEpisodes(): Promise<Video[]> {
+    //Implement your VidSrc fetch latest episodes logic here
+    return [];
+}
+
+async function fetchTVShowEpisodes(showId: number, season?: number): Promise<Video[]> {
+    //Implement your VidSrc fetch TV show episodes logic here.
+    return [];
 }
 
 function createVidSrcVideo(data: any): Video {
