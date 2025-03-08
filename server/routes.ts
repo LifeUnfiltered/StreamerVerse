@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer } from "http";
 import { searchSchema } from "@shared/schema";
-import { searchYouTube } from "../client/src/lib/youtube";
+import { searchYouTube } from "./lib/youtube";
 
 export async function registerRoutes(app: Express) {
   const httpServer = createServer(app);
