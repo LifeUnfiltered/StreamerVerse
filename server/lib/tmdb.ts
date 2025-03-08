@@ -5,6 +5,10 @@ const tmdb = new MovieDb(process.env.TMDB_API_KEY!);
 
 // Convert TMDB movie to our Video type
 function movieToVideo(movie: any): Video {
+  const embedUrl = movie.imdb_id 
+    ? `https://vidsrc.xyz/embed/movie/${movie.imdb_id}`
+    : null;
+
   return {
     id: 0,
     sourceId: movie.imdb_id || `tmdb-${movie.id}`,
@@ -16,7 +20,7 @@ function movieToVideo(movie: any): Video {
       imdbId: movie.imdb_id,
       type: 'movie',
       tmdbId: movie.id,
-      embedUrl: movie.imdb_id ? `https://vidsrc.xyz/embed/movie/${movie.imdb_id}` : null
+      embedUrl
     },
     chapters: []
   };
@@ -24,6 +28,12 @@ function movieToVideo(movie: any): Video {
 
 // Convert TMDB TV show to our Video type
 function tvShowToVideo(show: any, episode?: any): Video {
+  const embedUrl = show.external_ids?.imdb_id 
+    ? episode
+      ? `https://vidsrc.xyz/embed/tv/${show.external_ids.imdb_id}/${episode.season_number}-${episode.episode_number}`
+      : `https://vidsrc.xyz/embed/tv/${show.external_ids.imdb_id}`
+    : null;
+
   const baseVideo = {
     id: 0,
     sourceId: show.external_ids?.imdb_id || `tmdb-${show.id}`,
@@ -35,41 +45,30 @@ function tvShowToVideo(show: any, episode?: any): Video {
       imdbId: show.external_ids?.imdb_id,
       type: 'tv',
       tmdbId: show.id,
+      embedUrl
     },
     chapters: []
   };
 
   if (episode) {
-    const seasonNum = episode.season_number;
-    const episodeNum = episode.episode_number;
     return {
       ...baseVideo,
-      title: `${show.name} S${seasonNum}E${episodeNum} - ${episode.name}`,
+      title: `${show.name} S${episode.season_number}E${episode.episode_number} - ${episode.name}`,
       description: episode.overview || show.overview,
       thumbnail: episode.still_path ? `https://image.tmdb.org/t/p/w500${episode.still_path}` : baseVideo.thumbnail,
       metadata: {
         ...baseVideo.metadata,
-        season: seasonNum,
-        episode: episodeNum,
-        embedUrl: show.external_ids?.imdb_id 
-          ? `https://vidsrc.xyz/embed/tv/${show.external_ids.imdb_id}/${seasonNum}-${episodeNum}`
-          : null
+        season: episode.season_number,
+        episode: episode.episode_number,
+        embedUrl
       }
     };
   }
 
-  // For show without specific episode
-  return {
-    ...baseVideo,
-    metadata: {
-      ...baseVideo.metadata,
-      embedUrl: show.external_ids?.imdb_id 
-        ? `https://vidsrc.xyz/embed/tv/${show.external_ids.imdb_id}`
-        : null
-    }
-  };
+  return baseVideo;
 }
 
+// Search for movies and TV shows
 export async function searchContent(query: string): Promise<Video[]> {
   try {
     const results = await tmdb.searchMulti({ query });
@@ -78,16 +77,20 @@ export async function searchContent(query: string): Promise<Video[]> {
     for (const result of results.results || []) {
       if (result.media_type === 'movie') {
         const movieDetails = await tmdb.movieInfo({ 
-          id: result.id as number, 
+          id: result.id, 
           append_to_response: 'external_ids' 
         });
-        videos.push(movieToVideo(movieDetails));
+        if (movieDetails.imdb_id) {
+          videos.push(movieToVideo(movieDetails));
+        }
       } else if (result.media_type === 'tv') {
         const showDetails = await tmdb.tvInfo({ 
-          id: result.id as number, 
+          id: result.id, 
           append_to_response: 'external_ids' 
         });
-        videos.push(tvShowToVideo(showDetails));
+        if (showDetails.external_ids?.imdb_id) {
+          videos.push(tvShowToVideo(showDetails));
+        }
       }
     }
 
@@ -98,6 +101,7 @@ export async function searchContent(query: string): Promise<Video[]> {
   }
 }
 
+// Fetch latest movies
 export async function fetchLatestMovies(): Promise<Video[]> {
   try {
     const nowPlaying = await tmdb.movieNowPlaying();
@@ -105,10 +109,12 @@ export async function fetchLatestMovies(): Promise<Video[]> {
 
     for (const movie of nowPlaying.results || []) {
       const movieDetails = await tmdb.movieInfo({ 
-        id: movie.id as number, 
+        id: movie.id, 
         append_to_response: 'external_ids' 
       });
-      videos.push(movieToVideo(movieDetails));
+      if (movieDetails.imdb_id) {
+        videos.push(movieToVideo(movieDetails));
+      }
     }
 
     return videos;
@@ -118,6 +124,7 @@ export async function fetchLatestMovies(): Promise<Video[]> {
   }
 }
 
+// Fetch latest TV shows
 export async function fetchLatestTVShows(): Promise<Video[]> {
   try {
     const airingToday = await tmdb.tvAiringToday();
@@ -125,10 +132,12 @@ export async function fetchLatestTVShows(): Promise<Video[]> {
 
     for (const show of airingToday.results || []) {
       const showDetails = await tmdb.tvInfo({ 
-        id: show.id as number, 
+        id: show.id, 
         append_to_response: 'external_ids' 
       });
-      videos.push(tvShowToVideo(showDetails));
+      if (showDetails.external_ids?.imdb_id) {
+        videos.push(tvShowToVideo(showDetails));
+      }
     }
 
     return videos;
@@ -138,6 +147,7 @@ export async function fetchLatestTVShows(): Promise<Video[]> {
   }
 }
 
+// Fetch latest episodes
 export async function fetchLatestEpisodes(): Promise<Video[]> {
   try {
     const airingToday = await tmdb.tvAiringToday();
@@ -145,11 +155,10 @@ export async function fetchLatestEpisodes(): Promise<Video[]> {
 
     for (const show of airingToday.results || []) {
       const showDetails = await tmdb.tvInfo({ 
-        id: show.id as number, 
+        id: show.id, 
         append_to_response: 'external_ids,last_episode_to_air' 
       });
-
-      if (showDetails.last_episode_to_air) {
+      if (showDetails.external_ids?.imdb_id && showDetails.last_episode_to_air) {
         videos.push(tvShowToVideo(showDetails, showDetails.last_episode_to_air));
       }
     }
