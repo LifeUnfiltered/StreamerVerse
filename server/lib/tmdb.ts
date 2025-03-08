@@ -135,9 +135,94 @@ export const TEST_EPISODES: Video[] = [
     },
     chapters: null
   },
-  // Game of Thrones Season 2
   {
     id: 6,
+    sourceId: 'tt0944947',
+    source: 'vidsrc',
+    title: 'Game of Thrones S1E4 - Cripples, Bastards, and Broken Things',
+    description: 'Ned investigates Jon Arryn\'s murder. Jon befriends Samwell Tarly, a coward who has been forced to join the Night\'s Watch.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg',
+    metadata: {
+      imdbId: 'tt0944947',
+      type: 'tv',
+      tmdbId: 1399,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0944947/1-4',
+      season: 1,
+      episode: 4
+    },
+    chapters: null
+  },
+  {
+    id: 7,
+    sourceId: 'tt0944947',
+    source: 'vidsrc',
+    title: 'Game of Thrones S1E5 - The Wolf and the Lion',
+    description: 'Catelyn arrests Tyrion for trying to kill Bran. Ned confronts Cersei about the secrets that Jon Arryn died for.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg',
+    metadata: {
+      imdbId: 'tt0944947',
+      type: 'tv',
+      tmdbId: 1399,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0944947/1-5',
+      season: 1,
+      episode: 5
+    },
+    chapters: null
+  },
+  {
+    id: 8,
+    sourceId: 'tt0944947',
+    source: 'vidsrc',
+    title: 'Game of Thrones S1E6 - A Golden Crown',
+    description: 'While recovering from his battle with Jaime, Ned is forced to run the kingdom while Robert goes hunting.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg',
+    metadata: {
+      imdbId: 'tt0944947',
+      type: 'tv',
+      tmdbId: 1399,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0944947/1-6',
+      season: 1,
+      episode: 6
+    },
+    chapters: null
+  },
+  {
+    id: 9,
+    sourceId: 'tt0944947',
+    source: 'vidsrc',
+    title: 'Game of Thrones S1E7 - You Win or You Die',
+    description: 'Robert has been injured while hunting and is dying. Jon and the others find evidence that proves Mormont\'s report.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg',
+    metadata: {
+      imdbId: 'tt0944947',
+      type: 'tv',
+      tmdbId: 1399,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0944947/1-7',
+      season: 1,
+      episode: 7
+    },
+    chapters: null
+  },
+  {
+    id: 10,
+    sourceId: 'tt0944947',
+    source: 'vidsrc',
+    title: 'Game of Thrones S1E8 - The Pointy End',
+    description: 'The Lannisters press their advantage over the Starks; Robb rallies his father\'s northern allies and heads south to war.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg',
+    metadata: {
+      imdbId: 'tt0944947',
+      type: 'tv',
+      tmdbId: 1399,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0944947/1-8',
+      season: 1,
+      episode: 8
+    },
+    chapters: null
+  },
+  // Game of Thrones Season 2
+  {
+    id: 11,
     sourceId: 'tt0944947',
     source: 'vidsrc',
     title: 'Game of Thrones S2E1 - The North Remembers',
@@ -154,11 +239,11 @@ export const TEST_EPISODES: Video[] = [
     chapters: null
   },
   {
-    id: 7,
+    id: 12,
     sourceId: 'tt0944947',
     source: 'vidsrc',
     title: 'Game of Thrones S2E2 - The Night Lands',
-    description: 'Arya makes friends with Gendry. Tyrion tries to take control of the Small Council. Theon arrives at his home, Pyke, in order to persuade his father into helping Robb with the war.',
+    description: 'Arya makes friends with Gendry. Tyrion tries to take control of the Small Council.',
     thumbnail: 'https://image.tmdb.org/t/p/w500/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg',
     metadata: {
       imdbId: 'tt0944947',
@@ -171,11 +256,11 @@ export const TEST_EPISODES: Video[] = [
     chapters: null
   },
   {
-    id: 8,
+    id: 13,
     sourceId: 'tt0944947',
     source: 'vidsrc',
     title: 'Game of Thrones S2E3 - What Is Dead May Never Die',
-    description: 'Tyrion tries to prevent the news of King Joffrey\'s true parentage from reaching the kingdom.',
+    description: 'Tyrion tests the loyalty of the small council. Catelyn tries to rally support for the Starks.',
     thumbnail: 'https://image.tmdb.org/t/p/w500/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg',
     metadata: {
       imdbId: 'tt0944947',
@@ -187,9 +272,128 @@ export const TEST_EPISODES: Video[] = [
     },
     chapters: null
   },
+  {
+    id: 14,
+    sourceId: 'tt0944947',
+    source: 'vidsrc',
+    title: 'Game of Thrones S2E4 - Garden of Bones',
+    description: 'Joffrey punishes Sansa for Robb\'s victories, and Tyrion scrambles to temper the king\'s cruelty.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg',
+    metadata: {
+      imdbId: 'tt0944947',
+      type: 'tv',
+      tmdbId: 1399,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0944947/2-4',
+      season: 2,
+      episode: 4
+    },
+    chapters: null
+  },
+  {
+    id: 15,
+    sourceId: 'tt0944947',
+    source: 'vidsrc',
+    title: 'Game of Thrones S2E5 - The Ghost of Harrenhal',
+    description: 'Arya and Gendry encounter a new threat. Tyrion seeks to solidify his position in King\'s Landing.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg',
+    metadata: {
+      imdbId: 'tt0944947',
+      type: 'tv',
+      tmdbId: 1399,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0944947/2-5',
+      season: 2,
+      episode: 5
+    },
+    chapters: null
+  },
+  {
+    id: 16,
+    sourceId: 'tt0944947',
+    source: 'vidsrc',
+    title: 'Game of Thrones S2E6 - The Old Gods and the New',
+    description: 'Bran and Rickard Karstark explore the mysteries of the past. Theon plots against the Starks.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg',
+    metadata: {
+      imdbId: 'tt0944947',
+      type: 'tv',
+      tmdbId: 1399,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0944947/2-6',
+      season: 2,
+      episode: 6
+    },
+    chapters: null
+  },
+  {
+    id: 17,
+    sourceId: 'tt0944947',
+    source: 'vidsrc',
+    title: 'Game of Thrones S2E7 - A Man Without Honor',
+    description: 'Theon confronts his father. Tyrion seeks an alliance, and the war against the Lannisters continues.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg',
+    metadata: {
+      imdbId: 'tt0944947',
+      type: 'tv',
+      tmdbId: 1399,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0944947/2-7',
+      season: 2,
+      episode: 7
+    },
+    chapters: null
+  },
+  {
+    id: 18,
+    sourceId: 'tt0944947',
+    source: 'vidsrc',
+    title: 'Game of Thrones S2E8 - Blackwater',
+    description: 'Stannis Baratheon attacks King\'s Landing.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg',
+    metadata: {
+      imdbId: 'tt0944947',
+      type: 'tv',
+      tmdbId: 1399,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0944947/2-8',
+      season: 2,
+      episode: 8
+    },
+    chapters: null
+  },
+  {
+    id: 19,
+    sourceId: 'tt0944947',
+    source: 'vidsrc',
+    title: 'Game of Thrones S2E9 - The Rains of Castamere',
+    description: 'The Red Wedding.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg',
+    metadata: {
+      imdbId: 'tt0944947',
+      type: 'tv',
+      tmdbId: 1399,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0944947/2-9',
+      season: 2,
+      episode: 9
+    },
+    chapters: null
+  },
+  {
+    id: 20,
+    sourceId: 'tt0944947',
+    source: 'vidsrc',
+    title: 'Game of Thrones S2E10 - Valar Morghulis',
+    description: 'The season finale.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg',
+    metadata: {
+      imdbId: 'tt0944947',
+      type: 'tv',
+      tmdbId: 1399,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0944947/2-10',
+      season: 2,
+      episode: 10
+    },
+    chapters: null
+  },
   // The Walking Dead Season 1
   {
-    id: 9,
+    id: 21,
     sourceId: 'tt1520211',
     source: 'vidsrc',
     title: 'The Walking Dead S1E1 - Days Gone Bye',
@@ -206,7 +410,7 @@ export const TEST_EPISODES: Video[] = [
     chapters: null
   },
   {
-    id: 10,
+    id: 22,
     sourceId: 'tt1520211',
     source: 'vidsrc',
     title: 'The Walking Dead S1E2 - Guts',
@@ -223,7 +427,7 @@ export const TEST_EPISODES: Video[] = [
     chapters: null
   },
   {
-    id: 11,
+    id: 23,
     sourceId: 'tt1520211',
     source: 'vidsrc',
     title: 'The Walking Dead S1E3 - Tell It to the Frogs',
@@ -239,9 +443,94 @@ export const TEST_EPISODES: Video[] = [
     },
     chapters: null
   },
+  {
+    id: 24,
+    sourceId: 'tt1520211',
+    source: 'vidsrc',
+    title: 'The Walking Dead S1E4 - Vatos',
+    description: 'Rick, Glenn, Daryl and T-Dog encounter a group of survivors in Atlanta who appear to be a threat.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/xf9wuDcqlUPWABZNeDKPbZUjWx0.jpg',
+    metadata: {
+      imdbId: 'tt1520211',
+      type: 'tv',
+      tmdbId: 1402,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt1520211/1-4',
+      season: 1,
+      episode: 4
+    },
+    chapters: null
+  },
+  {
+    id: 25,
+    sourceId: 'tt1520211',
+    source: 'vidsrc',
+    title: 'The Walking Dead S1E5 - Wildfire',
+    description: 'The group discovers the source of the mysterious fire and encounters another threat.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/xf9wuDcqlUPWABZNeDKPbZUjWx0.jpg',
+    metadata: {
+      imdbId: 'tt1520211',
+      type: 'tv',
+      tmdbId: 1402,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt1520211/1-5',
+      season: 1,
+      episode: 5
+    },
+    chapters: null
+  },
+  {
+    id: 26,
+    sourceId: 'tt1520211',
+    source: 'vidsrc',
+    title: 'The Walking Dead S1E6 - Ts',
+    description: 'The group struggles to survive as their numbers dwindle and they face a new threat.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/xf9wuDcqlUPWABZNeDKPbZUjWx0.jpg',
+    metadata: {
+      imdbId: 'tt1520211',
+      type: 'tv',
+      tmdbId: 1402,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt1520211/1-6',
+      season: 1,
+      episode: 6
+    },
+    chapters: null
+  },
+  {
+    id: 27,
+    sourceId: 'tt1520211',
+    source: 'vidsrc',
+    title: 'The Walking Dead S1E7 - The Infected',
+    description: 'The group finds themselves trapped and must work together to escape.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/xf9wuDcqlUPWABZNeDKPbZUjWx0.jpg',
+    metadata: {
+      imdbId: 'tt1520211',
+      type: 'tv',
+      tmdbId: 1402,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt1520211/1-7',
+      season: 1,
+      episode: 7
+    },
+    chapters: null
+  },
+  {
+    id: 28,
+    sourceId: 'tt1520211',
+    source: 'vidsrc',
+    title: 'The Walking Dead S1E8 - Sacrifice',
+    description: 'The group makes a sacrifice to save themselves.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/xf9wuDcqlUPWABZNeDKPbZUjWx0.jpg',
+    metadata: {
+      imdbId: 'tt1520211',
+      type: 'tv',
+      tmdbId: 1402,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt1520211/1-8',
+      season: 1,
+      episode: 8
+    },
+    chapters: null
+  },
   // The Walking Dead Season 2
   {
-    id: 12,
+    id: 29,
     sourceId: 'tt1520211',
     source: 'vidsrc',
     title: 'The Walking Dead S2E1 - What Lies Ahead',
@@ -258,7 +547,7 @@ export const TEST_EPISODES: Video[] = [
     chapters: null
   },
   {
-    id: 13,
+    id: 30,
     sourceId: 'tt1520211',
     source: 'vidsrc',
     title: 'The Walking Dead S2E2 - Bloodletting',
@@ -275,7 +564,7 @@ export const TEST_EPISODES: Video[] = [
     chapters: null
   },
   {
-    id: 14,
+    id: 31,
     sourceId: 'tt1520211',
     source: 'vidsrc',
     title: 'The Walking Dead S2E3 - Save the Last One',
@@ -291,9 +580,94 @@ export const TEST_EPISODES: Video[] = [
     },
     chapters: null
   },
+  {
+    id: 32,
+    sourceId: 'tt1520211',
+    source: 'vidsrc',
+    title: 'The Walking Dead S2E4 - Cherokee Rose',
+    description: 'The group mourns a loss and searches for answers.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/xf9wuDcqlUPWABZNeDKPbZUjWx0.jpg',
+    metadata: {
+      imdbId: 'tt1520211',
+      type: 'tv',
+      tmdbId: 1402,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt1520211/2-4',
+      season: 2,
+      episode: 4
+    },
+    chapters: null
+  },
+  {
+    id: 33,
+    sourceId: 'tt1520211',
+    source: 'vidsrc',
+    title: 'The Walking Dead S2E5 - Chupacabra',
+    description: 'The group encounters a new threat.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/xf9wuDcqlUPWABZNeDKPbZUjWx0.jpg',
+    metadata: {
+      imdbId: 'tt1520211',
+      type: 'tv',
+      tmdbId: 1402,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt1520211/2-5',
+      season: 2,
+      episode: 5
+    },
+    chapters: null
+  },
+  {
+    id: 34,
+    sourceId: 'tt1520211',
+    source: 'vidsrc',
+    title: 'The Walking Dead S2E6 - Secrets',
+    description: 'Secrets are revealed.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/xf9wuDcqlUPWABZNeDKPbZUjWx0.jpg',
+    metadata: {
+      imdbId: 'tt1520211',
+      type: 'tv',
+      tmdbId: 1402,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt1520211/2-6',
+      season: 2,
+      episode: 6
+    },
+    chapters: null
+  },
+  {
+    id: 35,
+    sourceId: 'tt1520211',
+    source: 'vidsrc',
+    title: 'The Walking Dead S2E7 - Pretty Much Dead Already',
+    description: 'The group faces a difficult decision.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/xf9wuDcqlUPWABZNeDKPbZUjWx0.jpg',
+    metadata: {
+      imdbId: 'tt1520211',
+      type: 'tv',
+      tmdbId: 1402,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt1520211/2-7',
+      season: 2,
+      episode: 7
+    },
+    chapters: null
+  },
+  {
+    id: 36,
+    sourceId: 'tt1520211',
+    source: 'vidsrc',
+    title: 'The Walking Dead S2E8 - Nebraska',
+    description: 'The group travels to Nebraska in search of supplies.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/xf9wuDcqlUPWABZNeDKPbZUjWx0.jpg',
+    metadata: {
+      imdbId: 'tt1520211',
+      type: 'tv',
+      tmdbId: 1402,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt1520211/2-8',
+      season: 2,
+      episode: 8
+    },
+    chapters: null
+  },
   // Breaking Bad Season 1
   {
-    id: 15,
+    id: 37,
     sourceId: 'tt0903747',
     source: 'vidsrc',
     title: 'Breaking Bad S1E1 - Pilot',
@@ -310,7 +684,7 @@ export const TEST_EPISODES: Video[] = [
     chapters: null
   },
   {
-    id: 16,
+    id: 38,
     sourceId: 'tt0903747',
     source: 'vidsrc',
     title: 'Breaking Bad S1E2 - Cat\'s in the Bag...',
@@ -326,10 +700,94 @@ export const TEST_EPISODES: Video[] = [
     },
     chapters: null
   },
-
+  {
+    id: 39,
+    sourceId: 'tt0903747',
+    source: 'vidsrc',
+    title: 'Breaking Bad S1E3 - ...And the Bag\'s in the River',
+    description: 'Walt and Jesse clean up the mess they\'ve made.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg',
+    metadata: {
+      imdbId: 'tt0903747',
+      type: 'tv',
+      tmdbId: 1396,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0903747/1-3',
+      season: 1,
+      episode: 3
+    },
+    chapters: null
+  },
+  {
+    id: 40,
+    sourceId: 'tt0903747',
+    source: 'vidsrc',
+    title: 'Breaking Bad S1E4 - Cancer Man',
+    description: 'Walt struggles to balance his new life with his family life.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg',
+    metadata: {
+      imdbId: 'tt0903747',
+      type: 'tv',
+      tmdbId: 1396,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0903747/1-4',
+      season: 1,
+      episode: 4
+    },
+    chapters: null
+  },
+  {
+    id: 41,
+    sourceId: 'tt0903747',
+    source: 'vidsrc',
+    title: 'Breaking Bad S1E5 - Gray Matter',
+    description: 'Walt reflects on his past and his current situation.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg',
+    metadata: {
+      imdbId: 'tt0903747',
+      type: 'tv',
+      tmdbId: 1396,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0903747/1-5',
+      season: 1,
+      episode: 5
+    },
+    chapters: null
+  },
+  {
+    id: 42,
+    sourceId: 'tt0903747',
+    source: 'vidsrc',
+    title: 'Breaking Bad S1E6 - Crazy Handful of Nothin\'',
+    description: 'Walt and Jesse encounter a new challenge.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg',
+    metadata: {
+      imdbId: 'tt0903747',
+      type: 'tv',
+      tmdbId: 1396,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0903747/1-6',
+      season: 1,
+      episode: 6
+    },
+    chapters: null
+  },
+  {
+    id: 43,
+    sourceId: 'tt0903747',
+    source: 'vidsrc',
+    title: 'Breaking Bad S1E7 - A No-Rough-Stuff-Type Deal',
+    description: 'Walt and Jesse try to keep a low profile.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg',
+    metadata: {
+      imdbId: 'tt0903747',
+      type: 'tv',
+      tmdbId: 1396,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0903747/1-7',
+      season: 1,
+      episode: 7
+    },
+    chapters: null
+  },
   // Stranger Things Season 1
   {
-    id: 17,
+    id: 44,
     sourceId: 'tt4574334',
     source: 'vidsrc',
     title: 'Stranger Things S1E1 - Chapter One: The Vanishing of Will Byers',
@@ -346,7 +804,7 @@ export const TEST_EPISODES: Video[] = [
     chapters: null
   },
   {
-    id: 18,
+    id: 45,
     sourceId: 'tt4574334',
     source: 'vidsrc',
     title: 'Stranger Things S1E2 - Chapter Two: The Weirdo on Maple Street',
@@ -362,10 +820,111 @@ export const TEST_EPISODES: Video[] = [
     },
     chapters: null
   },
-
+  {
+    id: 46,
+    sourceId: 'tt4574334',
+    source: 'vidsrc',
+    title: 'Stranger Things S1E3 - Chapter Three: Holly, Jolly',
+    description: 'An increasingly concerned Nancy looks for Barb and finds out what Jonathan\'s been up to. Joyce is convinced Will is trying to talk to her.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg',
+    metadata: {
+      imdbId: 'tt4574334',
+      type: 'tv',
+      tmdbId: 66732,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt4574334/1-3',
+      season: 1,
+      episode: 3
+    },
+    chapters: null
+  },
+  {
+    id: 47,
+    sourceId: 'tt4574334',
+    source: 'vidsrc',
+    title: 'Stranger Things S1E4 - Chapter Four: The Body',
+    description: 'The search for Will intensifies as the town grapples with a tragic loss.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg',
+    metadata: {
+      imdbId: 'tt4574334',
+      type: 'tv',
+      tmdbId: 66732,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt4574334/1-4',
+      season: 1,
+      episode: 4
+    },
+    chapters: null
+  },
+  {
+    id: 48,
+    sourceId: 'tt4574334',
+    source: 'vidsrc',
+    title: 'Stranger Things S1E5 - Chapter Five: The Flea and the Acrobat',
+    description: 'Eleven\'s past is revealed, and the group gets closer to finding Will.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg',
+    metadata: {
+      imdbId: 'tt4574334',
+      type: 'tv',
+      tmdbId: 66732,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt4574334/1-5',
+      season: 1,
+      episode: 5
+    },
+    chapters: null
+  },
+  {
+    id: 49,
+    sourceId: 'tt4574334',
+    source: 'vidsrc',
+    title: 'Stranger Things S1E6 - Chapter Six: The Monster',
+    description: 'The group confronts the monster in the Upside Down.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg',
+    metadata: {
+      imdbId: 'tt4574334',
+      type: 'tv',
+      tmdbId: 66732,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt4574334/1-6',
+      season: 1,
+      episode: 6
+    },
+    chapters: null
+  },
+  {
+    id: 50,
+    sourceId: 'tt4574334',
+    source: 'vidsrc',
+    title: 'Stranger Things S1E7 - Chapter Seven: The Bathtub',
+    description: 'Eleven uses her powers to help the group.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg',
+    metadata: {
+      imdbId: 'tt4574334',
+      type: 'tv',
+      tmdbId: 66732,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt4574334/1-7',
+      season: 1,
+      episode: 7
+    },
+    chapters: null
+  },
+  {
+    id: 51,
+    sourceId: 'tt4574334',
+    source: 'vidsrc',
+    title: 'Stranger Things S1E8 - Chapter Eight: The Upside Down',
+    description: 'The final confrontation with the monster.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg',
+    metadata: {
+      imdbId: 'tt4574334',
+      type: 'tv',
+      tmdbId: 66732,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt4574334/1-8',
+      season: 1,
+      episode: 8
+    },
+    chapters: null
+  },
   // The Mandalorian Season 1
   {
-    id: 19,
+    id: 52,
     sourceId: 'tt8111088',
     source: 'vidsrc',
     title: 'The Mandalorian S1E1 - Chapter 1: The Mandalorian',
@@ -382,7 +941,7 @@ export const TEST_EPISODES: Video[] = [
     chapters: null
   },
   {
-    id: 20,
+    id: 53,
     sourceId: 'tt8111088',
     source: 'vidsrc',
     title: 'The Mandalorian S1E2 - Chapter 2: The Child',
@@ -395,6 +954,108 @@ export const TEST_EPISODES: Video[] = [
       embedUrl: 'https://vidsrc.to/embed/tv/tt8111088/1-2',
       season: 1,
       episode: 2
+    },
+    chapters: null
+  },
+  {
+    id: 54,
+    sourceId: 'tt8111088',
+    source: 'vidsrc',
+    title: 'The Mandalorian S1E3 - Chapter 3: The Sin',
+    description: 'The battered Mandalorian returns to his client for reward.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/eU1i6eHXlzMOlEq0ku1Rzq7Y4wA.jpg',
+    metadata: {
+      imdbId: 'tt8111088',
+      type: 'tv',
+      tmdbId: 82856,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt8111088/1-3',
+      season: 1,
+      episode: 3
+    },
+    chapters: null
+  },
+  {
+    id: 55,
+    sourceId: 'tt8111088',
+    source: 'vidsrc',
+    title: 'The Mandalorian S1E4 - Chapter 4: Sanctuary',
+    description: 'The Mandalorian seeks refuge on a remote planet.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/eU1i6eHXlzMOlEq0ku1Rzq7Y4wA.jpg',
+    metadata: {
+      imdbId: 'tt8111088',
+      type: 'tv',
+      tmdbId: 82856,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt8111088/1-4',
+      season: 1,
+      episode: 4
+    },
+    chapters: null
+  },
+  {
+    id: 56,
+    sourceId: 'tt8111088',
+    source: 'vidsrc',
+    title: 'The Mandalorian S1E5 - Chapter 5: The Gunslinger',
+    description: 'The Mandalorian crosses paths with a gunslinger.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/eU1i6eHXlzMOlEq0ku1Rzq7Y4wA.jpg',
+    metadata: {
+      imdbId: 'tt8111088',
+      type: 'tv',
+      tmdbId: 82856,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt8111088/1-5',
+      season: 1,
+      episode: 5
+    },
+    chapters: null
+  },
+  {
+    id: 57,
+    sourceId: 'tt8111088',
+    source: 'vidsrc',
+    title: 'The Mandalorian S1E6 - Chapter 6: The Prisoner',
+    description: 'The Mandalorian takes on a new mission.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/eU1i6eHXlzMOlEq0ku1Rzq7Y4wA.jpg',
+    metadata: {
+      imdbId: 'tt8111088',
+      type: 'tv',
+      tmdbId: 82856,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt8111088/1-6',
+      season: 1,
+      episode: 6
+    },
+    chapters: null
+  },
+  {
+    id: 58,
+    sourceId: 'tt8111088',
+    source: 'vidsrc',
+    title: 'The Mandalorian S1E7 - Chapter 7: The Reckoning',
+    description: 'The Mandalorian faces a reckoning.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/eU1i6eHXlzMOlEq0ku1Rzq7Y4wA.jpg',
+    metadata: {
+      imdbId: 'tt8111088',
+      type: 'tv',
+      tmdbId: 82856,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt8111088/1-7',
+      season: 1,
+      episode: 7
+    },
+    chapters: null
+  },
+  {
+    id: 59,
+    sourceId: 'tt8111088',
+    source: 'vidsrc',
+    title: 'The Mandalorian S1E8 - Chapter 8: Redemption',
+    description: 'The Mandalorian seeks redemption.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/eU1i6eHXlzMOlEq0ku1Rzq7Y4wA.jpg',
+    metadata: {
+      imdbId: 'tt8111088',
+      type: 'tv',
+      tmdbId: 82856,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt8111088/1-8',
+      season: 1,
+      episode: 8
     },
     chapters: null
   }
@@ -424,7 +1085,7 @@ function tvShowToVideo(show: any, episode?: any): Video | null {
   try {
     const imdbId = show.external_ids?.imdb_id;
     if (!imdbId || !show.name) {
-      console.log('Skipping show - missing data:', { 
+      console.log('Skipping show - missing data:', {
         name: show?.name,
         imdbId,
         showId: show?.id
@@ -488,9 +1149,9 @@ export async function searchContent(query: string): Promise<Video[]> {
     for (const result of results.results || []) {
       try {
         if (result.media_type === 'movie') {
-          const movieDetails = await tmdb.movieInfo({ 
+          const movieDetails = await tmdb.movieInfo({
             id: result.id,
-            append_to_response: 'external_ids' 
+            append_to_response: 'external_ids'
           });
           if (movieDetails.imdb_id) {
             videos.push(movieToVideo(movieDetails));
@@ -525,9 +1186,9 @@ export async function fetchLatestMovies(): Promise<Video[]> {
 
     for (const movie of nowPlaying.results || []) {
       try {
-        const movieDetails = await tmdb.movieInfo({ 
+        const movieDetails = await tmdb.movieInfo({
           id: movie.id,
-          append_to_response: 'external_ids' 
+          append_to_response: 'external_ids'
         });
         if (movieDetails.imdb_id) {
           videos.push(movieToVideo(movieDetails));
