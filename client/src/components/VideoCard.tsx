@@ -8,46 +8,68 @@ interface VideoCardProps {
   onClick: () => void;
   isSelected: boolean;
   onAuthRequired: () => void;
+  variant?: 'default' | 'compact';
 }
 
 export default function VideoCard({ 
   video, 
   onClick, 
   isSelected,
-  onAuthRequired 
+  onAuthRequired,
+  variant = 'default'
 }: VideoCardProps) {
+  const isCompact = variant === 'compact';
+
   return (
     <Card 
       className={cn(
         "cursor-pointer transition-colors hover:bg-accent",
-        isSelected && "border-primary"
+        isSelected && "border-primary",
+        isCompact && "border-0 shadow-none"
       )}
     >
-      <CardContent className="p-3">
+      <CardContent className={cn("p-3", isCompact && "p-2")}>
         <div 
-          className="aspect-video relative overflow-hidden rounded-md"
-          onClick={onClick}
+          className="grid gap-3"
+          style={{
+            gridTemplateColumns: isCompact ? '120px 1fr' : '1fr',
+          }}
         >
-          <img 
-            src={video.thumbnail || ''} 
-            alt={video.title}
-            className="object-cover w-full h-full"
-          />
-          <div className="absolute top-2 right-2" onClick={e => e.stopPropagation()}>
-            <WatchlistButton 
-              video={video} 
-              onAuthRequired={onAuthRequired}
+          <div 
+            className={cn(
+              "relative overflow-hidden rounded-md",
+              isCompact ? "aspect-video" : "aspect-video w-full"
+            )}
+            onClick={onClick}
+          >
+            <img 
+              src={video.thumbnail || ''} 
+              alt={video.title}
+              className="object-cover w-full h-full"
             />
+            <div className="absolute top-2 right-2" onClick={e => e.stopPropagation()}>
+              <WatchlistButton 
+                video={video} 
+                onAuthRequired={onAuthRequired}
+              />
+            </div>
           </div>
-        </div>
-        <div 
-          className="mt-3 cursor-pointer"
-          onClick={onClick}
-        >
-          <h3 className="font-semibold line-clamp-2">{video.title}</h3>
-          <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
-            {video.description}
-          </p>
+          <div 
+            className="cursor-pointer"
+            onClick={onClick}
+          >
+            <h3 className={cn(
+              "font-semibold",
+              isCompact ? "text-sm line-clamp-2" : "line-clamp-2"
+            )}>
+              {video.title}
+            </h3>
+            {!isCompact && (
+              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">
+                {video.description}
+              </p>
+            )}
+          </div>
         </div>
       </CardContent>
     </Card>

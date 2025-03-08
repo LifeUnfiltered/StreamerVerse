@@ -7,6 +7,7 @@ import { cache } from "./lib/cache";
 import bcrypt from "bcryptjs";
 import session from "express-session";
 import memorystore from "memorystore";
+import { z } from "zod";
 
 const MemoryStore = memorystore(session);
 
@@ -150,6 +151,49 @@ export async function registerRoutes(app: Express) {
       res.json({ message: 'Removed from watchlist' });
     } catch (error) {
       res.status(500).json({ message: 'Failed to remove from watchlist' });
+    }
+  });
+
+  app.get('/api/videos/recommendations', async (req, res) => {
+    try {
+      const { videoId } = z.object({
+        videoId: z.string().min(1)
+      }).parse(req.query);
+
+      // Get recommendations from YouTube API with video relation
+      const params = new URLSearchParams({
+        part: 'snippet',
+        maxResults: '10',
+        relatedToVideoId: videoId,
+        type: 'video',
+        key: process.env.VITE_YOUTUBE_API_KEY!
+      });
+
+      const response = await fetch(
+        `https://www.googleapis.com/youtube/v3/search?${params}`
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch recommendations');
+      }
+
+      const data = await response.json();
+      const recommendations = data.items.map((item: any) => ({
+        id: item.id.videoId,
+        sourceId: item.id.videoId,
+        source: 'youtube',
+        title: item.snippet.title,
+        description: item.snippet.description,
+        thumbnail: item.snippet.thumbnails.high.url,
+        metadata: item.snippet
+      }));
+
+      res.json(recommendations);
+    } catch (error) {
+      console.error('Recommendation Error:', error);
+      res.status(400).json({ 
+        message: error instanceof Error ? error.message : 'Failed to get recommendations'
+      });
     }
   });
 

@@ -11,7 +11,7 @@ import AuthDialog from "@/components/AuthDialog";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
+import RecommendationSidebar from "@/components/RecommendationSidebar";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -89,9 +89,16 @@ export default function Home() {
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_350px]">
           {selectedVideo ? (
-            <div className="order-first lg:col-span-1">
-              <VideoPlayer video={selectedVideo} />
-            </div>
+            <>
+              <div className="space-y-6">
+                <VideoPlayer video={selectedVideo} />
+                <RecommendationSidebar
+                  currentVideo={selectedVideo}
+                  onVideoSelect={handleVideoSelect}
+                  onAuthRequired={() => setIsAuthDialogOpen(true)}
+                />
+              </div>
+            </>
           ) : null}
 
           <ScrollArea className="h-[calc(100vh-200px)] lg:col-span-1">
