@@ -89,7 +89,15 @@ export async function registerRoutes(app: Express) {
         query: z.string().min(1)
       }).parse(req.query);
 
+      console.log('Processing search request for:', query);
       const videos = await searchContent(query);
+
+      if (videos.length === 0) {
+        console.log('No results found for query:', query);
+      } else {
+        console.log(`Found ${videos.length} results for query:`, query);
+      }
+
       res.json(videos);
     } catch (error) {
       console.error('VidSrc Search Error:', error);

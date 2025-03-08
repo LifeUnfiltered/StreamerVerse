@@ -102,23 +102,28 @@ export async function searchContent(query: string): Promise<Video[]> {
   const videos: Video[] = [];
 
   try {
+    console.log('Searching TMDB for:', query);
     const results = await tmdb.searchMulti({ query });
 
     for (const result of results.results || []) {
       try {
         if (result.media_type === 'movie') {
+          // Fetch complete movie details including IMDB ID
           const movieDetails = await tmdb.movieInfo({
             id: result.id,
             append_to_response: 'external_ids'
           });
+
           if (movieDetails.imdb_id) {
             videos.push(movieToVideo(movieDetails));
           }
         } else if (result.media_type === 'tv') {
+          // Fetch complete TV show details including external IDs
           const showDetails = await tmdb.tvInfo({
             id: result.id,
             append_to_response: 'external_ids'
           });
+
           if (showDetails.name && showDetails.external_ids?.imdb_id) {
             videos.push(showToVideo(showDetails));
           }
@@ -127,6 +132,8 @@ export async function searchContent(query: string): Promise<Video[]> {
         console.error(`Error fetching details for ${result.title || result.name}:`, error);
       }
     }
+
+    console.log(`Found ${videos.length} results for query: ${query}`);
   } catch (error) {
     console.error('TMDB Search Error:', error);
   }
