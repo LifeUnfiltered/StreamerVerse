@@ -290,7 +290,7 @@ export async function registerRoutes(app: Express) {
   app.get('/api/videos/test-tv', (req, res) => {
     console.log('Serving test TV shows:', TEST_TV_SHOWS.map(show => ({
       title: show.title,
-      embedUrl: show.metadata.embedUrl
+      embedUrl: show.metadata?.embedUrl
     })));
 
     res.json(TEST_TV_SHOWS);
