@@ -3,6 +3,7 @@ import type { Video } from "@shared/schema";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import VideoChapters from "./VideoChapters";
+import FloatingActionButton from "./FloatingActionButton";
 
 interface VideoPlayerProps {
   video: Video;
@@ -13,12 +14,11 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const playerRef = useRef<any>(null);
 
-  const embedUrl = video.source === 'youtube' 
+  const embedUrl = video.source === 'youtube'
     ? `https://www.youtube.com/embed/${video.sourceId}?enablejsapi=1`
     : '';
 
   useEffect(() => {
-    // Load YouTube IFrame API if not already loaded
     if (!(window as any).YT) {
       const tag = document.createElement('script');
       tag.src = "https://www.youtube.com/iframe_api";
@@ -26,7 +26,6 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
       firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
     }
 
-    // Function to initialize the player
     const initPlayer = () => {
       if (!iframeRef.current) return;
 
@@ -49,11 +48,9 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
       });
     };
 
-    // Initialize player when API is ready
     if ((window as any).YT && (window as any).YT.Player) {
       initPlayer();
     } else {
-      // If API is not ready, wait for it
       (window as any).onYouTubeIframeAPIReady = initPlayer;
     }
 
@@ -71,43 +68,47 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
     }
   };
 
-  console.log('Video chapters:', video.chapters); // Debug log
+  console.log('Video chapters:', video.chapters);
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>{video.title}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
-          <div className="space-y-4">
-            <AspectRatio ratio={16/9}>
-              <iframe
-                ref={iframeRef}
-                src={embedUrl}
-                title={video.title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full rounded-md"
-              />
-            </AspectRatio>
-            <p className="text-sm text-muted-foreground">
-              {video.description}
-            </p>
-          </div>
-
-          {video.chapters && video.chapters.length > 0 && (
-            <div>
-              <h3 className="text-lg font-semibold mb-2">Chapters</h3>
-              <VideoChapters
-                chapters={video.chapters}
-                currentTime={currentTime}
-                onChapterClick={handleChapterClick}
-              />
+    <>
+      <Card>
+        <CardHeader>
+          <CardTitle>{video.title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
+            <div className="space-y-4">
+              <AspectRatio ratio={16 / 9}>
+                <iframe
+                  ref={iframeRef}
+                  src={embedUrl}
+                  title={video.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="w-full h-full rounded-md"
+                />
+              </AspectRatio>
+              <p className="text-sm text-muted-foreground">
+                {video.description}
+              </p>
             </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+
+            {video.chapters && video.chapters.length > 0 && (
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Chapters</h3>
+                <VideoChapters
+                  chapters={video.chapters}
+                  currentTime={currentTime}
+                  onChapterClick={handleChapterClick}
+                />
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      <FloatingActionButton video={video} currentTime={currentTime} />
+    </>
   );
 }
