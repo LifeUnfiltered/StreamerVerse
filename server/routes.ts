@@ -197,21 +197,41 @@ export async function registerRoutes(app: Express) {
     }
   });
 
+  app.get('/api/videos/vidsrc/search', async (req, res) => {
+    try {
+      const { query } = z.object({
+        query: z.string().min(1)
+      }).parse(req.query);
+
+      const videos = await searchVidSrc(query);
+      res.json(videos);
+    } catch (error) {
+      console.error('VidSrc Search Error:', error);
+      res.status(400).json({ 
+        message: error instanceof Error ? error.message : 'Failed to search VidSrc'
+      });
+    }
+  });
+
   app.get('/api/videos/vidsrc/:imdbId', async (req, res) => {
     try {
       const { imdbId } = req.params;
+      const { type, season, episode } = z.object({
+        type: z.enum(['movie', 'tv']).default('movie'),
+        season: z.string().optional(),
+        episode: z.string().optional()
+      }).parse(req.query);
 
-      // For testing purposes, create a sample VidSrc video
-      const video = {
-        id: imdbId,
-        sourceId: imdbId,
-        source: 'vidsrc',
-        title: 'Sample VidSrc Video',
-        description: 'This is a test VidSrc video stream',
-        thumbnail: null,
-        metadata: { imdbId },
-        chapters: null
-      };
+      // TODO: Implement actual VidSrc API fetch
+      // For now, return sample data
+      const video = createVidSrcVideo({
+        imdbId,
+        title: type === 'movie' ? 'Sample Movie' : 'Sample TV Show',
+        type,
+        season: season ? parseInt(season) : undefined,
+        episode: episode ? parseInt(episode) : undefined,
+        description: `This is a sample ${type === 'movie' ? 'movie' : 'TV show'} from VidSrc`
+      });
 
       res.json(video);
     } catch (error) {
@@ -223,4 +243,24 @@ export async function registerRoutes(app: Express) {
   });
 
   return httpServer;
+}
+
+// Placeholder functions -  Replace these with your actual implementations
+async function searchVidSrc(query: string): Promise<any[]> {
+  //  Implement your VidSrc search logic here.  Return an array of video objects.
+  return [];
+}
+
+function createVidSrcVideo(data: any): any {
+  // Implement your VidSrc video creation logic here.  Return a video object.
+  return {
+    id: data.imdbId,
+    sourceId: data.imdbId,
+    source: 'vidsrc',
+    title: data.title,
+    description: data.description,
+    thumbnail: null,
+    metadata: { imdbId: data.imdbId, type: data.type, season: data.season, episode: data.episode },
+    chapters: null
+  };
 }
