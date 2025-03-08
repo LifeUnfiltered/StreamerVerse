@@ -17,10 +17,21 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
   const playerRef = useRef<any>(null);
 
   const embedUrl = video.source === 'youtube'
-    ? `https://www.youtube.com/embed/${video.sourceId}?enablejsapi=1`
+    ? `https://www.youtube.com/embed/${video.sourceId}?enablejsapi=1&origin=${window.location.origin}`
     : '';
 
   useEffect(() => {
+    // Reset state when video changes
+    setCurrentTime(0);
+    setIsBuffering(true);
+
+    // Clean up existing player
+    if (playerRef.current?.destroy) {
+      playerRef.current.destroy();
+      playerRef.current = null;
+    }
+
+    // Load YouTube IFrame API if not already loaded
     if (!(window as any).YT) {
       const tag = document.createElement('script');
       tag.src = "https://www.youtube.com/iframe_api";
@@ -32,6 +43,12 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
       if (!iframeRef.current) return;
 
       playerRef.current = new (window as any).YT.Player(iframeRef.current, {
+        videoId: video.sourceId,
+        playerVars: {
+          autoplay: 1,
+          modestbranding: 1,
+          rel: 0,
+        },
         events: {
           onStateChange: (event: any) => {
             // Update buffering state based on player state
@@ -51,11 +68,16 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
           },
           onReady: () => {
             setIsBuffering(false);
+          },
+          onError: (error: any) => {
+            console.error('YouTube Player Error:', error);
+            setIsBuffering(false);
           }
         }
       });
     };
 
+    // Initialize player when API is ready
     if ((window as any).YT && (window as any).YT.Player) {
       initPlayer();
     } else {
@@ -68,7 +90,7 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
         playerRef.current = null;
       }
     };
-  }, [video.sourceId]);
+  }, [video.sourceId]); // Re-initialize when video changes
 
   return (
     <>
@@ -79,14 +101,17 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
         <CardContent>
           <div className="space-y-4">
             <AspectRatio ratio={16 / 9} className="relative">
-              <iframe
-                ref={iframeRef}
-                src={embedUrl}
-                title={video.title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full rounded-md"
-              />
+              <div id={`youtube-player-${video.sourceId}`}>
+                <iframe
+                  ref={iframeRef}
+                  id={`youtube-iframe-${video.sourceId}`}
+                  src={embedUrl}
+                  title={video.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="w-full h-full rounded-md"
+                />
+              </div>
               <AnimatePresence>
                 {isBuffering && <LoadingSpinner />}
               </AnimatePresence>
