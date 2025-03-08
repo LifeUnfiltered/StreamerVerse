@@ -31,8 +31,7 @@ export default function VidSrc() {
     queryKey: ['/api/videos/test-tv'],
     queryFn: async () => {
       const response = await apiRequest('GET', '/api/videos/test-tv');
-      const video = await response.json();
-      return [video];
+      return response.json();
     },
     enabled: !searchQuery
   });
@@ -67,12 +66,13 @@ export default function VidSrc() {
   };
 
   // Get current show and its episodes
-  const currentShow = selectedVideo ? shows?.find(show => 
-    show.sourceId === selectedVideo.metadata?.imdbId
-  ) : null;
+  const currentShow = selectedVideo && shows?.find(show => 
+    show.sourceId === selectedVideo.sourceId || // For direct show selection
+    show.sourceId === selectedVideo.metadata?.imdbId // For episode selection
+  );
 
   const showEpisodes = episodes?.filter(episode => 
-    episode.sourceId === selectedVideo?.sourceId
+    episode.metadata?.imdbId === currentShow?.metadata?.imdbId
   ) || [];
 
   return (
@@ -84,7 +84,6 @@ export default function VidSrc() {
       <main className="container mx-auto px-4 py-6">
         <SearchBar 
           onSearch={handleSearch}
-          defaultValue={searchQuery}
           placeholder="Search movies and TV shows..."
         />
 
