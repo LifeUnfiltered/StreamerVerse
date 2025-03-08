@@ -1,6 +1,6 @@
 import type { Video } from "@shared/schema";
 
-const VIDSRC_BASE_URL = "https://vidsrc.xyz/embed";
+const VIDSRC_BASE_URL = "https://vidsrc.xyz";
 
 // Different content types for VidSrc
 type ContentType = 'movie' | 'tv';
@@ -17,7 +17,7 @@ interface VidSrcContent {
 }
 
 export function getVidSrcEmbedUrl(imdbId: string, type: ContentType, season?: number, episode?: number): string {
-  let url = `${VIDSRC_BASE_URL}/${type}/${imdbId}`;
+  let url = `${VIDSRC_BASE_URL}/embed/${type}/${imdbId}`;
 
   if (type === 'tv' && season && episode) {
     url += `/${season}-${episode}`;
@@ -51,55 +51,22 @@ export function createVidSrcVideo(content: VidSrcContent): Video {
   };
 }
 
-// Search VidSrc content (to be implemented with actual API)
-export async function searchVidSrc(query: string): Promise<Video[]> {
-  // TODO: Implement actual VidSrc API search
-  // For now, return sample data
-  const sampleMovies: VidSrcContent[] = [
-    {
-      imdbId: 'tt0111161',
-      title: 'The Shawshank Redemption',
-      type: 'movie',
-      year: '1994',
-      description: 'Two imprisoned men bond over a number of years...',
-      poster: 'https://example.com/shawshank.jpg'
-    },
-    {
-      imdbId: 'tt0068646',
-      title: 'The Godfather',
-      type: 'movie',
-      year: '1972',
-      description: 'The aging patriarch of an organized crime dynasty...',
-      poster: 'https://example.com/godfather.jpg'
-    }
-  ];
-
-  // Convert VidSrcContent to Video type
-  return sampleMovies.map(movie => createVidSrcVideo(movie));
-}
-
 // Fetch latest movies
 export async function getLatestMovies(page: number = 1): Promise<Video[]> {
   try {
-    // For testing, return sample data since the API endpoint might be rate-limited
-    return [
-      createVidSrcVideo({
-        imdbId: 'tt9362722',
-        title: 'Spider-Man: Across the Spider-Verse',
-        type: 'movie',
-        year: '2023',
-        description: 'Miles Morales catapults across the Multiverse...',
-        poster: 'https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg'
-      }),
-      createVidSrcVideo({
-        imdbId: 'tt1517268',
-        title: 'Barbie',
-        type: 'movie',
-        year: '2023',
-        description: 'Barbie and Ken are having the time of their lives...',
-        poster: 'https://image.tmdb.org/t/p/w500/iuFNMS8U5cb6xfzi51Dbkovj7vM.jpg'
-      })
-    ];
+    const response = await fetch(`${VIDSRC_BASE_URL}/movies/latest/page-${page}.json`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch latest movies');
+    }
+    const data = await response.json();
+    return data.map((movie: any) => createVidSrcVideo({
+      imdbId: movie.imdb_id,
+      title: movie.title,
+      type: 'movie',
+      year: movie.year,
+      description: movie.overview,
+      poster: movie.poster
+    }));
   } catch (error) {
     console.error('Error fetching latest movies:', error);
     return [];
@@ -109,25 +76,19 @@ export async function getLatestMovies(page: number = 1): Promise<Video[]> {
 // Fetch latest TV shows
 export async function getLatestTVShows(page: number = 1): Promise<Video[]> {
   try {
-    // For testing, return sample data
-    return [
-      createVidSrcVideo({
-        imdbId: 'tt1520211',
-        title: 'The Walking Dead',
-        type: 'tv',
-        year: '2010',
-        description: 'Sheriff Deputy Rick Grimes wakes up from a coma...',
-        poster: 'https://image.tmdb.org/t/p/w500/n8iUqhJZ8t3xG3iaUXwJXXxEyXD.jpg'
-      }),
-      createVidSrcVideo({
-        imdbId: 'tt0944947',
-        title: 'Game of Thrones',
-        type: 'tv',
-        year: '2011',
-        description: 'Nine noble families fight for control...',
-        poster: 'https://image.tmdb.org/t/p/w500/7WUHnWGx5OO145IRxPDUkQSh4C7.jpg'
-      })
-    ];
+    const response = await fetch(`${VIDSRC_BASE_URL}/tvshows/latest/page-${page}.json`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch latest TV shows');
+    }
+    const data = await response.json();
+    return data.map((show: any) => createVidSrcVideo({
+      imdbId: show.imdb_id,
+      title: show.title,
+      type: 'tv',
+      year: show.year,
+      description: show.overview,
+      poster: show.poster
+    }));
   } catch (error) {
     console.error('Error fetching latest TV shows:', error);
     return [];
@@ -137,29 +98,64 @@ export async function getLatestTVShows(page: number = 1): Promise<Video[]> {
 // Fetch latest episodes
 export async function getLatestEpisodes(page: number = 1): Promise<Video[]> {
   try {
-    // For testing, return sample data
-    return [
-      createVidSrcVideo({
-        imdbId: 'tt1520211',
-        title: 'The Walking Dead',
-        type: 'tv',
-        season: 1,
-        episode: 1,
-        description: 'Rick searches for his family...',
-        poster: 'https://image.tmdb.org/t/p/w500/n8iUqhJZ8t3xG3iaUXwJXXxEyXD.jpg'
-      }),
-      createVidSrcVideo({
-        imdbId: 'tt0944947',
-        title: 'Game of Thrones',
-        type: 'tv',
-        season: 1,
-        episode: 1,
-        description: 'Winter is Coming',
-        poster: 'https://image.tmdb.org/t/p/w500/7WUHnWGx5OO145IRxPDUkQSh4C7.jpg'
-      })
-    ];
+    const response = await fetch(`${VIDSRC_BASE_URL}/episodes/latest/page-${page}.json`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch latest episodes');
+    }
+    const data = await response.json();
+    return data.map((episode: any) => createVidSrcVideo({
+      imdbId: episode.show_imdb_id,
+      title: episode.show_title,
+      type: 'tv',
+      season: episode.season_number,
+      episode: episode.episode_number,
+      description: episode.overview,
+      poster: episode.still_path
+    }));
   } catch (error) {
     console.error('Error fetching latest episodes:', error);
+    return [];
+  }
+}
+
+// Search VidSrc content
+export async function searchVidSrc(query: string): Promise<Video[]> {
+  try {
+    // For IMDB ID search (starts with 'tt')
+    if (query.toLowerCase().startsWith('tt')) {
+      const response = await fetch(`${VIDSRC_BASE_URL}/movie/${query}`);
+      if (!response.ok) {
+        throw new Error('Movie not found');
+      }
+      const movie = await response.json();
+      return [createVidSrcVideo({
+        imdbId: movie.imdb_id,
+        title: movie.title,
+        type: 'movie',
+        year: movie.year,
+        description: movie.overview,
+        poster: movie.poster
+      })];
+    }
+
+    // Title search
+    const encodedQuery = encodeURIComponent(query);
+    const response = await fetch(`${VIDSRC_BASE_URL}/search?query=${encodedQuery}`);
+    if (!response.ok) {
+      throw new Error('Search failed');
+    }
+    const results = await response.json();
+
+    return results.map((item: any) => createVidSrcVideo({
+      imdbId: item.imdb_id,
+      title: item.title,
+      type: item.media_type === 'movie' ? 'movie' : 'tv',
+      year: item.year,
+      description: item.overview,
+      poster: item.poster
+    }));
+  } catch (error) {
+    console.error('Search error:', error);
     return [];
   }
 }
