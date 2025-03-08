@@ -1,30 +1,45 @@
-const { execSync } = require('child_process');
+import { execSync } from 'child_process';
 
 async function buildAndroid() {
   try {
     // Build the web app first
-    console.log('Building web application...');
+    console.log('\n📦 Step 1: Building web application...');
     execSync('npm run build', { stdio: 'inherit' });
 
-    // Initialize Capacitor if not already done
-    console.log('Initializing Capacitor...');
-    execSync('npx cap init "Streamer Verse" "com.streamerverse.app" --web-dir="dist/public"', { stdio: 'inherit' });
-
-    // Add Android platform
-    console.log('Adding Android platform...');
-    execSync('npx cap add android', { stdio: 'inherit' });
+    // Add Android platform if not already added
+    console.log('\n📱 Step 2: Setting up Android platform...');
+    try {
+      execSync('npx cap add android', { stdio: 'inherit' });
+    } catch (error) {
+      console.log('Android platform already exists, continuing...');
+    }
 
     // Copy web assets
-    console.log('Copying web assets to Android platform...');
+    console.log('\n📂 Step 3: Copying web assets to Android platform...');
     execSync('npx cap copy', { stdio: 'inherit' });
 
-    // Open Android Studio (for local development)
-    console.log('Opening Android Studio...');
-    execSync('npx cap open android', { stdio: 'inherit' });
+    // Update Android project
+    console.log('\n🔄 Step 4: Syncing Android project...');
+    execSync('npx cap sync android', { stdio: 'inherit' });
 
-    console.log('Android build setup completed successfully!');
+    // Build APK using Gradle
+    console.log('\n🛠️ Step 5: Building Android APK...');
+    process.chdir('android');
+    execSync('./gradlew assembleDebug', { stdio: 'inherit' });
+    process.chdir('..');
+
+    console.log('\n✨ Build Complete!');
+    console.log('\nYour APK can be found at:');
+    console.log('android/app/build/outputs/apk/debug/app-debug.apk');
+
+    console.log('\n📱 To install on your Android device:');
+    console.log('1. Download the APK file from the location above');
+    console.log('2. Transfer it to your Android device');
+    console.log('3. On your Android device, tap the APK file to install');
+    console.log('4. You might need to enable "Install from Unknown Sources" in your Android settings');
+
   } catch (error) {
-    console.error('Error during Android build:', error);
+    console.error('❌ Error during Android build:', error);
     process.exit(1);
   }
 }

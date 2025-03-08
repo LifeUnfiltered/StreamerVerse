@@ -197,5 +197,30 @@ export async function registerRoutes(app: Express) {
     }
   });
 
+  app.get('/api/videos/vidsrc/:imdbId', async (req, res) => {
+    try {
+      const { imdbId } = req.params;
+
+      // For testing purposes, create a sample VidSrc video
+      const video = {
+        id: imdbId,
+        sourceId: imdbId,
+        source: 'vidsrc',
+        title: 'Sample VidSrc Video',
+        description: 'This is a test VidSrc video stream',
+        thumbnail: null,
+        metadata: { imdbId },
+        chapters: null
+      };
+
+      res.json(video);
+    } catch (error) {
+      console.error('VidSrc Error:', error);
+      res.status(400).json({ 
+        message: error instanceof Error ? error.message : 'Failed to get VidSrc video'
+      });
+    }
+  });
+
   return httpServer;
 }

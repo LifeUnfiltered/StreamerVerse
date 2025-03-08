@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Streamer Verse</string>
+    <string name="title_activity_main">Streamer Verse</string>
+    <string name="package_name">com.streamerverse.app</string>
+    <string name="custom_url_scheme">com.streamerverse.app</string>
+</resources>

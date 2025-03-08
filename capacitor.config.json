@@ -1,0 +1,13 @@
+{
+  "appId": "com.streamerverse.app",
+  "appName": "Streamer Verse",
+  "webDir": "dist/public",
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "buildOptions": {
+      "releaseType": "APK"
+    }
+  }
+}

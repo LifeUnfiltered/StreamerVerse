@@ -11,11 +11,12 @@ interface VideoPlayerProps {
 }
 
 export default function VideoPlayer({ video }: VideoPlayerProps) {
-  const [currentTime, setCurrentTime] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Create a basic embed URL without the API
-  const embedUrl = `https://www.youtube.com/embed/${video.sourceId}?autoplay=1&modestbranding=1&rel=0`;
+  // Create embed URL based on source
+  const embedUrl = video.source === 'youtube'
+    ? `https://www.youtube.com/embed/${video.sourceId}?autoplay=1&modestbranding=1&rel=0`
+    : `https://vidsrc.xyz/embed/${video.sourceId}`;
 
   return (
     <div className="w-full">
@@ -46,7 +47,7 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
         </CardContent>
       </Card>
 
-      <FloatingActionButton video={video} currentTime={currentTime} />
+      <FloatingActionButton video={video} />
     </div>
   );
 }
