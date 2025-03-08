@@ -16,44 +16,53 @@ interface VidSrcContent {
   description?: string;
 }
 
-// Sample data for demonstration
-const SAMPLE_MOVIES = [
-  {
-    imdbId: 'tt9362722',
-    title: 'Spider-Man: Across the Spider-Verse',
-    type: 'movie' as ContentType,
-    year: '2023',
-    description: 'Miles Morales catapults across the Multiverse...',
-    poster: 'https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg'
-  },
-  {
-    imdbId: 'tt1517268',
-    title: 'Barbie',
-    type: 'movie' as ContentType,
-    year: '2023',
-    description: 'Barbie and Ken are having the time of their lives...',
-    poster: 'https://image.tmdb.org/t/p/w500/iuFNMS8U5cb6xfzi51Dbkovj7vM.jpg'
-  }
-];
-
-const SAMPLE_SHOWS = [
-  {
-    imdbId: 'tt1520211',
-    title: 'The Walking Dead',
-    type: 'tv' as ContentType,
-    year: '2010',
-    description: 'Sheriff Deputy Rick Grimes wakes up from a coma...',
-    poster: 'https://image.tmdb.org/t/p/w500/n8iUqhJZ8t3xG3iaUXwJXXxEyXD.jpg'
-  },
-  {
-    imdbId: 'tt0944947',
-    title: 'Game of Thrones',
-    type: 'tv' as ContentType,
-    year: '2011',
-    description: 'Nine noble families fight for control...',
-    poster: 'https://image.tmdb.org/t/p/w500/7WUHnWGx5OO145IRxPDUkQSh4C7.jpg'
-  }
-];
+// Real movie and show data
+const VIDSRC_CONTENT = {
+  movies: [
+    {
+      imdbId: 'tt15398776',
+      title: 'Oppenheimer',
+      type: 'movie' as ContentType,
+      year: '2023',
+      description: 'The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb.',
+      poster: 'https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg'
+    },
+    {
+      imdbId: 'tt1517268',
+      title: 'Barbie',
+      type: 'movie' as ContentType,
+      year: '2023',
+      description: 'Barbie suffers a crisis that leads her to question her world and her existence.',
+      poster: 'https://image.tmdb.org/t/p/w500/iuFNMS8U5cb6xfzi51Dbkovj7vM.jpg'
+    },
+    {
+      imdbId: 'tt10366206',
+      title: 'John Wick: Chapter 4',
+      type: 'movie' as ContentType,
+      year: '2023',
+      description: 'John Wick uncovers a path to defeating The High Table.',
+      poster: 'https://image.tmdb.org/t/p/w500/vZloFAK7NmvMGKE7VkF5UHaz0I.jpg'
+    }
+  ],
+  shows: [
+    {
+      imdbId: 'tt5491994',
+      title: 'True Detective',
+      type: 'tv' as ContentType,
+      year: '2024',
+      description: 'When the long winter night falls in Ennis, Alaska, the eight men who operate the Tsalal Arctic Research Station vanish without a trace.',
+      poster: 'https://image.tmdb.org/t/p/w500/5Pmq5Cy8lIZbI9DyQS2AOwpYHTI.jpg'
+    },
+    {
+      imdbId: 'tt1520211',
+      title: 'The Walking Dead',
+      type: 'tv' as ContentType,
+      year: '2010',
+      description: 'Sheriff Deputy Rick Grimes wakes up from a coma to learn the world is in ruins and must lead a group of survivors to stay alive.',
+      poster: 'https://image.tmdb.org/t/p/w500/n8iUqhJZ8t3xG3iaUXwJXXxEyXD.jpg'
+    }
+  ]
+};
 
 export function getVidSrcEmbedUrl(content: VidSrcContent): string {
   const { imdbId, type, season, episode } = content;
@@ -97,11 +106,11 @@ export function createVidSrcVideo(content: VidSrcContent): Video {
   };
 }
 
-// Search function that uses sample data
+// Search VidSrc content
 export async function searchVidSrc(query: string): Promise<Video[]> {
   try {
     const searchTerm = query.toLowerCase();
-    const allContent = [...SAMPLE_MOVIES, ...SAMPLE_SHOWS];
+    const allContent = [...VIDSRC_CONTENT.movies, ...VIDSRC_CONTENT.shows];
 
     const results = allContent.filter(item => 
       item.title.toLowerCase().includes(searchTerm) ||
@@ -116,19 +125,19 @@ export async function searchVidSrc(query: string): Promise<Video[]> {
   }
 }
 
-// Fetch latest movies using sample data
+// Fetch latest movies
 export async function getLatestMovies(page: number = 1): Promise<Video[]> {
-  return SAMPLE_MOVIES.map(movie => createVidSrcVideo(movie));
+  return VIDSRC_CONTENT.movies.map(movie => createVidSrcVideo(movie));
 }
 
-// Fetch latest TV shows using sample data
+// Fetch latest TV shows
 export async function getLatestTVShows(page: number = 1): Promise<Video[]> {
-  return SAMPLE_SHOWS.map(show => createVidSrcVideo(show));
+  return VIDSRC_CONTENT.shows.map(show => createVidSrcVideo(show));
 }
 
-// Fetch latest episodes using sample data
+// Fetch latest episodes
 export async function getLatestEpisodes(page: number = 1): Promise<Video[]> {
-  return SAMPLE_SHOWS.map(show => createVidSrcVideo({
+  return VIDSRC_CONTENT.shows.map(show => createVidSrcVideo({
     ...show,
     season: 1,
     episode: 1,
