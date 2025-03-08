@@ -8,6 +8,8 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Video } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 import AuthDialog from "@/components/AuthDialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -67,6 +69,16 @@ export default function Home() {
           ) : null}
 
           <ScrollArea className="h-[calc(100vh-200px)] lg:col-span-1">
+            {!searchQuery && !watchlist?.length && (
+              <Alert>
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>
+                  Your watchlist is empty. Search for videos and click the bookmark icon to add them to your watchlist.
+                  {watchlist === null && " Please log in to use the watchlist feature."}
+                </AlertDescription>
+              </Alert>
+            )}
+
             {!searchQuery && watchlist && watchlist.length > 0 && (
               <div className="mb-6">
                 <h2 className="text-xl font-semibold mb-4">Your Watchlist</h2>

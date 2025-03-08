@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { LogIn, LogOut } from "lucide-react";
 import type { Video } from "@shared/schema";
+import { useToast } from "@/hooks/use-toast";
 
 interface HeaderProps {
   onAuthClick: () => void;
@@ -11,6 +12,7 @@ interface HeaderProps {
 
 export default function Header({ onAuthClick }: HeaderProps) {
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const { data: watchlist } = useQuery<Video[]>({
     queryKey: ['/api/watchlist'],
@@ -33,6 +35,9 @@ export default function Header({ onAuthClick }: HeaderProps) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries();
+      toast({
+        description: "Successfully logged out"
+      });
     }
   });
 
@@ -48,22 +53,30 @@ export default function Header({ onAuthClick }: HeaderProps) {
           </h1>
         </div>
 
-        <Button 
-          variant="ghost"
-          onClick={isLoggedIn ? () => logout() : onAuthClick}
-        >
-          {isLoggedIn ? (
-            <>
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </>
-          ) : (
-            <>
-              <LogIn className="h-4 w-4 mr-2" />
-              Login
-            </>
+        <div className="flex items-center gap-4">
+          {isLoggedIn && watchlist && (
+            <span className="text-sm text-muted-foreground">
+              {watchlist.length} {watchlist.length === 1 ? 'video' : 'videos'} in watchlist
+            </span>
           )}
-        </Button>
+          <Button 
+            variant="ghost"
+            onClick={isLoggedIn ? () => logout() : onAuthClick}
+            title={isLoggedIn ? "Click to log out" : "Click to log in or register"}
+          >
+            {isLoggedIn ? (
+              <>
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </>
+            ) : (
+              <>
+                <LogIn className="h-4 w-4 mr-2" />
+                Login
+              </>
+            )}
+          </Button>
+        </div>
       </div>
     </header>
   );
