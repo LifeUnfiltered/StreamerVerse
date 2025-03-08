@@ -36,7 +36,8 @@ function showToVideo(show: any): Video {
       type: 'tv',
       tmdbId: show.id,
       embedUrl: show.external_ids?.imdb_id ? 
-        `https://vidsrc.to/embed/tv/${show.external_ids.imdb_id}` : null
+        `https://vidsrc.to/embed/tv/${show.external_ids.imdb_id}` : null,
+      totalSeasons: show.number_of_seasons
     },
     chapters: null
   };
@@ -44,23 +45,27 @@ function showToVideo(show: any): Video {
 
 // Convert TMDB episode to our Video type
 function episodeToVideo(episode: any, show: any): Video {
+  const imdbId = show.external_ids?.imdb_id;
+  const seasonNum = episode.season_number;
+  const episodeNum = episode.episode_number;
+
   return {
     id: episode.id,
-    sourceId: show.external_ids?.imdb_id || `tmdb-${show.id}`,
+    sourceId: `${imdbId}-s${seasonNum}e${episodeNum}`,
     source: 'vidsrc',
-    title: `${show.name} S${episode.season_number}E${episode.episode_number} - ${episode.name}`,
+    title: `${show.name} S${seasonNum}E${episodeNum} - ${episode.name}`,
     description: episode.overview || null,
     thumbnail: episode.still_path ? 
       `https://image.tmdb.org/t/p/w500${episode.still_path}` : 
       (show.poster_path ? `https://image.tmdb.org/t/p/w500${show.poster_path}` : null),
     metadata: {
-      imdbId: show.external_ids?.imdb_id,
+      imdbId: imdbId,
       type: 'tv',
       tmdbId: show.id,
-      embedUrl: show.external_ids?.imdb_id ? 
-        `https://vidsrc.to/embed/tv/${show.external_ids.imdb_id}/${episode.season_number}-${episode.episode_number}` : null,
-      season: episode.season_number,
-      episode: episode.episode_number
+      embedUrl: imdbId ? 
+        `https://vidsrc.to/embed/tv/${imdbId}/${seasonNum}-${episodeNum}` : null,
+      season: seasonNum,
+      episode: episodeNum
     },
     chapters: null
   };
@@ -174,6 +179,7 @@ export async function fetchTVShowEpisodes(showId: number, seasonNumber?: number)
 
     // If season number is provided, fetch only that season
     if (seasonNumber) {
+      console.log(`Fetching season ${seasonNumber} for show ${showDetails.name}`);
       const season = await tmdb.seasonInfo({
         id: showId,
         season_number: seasonNumber
@@ -184,6 +190,7 @@ export async function fetchTVShowEpisodes(showId: number, seasonNumber?: number)
       }
     } else {
       // Fetch all seasons
+      console.log(`Fetching all seasons for show ${showDetails.name}`);
       for (let i = 1; i <= (showDetails.number_of_seasons || 1); i++) {
         const season = await tmdb.seasonInfo({
           id: showId,
@@ -195,6 +202,14 @@ export async function fetchTVShowEpisodes(showId: number, seasonNumber?: number)
         }
       }
     }
+
+    // Sort episodes by season and episode number
+    videos.sort((a, b) => {
+      const seasonA = a.metadata?.season || 0;
+      const seasonB = b.metadata?.season || 0;
+      if (seasonA !== seasonB) return seasonA - seasonB;
+      return (a.metadata?.episode || 0) - (b.metadata?.episode || 0);
+    });
   } catch (error) {
     console.error('TMDB TV Show Episodes Error:', error);
   }
