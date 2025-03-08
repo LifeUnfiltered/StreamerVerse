@@ -16,7 +16,22 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
   // Get the embed URL based on the source
   const embedUrl = video.source === 'youtube'
     ? `https://www.youtube.com/embed/${video.sourceId}?autoplay=1&modestbranding=1&rel=0`
-    : video.metadata.embedUrl;
+    : video.metadata?.embedUrl || '';
+
+  if (!embedUrl) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle className="line-clamp-1">{video.title}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center text-muted-foreground">
+            Video URL not available
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="w-full">
@@ -28,7 +43,7 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
           <div className="space-y-4">
             <AspectRatio ratio={16 / 9} className="relative bg-black rounded-md overflow-hidden">
               <iframe
-                key={video.sourceId} // Force remount when video changes
+                key={video.sourceId}
                 src={embedUrl}
                 title={video.title}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"

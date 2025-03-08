@@ -58,7 +58,7 @@ export default function VideoList({
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
       {videos.map((video) => (
         <VideoCard
-          key={`${video.source}-${video.sourceId}-${video.metadata?.season || ''}-${video.metadata?.episode || ''}`}
+          key={`${video.source}-${video.sourceId}`}
           video={video}
           onClick={() => onVideoSelect(video)}
           isSelected={selectedVideo?.sourceId === video.sourceId}
