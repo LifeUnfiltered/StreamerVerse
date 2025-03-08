@@ -55,14 +55,20 @@ const SAMPLE_SHOWS = [
   }
 ];
 
-export function getVidSrcEmbedUrl(imdbId: string, type: ContentType, season?: number, episode?: number): string {
-  let url = `${VIDSRC_BASE_URL}/embed/${type}/${imdbId}`;
+export function getVidSrcEmbedUrl(content: VidSrcContent): string {
+  const { imdbId, type, season, episode } = content;
 
-  if (type === 'tv' && season && episode) {
-    url += `/${season}-${episode}`;
+  // Create the embed URL based on the content type
+  if (type === 'movie') {
+    return `${VIDSRC_BASE_URL}/embed/movie/${imdbId}`;
+  } else if (type === 'tv') {
+    if (season && episode) {
+      return `${VIDSRC_BASE_URL}/embed/tv/${imdbId}/${season}-${episode}`;
+    }
+    return `${VIDSRC_BASE_URL}/embed/tv/${imdbId}`;
   }
 
-  return url;
+  throw new Error('Invalid content type');
 }
 
 export function createVidSrcVideo(content: VidSrcContent): Video {
@@ -84,16 +90,16 @@ export function createVidSrcVideo(content: VidSrcContent): Video {
       imdbId,
       type,
       season,
-      episode
+      episode,
+      embedUrl: getVidSrcEmbedUrl(content)
     },
     chapters: []
   };
 }
 
-// Search VidSrc content
+// Search function that uses sample data
 export async function searchVidSrc(query: string): Promise<Video[]> {
   try {
-    // For now, search through our sample data
     const searchTerm = query.toLowerCase();
     const allContent = [...SAMPLE_MOVIES, ...SAMPLE_SHOWS];
 
@@ -110,40 +116,22 @@ export async function searchVidSrc(query: string): Promise<Video[]> {
   }
 }
 
-// Fetch latest movies
+// Fetch latest movies using sample data
 export async function getLatestMovies(page: number = 1): Promise<Video[]> {
-  try {
-    // For demonstration, return sample movies
-    return SAMPLE_MOVIES.map(movie => createVidSrcVideo(movie));
-  } catch (error) {
-    console.error('Error fetching latest movies:', error);
-    return [];
-  }
+  return SAMPLE_MOVIES.map(movie => createVidSrcVideo(movie));
 }
 
-// Fetch latest TV shows
+// Fetch latest TV shows using sample data
 export async function getLatestTVShows(page: number = 1): Promise<Video[]> {
-  try {
-    // For demonstration, return sample shows
-    return SAMPLE_SHOWS.map(show => createVidSrcVideo(show));
-  } catch (error) {
-    console.error('Error fetching latest TV shows:', error);
-    return [];
-  }
+  return SAMPLE_SHOWS.map(show => createVidSrcVideo(show));
 }
 
-// Fetch latest episodes
+// Fetch latest episodes using sample data
 export async function getLatestEpisodes(page: number = 1): Promise<Video[]> {
-  try {
-    // For demonstration, return sample episodes
-    return SAMPLE_SHOWS.map(show => createVidSrcVideo({
-      ...show,
-      season: 1,
-      episode: 1,
-      description: `Latest episode of ${show.title}`
-    }));
-  } catch (error) {
-    console.error('Error fetching latest episodes:', error);
-    return [];
-  }
+  return SAMPLE_SHOWS.map(show => createVidSrcVideo({
+    ...show,
+    season: 1,
+    episode: 1,
+    description: `Latest episode of ${show.title}`
+  }));
 }

@@ -13,10 +13,10 @@ interface VideoPlayerProps {
 export default function VideoPlayer({ video }: VideoPlayerProps) {
   const [isLoading, setIsLoading] = useState(true);
 
-  // Create embed URL based on source
+  // Get the embed URL based on the source
   const embedUrl = video.source === 'youtube'
     ? `https://www.youtube.com/embed/${video.sourceId}?autoplay=1&modestbranding=1&rel=0`
-    : `https://vidsrc.xyz/embed/${video.sourceId}`;
+    : video.metadata.embedUrl;
 
   return (
     <div className="w-full">
