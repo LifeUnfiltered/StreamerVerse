@@ -49,6 +49,11 @@ export const watchlistSchema = createInsertSchema(watchlist).pick({
   videoId: true,
 });
 
+export const searchSchema = z.object({
+  query: z.string().min(1),
+  source: z.enum(['youtube']).default('youtube')
+});
+
 // Types
 export type Video = typeof videos.$inferSelect;
 export type InsertVideo = z.infer<typeof videoSchema>;
@@ -59,9 +64,11 @@ export type InsertUser = z.infer<typeof userSchema>;
 export type WatchlistItem = typeof watchlist.$inferSelect;
 export type InsertWatchlistItem = z.infer<typeof watchlistSchema>;
 
-export const searchSchema = z.object({
-  query: z.string().min(1),
-  source: z.enum(['youtube']).default('youtube')
-});
-
 export type SearchParams = z.infer<typeof searchSchema>;
+
+// Add cache entry type
+export interface CacheEntry<T> {
+  data: T;
+  timestamp: number;
+  expiresIn: number;
+}

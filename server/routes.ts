@@ -3,6 +3,7 @@ import { createServer } from "http";
 import { searchSchema, userSchema } from "@shared/schema";
 import { searchYouTube } from "./lib/youtube";
 import { storage } from "./storage";
+import { cache } from "./lib/cache";
 import bcrypt from "bcryptjs";
 import session from "express-session";
 import memorystore from "memorystore";
@@ -45,8 +46,23 @@ export async function registerRoutes(app: Express) {
       const { query, source } = searchSchema.parse(req.query);
 
       if (source === 'youtube') {
+        // Create a cache key based on the search parameters
+        const cacheKey = `search:${source}:${query}`;
+
+        // Try to get results from cache first
+        const cachedResults = cache.get(cacheKey);
+        if (cachedResults) {
+          console.log(`Cache hit for search: ${query}`);
+          return res.json(cachedResults);
+        }
+
         try {
+          console.log(`Cache miss for search: ${query}`);
           const videos = await searchYouTube(query);
+
+          // Cache the results for 5 minutes
+          cache.set(cacheKey, videos, 5 * 60 * 1000);
+
           res.json(videos);
         } catch (error) {
           console.error('YouTube API Error:', error);
