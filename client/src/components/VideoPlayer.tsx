@@ -72,12 +72,12 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
 
   return (
     <>
-      <Card>
+      <Card className="w-full">
         <CardHeader>
-          <CardTitle>{video.title}</CardTitle>
+          <CardTitle className="line-clamp-1">{video.title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 lg:grid-cols-[2fr_1fr]">
+          <div className="grid gap-6 lg:grid-cols-[3fr_1fr]">
             <div className="space-y-4">
               <AspectRatio ratio={16 / 9}>
                 <iframe
@@ -95,7 +95,7 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
             </div>
 
             {video.chapters && video.chapters.length > 0 && (
-              <div>
+              <div className="relative min-w-[250px]">
                 <h3 className="text-lg font-semibold mb-2">Chapters</h3>
                 <VideoChapters
                   chapters={video.chapters}

@@ -23,12 +23,12 @@ export default function VideoChapters({
   if (!chapters?.length) return null;
 
   return (
-    <ScrollArea className="h-[200px]">
+    <ScrollArea className="h-[400px]">
       <div className="space-y-1 p-2">
         {chapters.map((chapter, index) => {
           const isActive = currentTime >= chapter.timestamp && 
             (index === chapters.length - 1 || currentTime < chapters[index + 1].timestamp);
-          
+
           return (
             <Button
               key={chapter.timestamp}
@@ -39,7 +39,7 @@ export default function VideoChapters({
               )}
               onClick={() => onChapterClick(chapter.timestamp)}
             >
-              <span className="text-muted-foreground font-mono">
+              <span className="text-muted-foreground font-mono shrink-0">
                 {formatTimestamp(chapter.timestamp)}
               </span>
               <span className="truncate">{chapter.title}</span>
