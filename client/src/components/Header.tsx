@@ -59,7 +59,7 @@ export default function Header({ onAuthClick, onWatchlistClick }: HeaderProps) {
         <div className="flex items-center gap-2">
           <SiYoutube className="h-8 w-8 text-primary" />
           <h1 className="text-2xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            Video Stream
+            Streamer Verse
           </h1>
         </div>
 
