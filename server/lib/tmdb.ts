@@ -56,13 +56,17 @@ export async function searchContent(query: string): Promise<Video[]> {
 
     for (const result of results.results || []) {
       if (result.media_type === 'tv') {
-        const showDetails = await tmdb.tvInfo({
-          id: result.id,
-          append_to_response: 'external_ids'
-        });
+        try {
+          const showDetails = await tmdb.tvInfo({
+            id: result.id,
+            append_to_response: 'external_ids'
+          });
 
-        if (showDetails.name) {
-          videos.push(showToVideo(showDetails));
+          if (showDetails.name && showDetails.external_ids?.imdb_id) {
+            videos.push(showToVideo(showDetails));
+          }
+        } catch (error) {
+          console.error(`Error fetching show details for ${result.name}:`, error);
         }
       }
     }
@@ -156,23 +160,28 @@ export async function fetchLatestEpisodes(): Promise<Video[]> {
 
     // For each show, get the latest season and its episodes
     for (const show of popular.results?.slice(0, 5) || []) {
-      const showDetails = await tmdb.tvInfo({
-        id: show.id,
-        append_to_response: 'external_ids'
-      });
+      try {
+        const showDetails = await tmdb.tvInfo({
+          id: show.id,
+          append_to_response: 'external_ids'
+        });
 
-      if (!showDetails.name || !showDetails.external_ids?.imdb_id) {
-        continue;
-      }
+        if (!showDetails.name || !showDetails.external_ids?.imdb_id) {
+          continue;
+        }
 
-      const latestSeason = showDetails.number_of_seasons || 1;
-      const season = await tmdb.seasonInfo({
-        id: show.id,
-        season_number: latestSeason
-      });
+        const latestSeason = showDetails.number_of_seasons || 1;
+        const season = await tmdb.seasonInfo({
+          id: show.id,
+          season_number: latestSeason
+        });
 
-      for (const episode of season.episodes?.slice(-3) || []) {
-        videos.push(episodeToVideo(episode, showDetails));
+        // Get the last 3 episodes of each show
+        for (const episode of season.episodes?.slice(-3) || []) {
+          videos.push(episodeToVideo(episode, showDetails));
+        }
+      } catch (error) {
+        console.error(`Error fetching show ${show.name}:`, error);
       }
     }
   } catch (error) {
