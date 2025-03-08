@@ -4,6 +4,8 @@ import { queryClient } from "./lib/queryClient";
 import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/home";
+import Landing from "@/pages/landing";
+import VidSrc from "@/pages/vidsrc";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AnimatePresence } from "framer-motion";
 import PageTransition from "@/components/PageTransition";
@@ -16,7 +18,17 @@ function Router() {
       <Switch key={location}>
         <Route path="/">
           <PageTransition>
+            <Landing />
+          </PageTransition>
+        </Route>
+        <Route path="/youtube">
+          <PageTransition>
             <Home />
+          </PageTransition>
+        </Route>
+        <Route path="/vidsrc">
+          <PageTransition>
+            <VidSrc />
           </PageTransition>
         </Route>
         <Route>
