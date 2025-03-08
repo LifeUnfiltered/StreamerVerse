@@ -1,5 +1,5 @@
 import type { Video } from "@shared/schema";
-import { searchContent, fetchLatestMovies, fetchLatestTVShows } from './tmdb';
+import { searchContent, fetchLatestMovies, fetchLatestTVShows, fetchLatestEpisodes } from './tmdb';
 
 // Search VidSrc content using TMDB
 export async function searchVidSrc(query: string): Promise<Video[]> {
@@ -26,8 +26,13 @@ export async function getLatestTVShows(page: number = 1): Promise<Video[]> {
   return shows;
 }
 
-// Fetch latest episodes (using latest TV shows)
+// Fetch latest episodes
 export async function getLatestEpisodes(page: number = 1): Promise<Video[]> {
-  console.log('Fetching latest episodes (using TV shows), page:', page);
-  return fetchLatestTVShows(); // For now, return the same TV shows
+  console.log('Fetching latest episodes, page:', page);
+  const episodes = await fetchLatestEpisodes();
+  console.log('Retrieved episodes:', episodes.map(episode => ({
+    title: episode.title,
+    embedUrl: episode.metadata?.embedUrl
+  })));
+  return episodes;
 }

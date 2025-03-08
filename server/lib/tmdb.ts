@@ -3,7 +3,7 @@ import type { Video } from '@shared/schema';
 
 const tmdb = new MovieDb(process.env.TMDB_API_KEY!);
 
-// Test TV show data using Game of Thrones as documented in VidSrc API
+// Test TV show data with multiple popular shows
 export const TEST_TV_SHOWS: Video[] = [
   {
     id: 0,
@@ -17,6 +17,74 @@ export const TEST_TV_SHOWS: Video[] = [
       type: 'tv',
       tmdbId: 1399,
       embedUrl: 'https://vidsrc.to/embed/tv/tt0944947'
+    },
+    chapters: []
+  },
+  {
+    id: 1,
+    sourceId: 'tt1520211',
+    source: 'vidsrc',
+    title: 'The Walking Dead',
+    description: 'Sheriff Deputy Rick Grimes wakes up from a coma to learn the world is in ruins and must lead a group of survivors to stay alive.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/xf9wuDcqlUPWABZNeDKPbZUjWx0.jpg',
+    metadata: {
+      imdbId: 'tt1520211',
+      type: 'tv',
+      tmdbId: 1402,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt1520211'
+    },
+    chapters: []
+  },
+  {
+    id: 2,
+    sourceId: 'tt1475582',
+    source: 'vidsrc',
+    title: 'Sherlock',
+    description: 'A modern update finds the famous sleuth and his doctor partner solving crime in 21st century London.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/7WTsnHkbA0FaG6R9twfFde0I9hl.jpg',
+    metadata: {
+      imdbId: 'tt1475582',
+      type: 'tv',
+      tmdbId: 19885,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt1475582'
+    },
+    chapters: []
+  }
+];
+
+// Test episodes for each show
+export const TEST_EPISODES: Video[] = [
+  {
+    id: 3,
+    sourceId: 'tt0944947',
+    source: 'vidsrc',
+    title: 'Game of Thrones S1E1 - Winter Is Coming',
+    description: 'Eddard Stark is torn between his family and an old friend when asked to serve at the side of King Robert Baratheon.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg',
+    metadata: {
+      imdbId: 'tt0944947',
+      type: 'tv',
+      tmdbId: 1399,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0944947/1-1',
+      season: 1,
+      episode: 1
+    },
+    chapters: []
+  },
+  {
+    id: 4,
+    sourceId: 'tt1520211',
+    source: 'vidsrc',
+    title: 'The Walking Dead S1E1 - Days Gone Bye',
+    description: 'Rick searches for his family in a world terrorized by the walking dead.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/xf9wuDcqlUPWABZNeDKPbZUjWx0.jpg',
+    metadata: {
+      imdbId: 'tt1520211',
+      type: 'tv',
+      tmdbId: 1402,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt1520211/1-1',
+      season: 1,
+      episode: 1
     },
     chapters: []
   }
@@ -128,10 +196,13 @@ export async function searchContent(query: string): Promise<Video[]> {
       }
     }
 
-    // Add test TV shows if query matches
-    if (query.toLowerCase().includes('game') || query.toLowerCase().includes('thrones')) {
-      videos.push(TEST_TV_SHOWS[0]);
-    }
+    // Add test TV shows if query matches any of their titles
+    const lowerQuery = query.toLowerCase();
+    TEST_TV_SHOWS.forEach(show => {
+      if (show.title.toLowerCase().includes(lowerQuery)) {
+        videos.push(show);
+      }
+    });
 
     return videos;
   } catch (error) {
@@ -172,4 +243,10 @@ export async function fetchLatestMovies(): Promise<Video[]> {
 export async function fetchLatestTVShows(): Promise<Video[]> {
   console.log('Returning test TV shows data');
   return TEST_TV_SHOWS;
+}
+
+// Fetch latest episodes - using test data for now
+export async function fetchLatestEpisodes(): Promise<Video[]> {
+  console.log('Returning test episodes data');
+  return TEST_EPISODES;
 }
