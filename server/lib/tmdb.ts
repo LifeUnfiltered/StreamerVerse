@@ -3,7 +3,6 @@ import type { Video } from '@shared/schema';
 
 const tmdb = new MovieDb(process.env.TMDB_API_KEY!);
 
-// Test TV show data with multiple popular shows
 export const TEST_TV_SHOWS: Video[] = [
   {
     id: 0,
@@ -34,26 +33,12 @@ export const TEST_TV_SHOWS: Video[] = [
       embedUrl: 'https://vidsrc.to/embed/tv/tt1520211'
     },
     chapters: []
-  },
-  {
-    id: 2,
-    sourceId: 'tt1475582',
-    source: 'vidsrc',
-    title: 'Sherlock',
-    description: 'A modern update finds the famous sleuth and his doctor partner solving crime in 21st century London.',
-    thumbnail: 'https://image.tmdb.org/t/p/w500/7WTsnHkbA0FaG6R9twfFde0I9hl.jpg',
-    metadata: {
-      imdbId: 'tt1475582',
-      type: 'tv',
-      tmdbId: 19885,
-      embedUrl: 'https://vidsrc.to/embed/tv/tt1475582'
-    },
-    chapters: []
   }
 ];
 
-// Test episodes for each show
+// Test episodes with multiple seasons
 export const TEST_EPISODES: Video[] = [
+  // Game of Thrones Season 1
   {
     id: 3,
     sourceId: 'tt0944947',
@@ -88,8 +73,27 @@ export const TEST_EPISODES: Video[] = [
     },
     chapters: []
   },
+  // Game of Thrones Season 2
   {
     id: 5,
+    sourceId: 'tt0944947',
+    source: 'vidsrc',
+    title: 'Game of Thrones S2E1 - The North Remembers',
+    description: 'As Robb Stark and his northern army continue the war against the Lannisters, Tyrion arrives in King\'s Landing to counsel Joffrey.',
+    thumbnail: 'https://image.tmdb.org/t/p/w500/u3bZgnGQ9T01sWNhyveQz0wH0Hl.jpg',
+    metadata: {
+      imdbId: 'tt0944947',
+      type: 'tv',
+      tmdbId: 1399,
+      embedUrl: 'https://vidsrc.to/embed/tv/tt0944947/2-1',
+      season: 2,
+      episode: 1
+    },
+    chapters: []
+  },
+  // The Walking Dead Season 1
+  {
+    id: 6,
     sourceId: 'tt1520211',
     source: 'vidsrc',
     title: 'The Walking Dead S1E1 - Days Gone Bye',
@@ -106,7 +110,7 @@ export const TEST_EPISODES: Video[] = [
     chapters: []
   },
   {
-    id: 6,
+    id: 7,
     sourceId: 'tt1520211',
     source: 'vidsrc',
     title: 'The Walking Dead S1E2 - Guts',

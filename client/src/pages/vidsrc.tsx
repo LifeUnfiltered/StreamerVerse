@@ -7,9 +7,9 @@ import { apiRequest } from "@/lib/queryClient";
 import VideoPlayer from "@/components/VideoPlayer";
 import VideoList from "@/components/VideoList";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import AuthDialog from "@/components/AuthDialog";
 import SearchBar from "@/components/SearchBar";
+import ShowDetails from "@/components/ShowDetails";
 
 export default function VidSrc() {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
@@ -24,7 +24,7 @@ export default function VidSrc() {
       const response = await apiRequest('GET', `/api/videos/vidsrc/latest/movies?page=${page}`);
       return response.json();
     },
-    enabled: !searchQuery // Only fetch when not searching
+    enabled: !searchQuery
   });
 
   const { data: shows, isLoading: showsLoading } = useQuery<Video[]>({
@@ -32,18 +32,18 @@ export default function VidSrc() {
     queryFn: async () => {
       const response = await apiRequest('GET', '/api/videos/test-tv');
       const video = await response.json();
-      return [video]; // Wrap single video in array
+      return [video];
     },
     enabled: !searchQuery
   });
 
-  const { data: episodes, isLoading: episodesLoading } = useQuery<Video[]>({
+  const { data: episodes } = useQuery<Video[]>({
     queryKey: ['/api/videos/vidsrc/latest/episodes', page],
     queryFn: async () => {
       const response = await apiRequest('GET', `/api/videos/vidsrc/latest/episodes?page=${page}`);
       return response.json();
     },
-    enabled: !searchQuery
+    enabled: !searchQuery && !!selectedVideo
   });
 
   // Search query
@@ -63,10 +63,17 @@ export default function VidSrc() {
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     setPage(1);
+    setSelectedVideo(null);
   };
 
-  const currentVideos = searchQuery ? searchResults : movies;
-  const isLoading = searchQuery ? searchLoading : moviesLoading;
+  // Get current show and its episodes
+  const currentShow = selectedVideo ? shows?.find(show => 
+    show.sourceId === selectedVideo.metadata?.imdbId
+  ) : null;
+
+  const showEpisodes = episodes?.filter(episode => 
+    episode.sourceId === selectedVideo?.sourceId
+  ) || [];
 
   return (
     <div className="min-h-screen bg-background">
@@ -77,6 +84,7 @@ export default function VidSrc() {
       <main className="container mx-auto px-4 py-6">
         <SearchBar 
           onSearch={handleSearch}
+          defaultValue={searchQuery}
           placeholder="Search movies and TV shows..."
         />
 
@@ -84,6 +92,14 @@ export default function VidSrc() {
           {selectedVideo ? (
             <div className="space-y-6">
               <VideoPlayer video={selectedVideo} />
+              {currentShow && (
+                <ShowDetails
+                  show={currentShow}
+                  episodes={showEpisodes}
+                  onEpisodeSelect={handleVideoSelect}
+                  currentEpisode={selectedVideo}
+                />
+              )}
             </div>
           ) : null}
 
@@ -101,64 +117,34 @@ export default function VidSrc() {
                 />
               </div>
             ) : (
-              <>
-                <Tabs defaultValue="movies" className="w-full">
-                  <TabsList className="grid w-full grid-cols-3">
-                    <TabsTrigger value="movies">Movies</TabsTrigger>
-                    <TabsTrigger value="shows">TV Shows</TabsTrigger>
-                    <TabsTrigger value="episodes">Latest Episodes</TabsTrigger>
-                  </TabsList>
+              <Tabs defaultValue="movies" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="movies">Movies</TabsTrigger>
+                  <TabsTrigger value="shows">TV Shows</TabsTrigger>
+                </TabsList>
 
-                  <TabsContent value="movies">
-                    <VideoList 
-                      videos={movies}
-                      isLoading={moviesLoading}
-                      error={null}
-                      onVideoSelect={handleVideoSelect}
-                      selectedVideo={selectedVideo}
-                      onAuthRequired={() => setIsAuthDialogOpen(true)}
-                    />
-                  </TabsContent>
+                <TabsContent value="movies">
+                  <VideoList 
+                    videos={movies}
+                    isLoading={moviesLoading}
+                    error={null}
+                    onVideoSelect={handleVideoSelect}
+                    selectedVideo={selectedVideo}
+                    onAuthRequired={() => setIsAuthDialogOpen(true)}
+                  />
+                </TabsContent>
 
-                  <TabsContent value="shows">
-                    <VideoList 
-                      videos={shows}
-                      isLoading={showsLoading}
-                      error={null}
-                      onVideoSelect={handleVideoSelect}
-                      selectedVideo={selectedVideo}
-                      onAuthRequired={() => setIsAuthDialogOpen(true)}
-                    />
-                  </TabsContent>
-
-                  <TabsContent value="episodes">
-                    <VideoList 
-                      videos={episodes}
-                      isLoading={episodesLoading}
-                      error={null}
-                      onVideoSelect={handleVideoSelect}
-                      selectedVideo={selectedVideo}
-                      onAuthRequired={() => setIsAuthDialogOpen(true)}
-                    />
-                  </TabsContent>
-                </Tabs>
-
-                <div className="mt-4 flex justify-center gap-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => setPage(p => Math.max(1, p - 1))}
-                    disabled={page === 1}
-                  >
-                    Previous
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => setPage(p => p + 1)}
-                  >
-                    Next
-                  </Button>
-                </div>
-              </>
+                <TabsContent value="shows">
+                  <VideoList 
+                    videos={shows}
+                    isLoading={showsLoading}
+                    error={null}
+                    onVideoSelect={handleVideoSelect}
+                    selectedVideo={selectedVideo}
+                    onAuthRequired={() => setIsAuthDialogOpen(true)}
+                  />
+                </TabsContent>
+              </Tabs>
             )}
           </ScrollArea>
         </div>

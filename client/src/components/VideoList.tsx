@@ -34,7 +34,7 @@ export default function VideoList({
     return (
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
         {[...Array(6)].map((_, i) => (
-          <div key={i} className="space-y-3">
+          <div key={`skeleton-${i}`} className="space-y-3">
             <Skeleton className="h-[200px] w-full rounded-lg" />
             <Skeleton className="h-4 w-3/4" />
             <Skeleton className="h-4 w-1/2" />
@@ -58,10 +58,10 @@ export default function VideoList({
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
       {videos.map((video) => (
         <VideoCard
-          key={video.id}
+          key={`${video.source}-${video.sourceId}-${video.metadata?.season || ''}-${video.metadata?.episode || ''}`}
           video={video}
           onClick={() => onVideoSelect(video)}
-          isSelected={selectedVideo?.id === video.id}
+          isSelected={selectedVideo?.sourceId === video.sourceId}
           onAuthRequired={onAuthRequired}
         />
       ))}
