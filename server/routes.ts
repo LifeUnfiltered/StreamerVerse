@@ -9,6 +9,7 @@ import session from "express-session";
 import memorystore from "memorystore";
 import { z } from "zod";
 import { getLatestMovies, getLatestTVShows, getLatestEpisodes } from './lib/vidsrc';
+import { TEST_TV_SHOWS } from './lib/tmdb';
 
 const MemoryStore = memorystore(session);
 
@@ -19,7 +20,7 @@ declare module "express-session" {
 }
 
 interface Video {
-    id: string | number; // Updated to accommodate number
+    id: string | number; 
     sourceId: string;
     source: 'youtube' | 'vidsrc';
     title: string;
@@ -287,9 +288,6 @@ export async function registerRoutes(app: Express) {
   });
 
   app.get('/api/videos/test-tv', (req, res) => {
-    // Import test data from tmdb.ts
-    const { TEST_TV_SHOWS } = require('./lib/tmdb');
-
     console.log('Serving test TV shows:', TEST_TV_SHOWS.map(show => ({
       title: show.title,
       embedUrl: show.metadata.embedUrl
