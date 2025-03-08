@@ -9,18 +9,22 @@ import VideoList from "@/components/VideoList";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import AuthDialog from "@/components/AuthDialog";
+import SearchBar from "@/components/SearchBar";
 
 export default function VidSrc() {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const [page, setPage] = useState(1);
+  const [searchQuery, setSearchQuery] = useState("");
 
+  // Latest content queries
   const { data: movies, isLoading: moviesLoading } = useQuery<Video[]>({
     queryKey: ['/api/videos/vidsrc/latest/movies', page],
     queryFn: async () => {
       const response = await apiRequest('GET', `/api/videos/vidsrc/latest/movies?page=${page}`);
       return response.json();
-    }
+    },
+    enabled: !searchQuery // Only fetch when not searching
   });
 
   const { data: shows, isLoading: showsLoading } = useQuery<Video[]>({
@@ -28,7 +32,8 @@ export default function VidSrc() {
     queryFn: async () => {
       const response = await apiRequest('GET', `/api/videos/vidsrc/latest/shows?page=${page}`);
       return response.json();
-    }
+    },
+    enabled: !searchQuery
   });
 
   const { data: episodes, isLoading: episodesLoading } = useQuery<Video[]>({
@@ -36,12 +41,31 @@ export default function VidSrc() {
     queryFn: async () => {
       const response = await apiRequest('GET', `/api/videos/vidsrc/latest/episodes?page=${page}`);
       return response.json();
-    }
+    },
+    enabled: !searchQuery
+  });
+
+  // Search query
+  const { data: searchResults, isLoading: searchLoading } = useQuery<Video[]>({
+    queryKey: ['/api/videos/vidsrc/search', searchQuery],
+    queryFn: async () => {
+      const response = await apiRequest('GET', `/api/videos/vidsrc/search?query=${encodeURIComponent(searchQuery)}`);
+      return response.json();
+    },
+    enabled: searchQuery.length > 0
   });
 
   const handleVideoSelect = (video: Video) => {
     setSelectedVideo(video);
   };
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    setPage(1);
+  };
+
+  const currentVideos = searchQuery ? searchResults : movies;
+  const isLoading = searchQuery ? searchLoading : moviesLoading;
 
   return (
     <div className="min-h-screen bg-background">
@@ -50,6 +74,11 @@ export default function VidSrc() {
         onWatchlistClick={() => {}}
       />
       <main className="container mx-auto px-4 py-6">
+        <SearchBar 
+          onSearch={handleSearch}
+          placeholder="Search movies and TV shows..."
+        />
+
         <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_350px]">
           {selectedVideo ? (
             <div className="space-y-6">
@@ -58,62 +87,78 @@ export default function VidSrc() {
           ) : null}
 
           <ScrollArea className="h-[calc(100vh-200px)] lg:col-span-1">
-            <Tabs defaultValue="movies" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="movies">Movies</TabsTrigger>
-                <TabsTrigger value="shows">TV Shows</TabsTrigger>
-                <TabsTrigger value="episodes">Latest Episodes</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="movies">
+            {searchQuery ? (
+              <div>
+                <h2 className="text-xl font-semibold mb-4">Search Results</h2>
                 <VideoList 
-                  videos={movies}
-                  isLoading={moviesLoading}
+                  videos={searchResults}
+                  isLoading={searchLoading}
                   error={null}
                   onVideoSelect={handleVideoSelect}
                   selectedVideo={selectedVideo}
                   onAuthRequired={() => setIsAuthDialogOpen(true)}
                 />
-              </TabsContent>
+              </div>
+            ) : (
+              <>
+                <Tabs defaultValue="movies" className="w-full">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="movies">Movies</TabsTrigger>
+                    <TabsTrigger value="shows">TV Shows</TabsTrigger>
+                    <TabsTrigger value="episodes">Latest Episodes</TabsTrigger>
+                  </TabsList>
 
-              <TabsContent value="shows">
-                <VideoList 
-                  videos={shows}
-                  isLoading={showsLoading}
-                  error={null}
-                  onVideoSelect={handleVideoSelect}
-                  selectedVideo={selectedVideo}
-                  onAuthRequired={() => setIsAuthDialogOpen(true)}
-                />
-              </TabsContent>
+                  <TabsContent value="movies">
+                    <VideoList 
+                      videos={movies}
+                      isLoading={moviesLoading}
+                      error={null}
+                      onVideoSelect={handleVideoSelect}
+                      selectedVideo={selectedVideo}
+                      onAuthRequired={() => setIsAuthDialogOpen(true)}
+                    />
+                  </TabsContent>
 
-              <TabsContent value="episodes">
-                <VideoList 
-                  videos={episodes}
-                  isLoading={episodesLoading}
-                  error={null}
-                  onVideoSelect={handleVideoSelect}
-                  selectedVideo={selectedVideo}
-                  onAuthRequired={() => setIsAuthDialogOpen(true)}
-                />
-              </TabsContent>
-            </Tabs>
+                  <TabsContent value="shows">
+                    <VideoList 
+                      videos={shows}
+                      isLoading={showsLoading}
+                      error={null}
+                      onVideoSelect={handleVideoSelect}
+                      selectedVideo={selectedVideo}
+                      onAuthRequired={() => setIsAuthDialogOpen(true)}
+                    />
+                  </TabsContent>
 
-            <div className="mt-4 flex justify-center gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setPage(p => Math.max(1, p - 1))}
-                disabled={page === 1}
-              >
-                Previous
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setPage(p => p + 1)}
-              >
-                Next
-              </Button>
-            </div>
+                  <TabsContent value="episodes">
+                    <VideoList 
+                      videos={episodes}
+                      isLoading={episodesLoading}
+                      error={null}
+                      onVideoSelect={handleVideoSelect}
+                      selectedVideo={selectedVideo}
+                      onAuthRequired={() => setIsAuthDialogOpen(true)}
+                    />
+                  </TabsContent>
+                </Tabs>
+
+                <div className="mt-4 flex justify-center gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    disabled={page === 1}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setPage(p => p + 1)}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </>
+            )}
           </ScrollArea>
         </div>
       </main>
