@@ -4,7 +4,7 @@ import type { Video } from '@shared/schema';
 const tmdb = new MovieDb(process.env.TMDB_API_KEY!);
 
 // Test TV show data using Game of Thrones as documented in VidSrc API
-const TEST_TV_SHOWS: Video[] = [
+export const TEST_TV_SHOWS: Video[] = [
   {
     id: 0,
     sourceId: 'tt0944947',
@@ -108,7 +108,6 @@ function tvShowToVideo(show: any, episode?: any): Video | null {
 // Search for movies and TV shows
 export async function searchContent(query: string): Promise<Video[]> {
   try {
-    console.log('Searching TMDB for:', query);
     const results = await tmdb.searchMulti({ query });
     const videos: Video[] = [];
 
@@ -116,7 +115,7 @@ export async function searchContent(query: string): Promise<Video[]> {
       try {
         if (result.media_type === 'movie') {
           const movieDetails = await tmdb.movieInfo({ 
-            id: result.id, 
+            id: result.id,
             append_to_response: 'external_ids' 
           });
           if (movieDetails.imdb_id) {
@@ -134,7 +133,6 @@ export async function searchContent(query: string): Promise<Video[]> {
       videos.push(TEST_TV_SHOWS[0]);
     }
 
-    console.log(`Found ${videos.length} videos`);
     return videos;
   } catch (error) {
     console.error('TMDB search error:', error);
@@ -151,7 +149,7 @@ export async function fetchLatestMovies(): Promise<Video[]> {
     for (const movie of nowPlaying.results || []) {
       try {
         const movieDetails = await tmdb.movieInfo({ 
-          id: movie.id, 
+          id: movie.id,
           append_to_response: 'external_ids' 
         });
         if (movieDetails.imdb_id) {
@@ -175,6 +173,3 @@ export async function fetchLatestTVShows(): Promise<Video[]> {
   console.log('Returning test TV shows data');
   return TEST_TV_SHOWS;
 }
-
-// Export only what we need
-export { searchContent, fetchLatestMovies, fetchLatestTVShows };
