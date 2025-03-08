@@ -15,6 +15,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
+  const [showWatchlist, setShowWatchlist] = useState(false);
   const queryClient = useQueryClient();
 
   const { data: videos, isLoading, error } = useQuery<Video[]>({
@@ -44,6 +45,7 @@ export default function Home() {
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     setSelectedVideo(null);
+    setShowWatchlist(false);
   };
 
   const handleVideoSelect = (video: Video) => {
@@ -54,9 +56,17 @@ export default function Home() {
     queryClient.invalidateQueries({ queryKey: ['/api/watchlist'] });
   };
 
+  const handleWatchlistClick = () => {
+    setSearchQuery('');
+    setShowWatchlist(true);
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      <Header onAuthClick={() => setIsAuthDialogOpen(true)} />
+      <Header 
+        onAuthClick={() => setIsAuthDialogOpen(true)} 
+        onWatchlistClick={handleWatchlistClick}
+      />
       <main className="container mx-auto px-4 py-6">
         <SearchBar onSearch={handleSearch} />
 
@@ -78,11 +88,9 @@ export default function Home() {
               </Alert>
             )}
 
-            {watchlist && watchlist.length > 0 && (
-              <div className={searchQuery ? "mb-6 p-4 bg-accent/10 rounded-lg" : "mb-6"}>
-                <h2 className="text-xl font-semibold mb-4">
-                  {searchQuery ? "Your Watchlist (Quick Access)" : "Your Watchlist"}
-                </h2>
+            {((showWatchlist && !searchQuery) || watchlist?.length === 0) && watchlist && (
+              <div className="mb-6">
+                <h2 className="text-xl font-semibold mb-4">Your Watchlist</h2>
                 <VideoList 
                   videos={watchlist}
                   isLoading={false}
@@ -97,6 +105,19 @@ export default function Home() {
             {searchQuery && (
               <div>
                 <h2 className="text-xl font-semibold mb-4">Search Results</h2>
+                {watchlist && watchlist.length > 0 && (
+                  <div className="mb-6 p-4 bg-accent/10 rounded-lg">
+                    <h3 className="text-lg font-semibold mb-4">Quick Access - Your Watchlist</h3>
+                    <VideoList 
+                      videos={watchlist}
+                      isLoading={false}
+                      error={null}
+                      onVideoSelect={handleVideoSelect}
+                      selectedVideo={selectedVideo}
+                      onAuthRequired={() => setIsAuthDialogOpen(true)}
+                    />
+                  </div>
+                )}
                 <VideoList 
                   videos={videos}
                   isLoading={isLoading}

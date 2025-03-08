@@ -2,15 +2,24 @@ import { SiYoutube } from "react-icons/si";
 import { Button } from "@/components/ui/button";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { LogIn, LogOut } from "lucide-react";
+import { LogIn, LogOut, User as UserIcon, Bookmark } from "lucide-react";
 import type { Video } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface HeaderProps {
   onAuthClick: () => void;
+  onWatchlistClick: () => void;
 }
 
-export default function Header({ onAuthClick }: HeaderProps) {
+export default function Header({ onAuthClick, onWatchlistClick }: HeaderProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -54,28 +63,40 @@ export default function Header({ onAuthClick }: HeaderProps) {
         </div>
 
         <div className="flex items-center gap-4">
-          {isLoggedIn && watchlist && (
-            <span className="text-sm text-muted-foreground">
-              {watchlist.length} {watchlist.length === 1 ? 'video' : 'videos'} in watchlist
-            </span>
-          )}
-          <Button 
-            variant="ghost"
-            onClick={isLoggedIn ? () => logout() : onAuthClick}
-            title={isLoggedIn ? "Click to log out" : "Click to log in or register"}
-          >
-            {isLoggedIn ? (
-              <>
-                <LogOut className="h-4 w-4 mr-2" />
-                Logout
-              </>
-            ) : (
-              <>
-                <LogIn className="h-4 w-4 mr-2" />
-                Login
-              </>
-            )}
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon">
+                <UserIcon className="h-5 w-5" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              {isLoggedIn ? (
+                <>
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={onWatchlistClick} className="cursor-pointer">
+                    <Bookmark className="mr-2 h-4 w-4" />
+                    <span>Watchlist</span>
+                    {watchlist && (
+                      <span className="ml-auto text-xs text-muted-foreground">
+                        {watchlist.length}
+                      </span>
+                    )}
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => logout()} className="cursor-pointer">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <DropdownMenuItem onClick={onAuthClick} className="cursor-pointer">
+                  <LogIn className="mr-2 h-4 w-4" />
+                  <span>Log in</span>
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>
