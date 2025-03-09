@@ -97,7 +97,7 @@ export default function VidSrc() {
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     setSelectedVideo(null);
-    setNavigation({ view: 'search', previousView: navigation.view });
+    setNavigation({ view: 'search', previousView: navigation.view === 'search' ? navigation.previousView : navigation.view });
   };
 
   const handleSourceSelect = (source: 'youtube' | 'vidsrc') => {
@@ -150,8 +150,8 @@ export default function VidSrc() {
 
   // Get current show and its episodes
   const currentShow = selectedVideo && shows?.find(show =>
-    show.sourceId === selectedVideo.sourceId || // For direct show selection
-    show.sourceId === selectedVideo.metadata?.imdbId // For episode selection
+    show.sourceId === selectedVideo.sourceId || 
+    show.sourceId === selectedVideo.metadata?.imdbId 
   );
 
   const showEpisodes = episodes?.filter(episode =>
@@ -166,20 +166,29 @@ export default function VidSrc() {
       />
       <main className="container mx-auto p-4 md:p-6">
         <div className="space-y-4">
-          {navigation.previousView && (
-            <div className="flex justify-between items-center">
+          {navigation.view !== 'browse' && (
+            <div className="flex items-center justify-between">
               <BackButton onClick={handleBack} />
+              <h2 className="text-xl font-semibold">
+                {navigation.view === 'search' && 'Search Results'}
+                {navigation.view === 'watchlist' && 'Your Watchlist'}
+                {navigation.view === 'video' && selectedVideo?.title}
+              </h2>
             </div>
           )}
 
-          <SourceSelector
-            currentSource={currentSource}
-            onSourceSelect={handleSourceSelect}
-          />
-          <SearchBar
-            onSearch={handleSearch}
-            placeholder={`Search ${currentSource === 'youtube' ? 'YouTube videos' : 'movies and TV shows'}...`}
-          />
+          {navigation.view === 'browse' && (
+            <>
+              <SourceSelector
+                currentSource={currentSource}
+                onSourceSelect={handleSourceSelect}
+              />
+              <SearchBar
+                onSearch={handleSearch}
+                placeholder={`Search ${currentSource === 'youtube' ? 'YouTube videos' : 'movies and TV shows'}...`}
+              />
+            </>
+          )}
         </div>
 
         <div className="mt-6 grid gap-6 grid-cols-1">
