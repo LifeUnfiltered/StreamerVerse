@@ -27,7 +27,6 @@ export default function AuthDialog({ isOpen, onOpenChange, onSuccess }: AuthDial
 
   const { mutate: login, isPending: isLoginPending } = useMutation({
     mutationFn: async () => {
-      // Ensure we're sending the request with the correct content type
       const response = await apiRequest("POST", "/api/auth/login", {
         username,
         password,
@@ -55,6 +54,32 @@ export default function AuthDialog({ isOpen, onOpenChange, onSuccess }: AuthDial
     },
   });
 
+  const { mutate: register, isPending: isRegisterPending } = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("POST", "/api/auth/register", {
+        username,
+        password,
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Registration failed');
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({ description: "Registered successfully! You can now log in." });
+      setIsLogin(true);
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        description: error instanceof Error ? error.message : "Registration failed",
+      });
+    },
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (username.trim() === '' || password.trim() === '') {
@@ -64,16 +89,22 @@ export default function AuthDialog({ isOpen, onOpenChange, onSuccess }: AuthDial
       });
       return;
     }
-    login();
+    if (isLogin) {
+      login();
+    } else {
+      register();
+    }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Login</DialogTitle>
+          <DialogTitle>{isLogin ? "Login" : "Create Account"}</DialogTitle>
           <DialogDescription>
-            Sign in to access your watchlist and favorites
+            {isLogin
+              ? "Sign in to access your watchlist and favorites"
+              : "Create an account to save your watchlist and preferences"}
           </DialogDescription>
         </DialogHeader>
 
@@ -100,15 +131,27 @@ export default function AuthDialog({ isOpen, onOpenChange, onSuccess }: AuthDial
             />
           </div>
 
-          <div className="flex justify-end">
-            <Button type="submit" disabled={isLoginPending}>
-              {isLoginPending ? "Logging in..." : "Login"}
+          <div className="flex justify-between items-center">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={() => setIsLogin(!isLogin)}
+              className="text-sm text-muted-foreground"
+            >
+              {isLogin ? "Need an account?" : "Already have an account?"}
+            </Button>
+            <Button type="submit" disabled={isLoginPending || isRegisterPending}>
+              {isLogin 
+                ? (isLoginPending ? "Logging in..." : "Login")
+                : (isRegisterPending ? "Creating account..." : "Create Account")}
             </Button>
           </div>
 
-          <div className="text-sm text-muted-foreground text-center">
-            Use username: "test" and password: "test" to login
-          </div>
+          {isLogin && (
+            <div className="text-sm text-muted-foreground text-center">
+              You can use username: "test" and password: "test" to try the demo
+            </div>
+          )}
         </form>
       </DialogContent>
     </Dialog>

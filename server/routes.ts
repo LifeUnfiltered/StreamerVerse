@@ -53,6 +53,26 @@ export async function registerRoutes(app: Express) {
   };
 
   // Auth routes
+  app.post('/api/auth/register', async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      if (!username || !password) {
+        return res.status(400).json({ message: 'Username and password are required' });
+      }
+
+      const existingUser = await storage.getUserByUsername(username);
+      if (existingUser) {
+        return res.status(400).json({ message: 'Username already taken' });
+      }
+
+      const user = await storage.createUser({ username, password });
+      res.status(201).json(user);
+    } catch (error) {
+      console.error('Registration error:', error);
+      res.status(500).json({ message: 'Failed to create account' });
+    }
+  });
+
   app.post('/api/auth/login', async (req, res) => {
     try {
       const { username, password } = req.body;
@@ -64,6 +84,13 @@ export async function registerRoutes(app: Express) {
       if (username === 'test' && password === 'test') {
         req.session.userId = 1;
         return res.json({ id: 1, username: 'test' });
+      }
+
+      // Check for registered users
+      const user = await storage.getUserByUsername(username);
+      if (user && user.password === password) { // In a real app, use proper password hashing
+        req.session.userId = user.id;
+        return res.json({ id: user.id, username: user.username });
       }
 
       res.status(401).json({ message: 'Invalid credentials' });
