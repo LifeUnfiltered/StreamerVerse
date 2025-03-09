@@ -166,5 +166,39 @@ export async function registerRoutes(app: Express) {
     }
   });
 
+  // Watchlist routes
+  app.get('/api/watchlist', requireAuth, async (req, res) => {
+    try {
+      const videos = await storage.getWatchlist(req.session.userId!);
+      res.json(videos);
+    } catch (error) {
+      console.error('Error fetching watchlist:', error);
+      res.status(500).json({ message: 'Failed to fetch watchlist' });
+    }
+  });
+
+  app.post('/api/watchlist/:videoId', requireAuth, async (req, res) => {
+    try {
+      const { videoId } = req.params;
+      const videoData = req.body;
+      const item = await storage.addToWatchlist(req.session.userId!, videoId, videoData);
+      res.json(item);
+    } catch (error) {
+      console.error('Error adding to watchlist:', error);
+      res.status(500).json({ message: 'Failed to add to watchlist' });
+    }
+  });
+
+  app.delete('/api/watchlist/:videoId', requireAuth, async (req, res) => {
+    try {
+      const { videoId } = req.params;
+      await storage.removeFromWatchlist(req.session.userId!, videoId);
+      res.json({ message: 'Removed from watchlist' });
+    } catch (error) {
+      console.error('Error removing from watchlist:', error);
+      res.status(500).json({ message: 'Failed to remove from watchlist' });
+    }
+  });
+
   return httpServer;
 }

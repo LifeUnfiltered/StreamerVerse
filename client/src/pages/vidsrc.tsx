@@ -119,7 +119,7 @@ export default function VidSrc() {
             </div>
           ) : null}
 
-          <ScrollArea className="h-[calc(100vh-200px)] lg:col-span-1">
+          <ScrollArea className="h-[calc(100vh-200px)] w-full">
             {searchQuery ? (
               <div>
                 <h2 className="text-xl font-semibold mb-4">Search Results</h2>
@@ -139,7 +139,7 @@ export default function VidSrc() {
                   <TabsTrigger value="shows">TV Shows</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="movies">
+                <TabsContent value="movies" className="w-full">
                   <VideoList 
                     videos={movies}
                     isLoading={moviesLoading}
@@ -150,7 +150,7 @@ export default function VidSrc() {
                   />
                 </TabsContent>
 
-                <TabsContent value="shows">
+                <TabsContent value="shows" className="w-full">
                   <VideoList 
                     videos={shows}
                     isLoading={showsLoading}
