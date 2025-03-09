@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Header from "@/components/Header";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -11,9 +11,14 @@ import AuthDialog from "@/components/AuthDialog";
 import SearchBar from "@/components/SearchBar";
 import ShowDetails from "@/components/ShowDetails";
 import SourceSelector from "@/components/SourceSelector";
-import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
+import BackButton from "@/components/BackButton";
+
+interface NavigationState {
+  view: 'browse' | 'search' | 'watchlist' | 'video';
+  previousView: 'browse' | 'search' | 'watchlist' | null;
+}
 
 export default function VidSrc() {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
@@ -21,7 +26,10 @@ export default function VidSrc() {
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentSource, setCurrentSource] = useState<'youtube' | 'vidsrc'>('vidsrc');
-  const [showWatchlist, setShowWatchlist] = useState(false);
+  const [navigation, setNavigation] = useState<NavigationState>({ 
+    view: 'browse',
+    previousView: null 
+  });
   const queryClient = useQueryClient();
 
   // Watchlist query
@@ -52,7 +60,7 @@ export default function VidSrc() {
       const response = await apiRequest('GET', `/api/videos/vidsrc/latest/movies?page=${page}`);
       return response.json();
     },
-    enabled: !searchQuery && currentSource === 'vidsrc'
+    enabled: !searchQuery && currentSource === 'vidsrc' && navigation.view === 'browse'
   });
 
   const { data: shows, isLoading: showsLoading, error: showsError } = useQuery<Video[]>({
@@ -61,7 +69,7 @@ export default function VidSrc() {
       const response = await apiRequest('GET', '/api/videos/test-tv');
       return response.json();
     },
-    enabled: !searchQuery && currentSource === 'vidsrc'
+    enabled: !searchQuery && currentSource === 'vidsrc' && navigation.view === 'browse'
   });
 
   const { data: episodes } = useQuery<Video[]>({
@@ -86,21 +94,17 @@ export default function VidSrc() {
     enabled: searchQuery.length > 0
   });
 
-  const handleVideoSelect = (video: Video) => {
-    setSelectedVideo(video);
-  };
-
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     setSelectedVideo(null);
-    setShowWatchlist(false);
+    setNavigation({ view: 'search', previousView: navigation.view });
   };
 
   const handleSourceSelect = (source: 'youtube' | 'vidsrc') => {
     setCurrentSource(source);
     setSelectedVideo(null);
     setSearchQuery('');
-    setShowWatchlist(false);
+    setNavigation({ view: 'browse', previousView: null });
   };
 
   const handleAuthSuccess = () => {
@@ -108,9 +112,39 @@ export default function VidSrc() {
   };
 
   const handleWatchlistClick = () => {
+    setNavigation({ 
+      view: 'watchlist',
+      previousView: navigation.view === 'watchlist' ? navigation.previousView : navigation.view
+    });
     setSearchQuery('');
-    setShowWatchlist(true);
   };
+
+  const handleVideoSelect = (video: Video) => {
+    setSelectedVideo(video);
+    setNavigation({ 
+      view: 'video',
+      previousView: navigation.view
+    });
+  };
+
+  const handleBack = useCallback(() => {
+    if (!navigation.previousView) {
+      setNavigation({ view: 'browse', previousView: null });
+      setSelectedVideo(null);
+      setSearchQuery('');
+      return;
+    }
+
+    setNavigation({ 
+      view: navigation.previousView,
+      previousView: null
+    });
+
+    if (navigation.previousView === 'browse') {
+      setSelectedVideo(null);
+      setSearchQuery('');
+    }
+  }, [navigation]);
 
   const isLoggedIn = watchlist !== null;
 
@@ -132,6 +166,12 @@ export default function VidSrc() {
       />
       <main className="container mx-auto p-4 md:p-6">
         <div className="space-y-4">
+          {navigation.previousView && (
+            <div className="flex justify-between items-center">
+              <BackButton onClick={handleBack} />
+            </div>
+          )}
+
           <SourceSelector
             currentSource={currentSource}
             onSourceSelect={handleSourceSelect}
@@ -158,16 +198,10 @@ export default function VidSrc() {
           ) : null}
 
           <div className="w-full">
-            {showWatchlist && !searchQuery && isLoggedIn ? (
+            {navigation.view === 'watchlist' && isLoggedIn ? (
               <>
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-xl font-semibold">Your Watchlist</h2>
-                  <Button
-                    variant="ghost"
-                    onClick={() => setShowWatchlist(false)}
-                  >
-                    ← Back to Browse
-                  </Button>
                 </div>
                 {!watchlist?.length ? (
                   <Alert>
