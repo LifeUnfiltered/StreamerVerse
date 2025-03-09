@@ -7,96 +7,72 @@ import {
 } from "@shared/schema";
 import { and, eq } from 'drizzle-orm';
 
-const sql = neon(process.env.DATABASE_URL!);
-const db = drizzle(sql);
-
 export interface IStorage {
   // User operations
-  createUser(user: InsertUser): Promise<User>;
-  getUserByEmail(email: string): Promise<User | undefined>;
-  getUser(id: number): Promise<User | undefined>;
+  createUser(user: any): Promise<any>;
+  getUserByEmail(email: string): Promise<any | undefined>;
+  getUser(id: number): Promise<any | undefined>;
 
   // Watchlist operations
-  addToWatchlist(userId: number, videoId: string, videoData: Video): Promise<WatchlistItem>;
+  addToWatchlist(userId: number, videoId: string, videoData: Video): Promise<any>;
   removeFromWatchlist(userId: number, videoId: string): Promise<void>;
   getWatchlist(userId: number): Promise<Video[]>;
   isInWatchlist(userId: number, videoId: string): Promise<boolean>;
 }
 
-export class DBStorage implements IStorage {
-  async createUser(user: InsertUser): Promise<User> {
-    const [newUser] = await db.insert(users).values(user).returning();
+// In-memory storage implementation for development
+class MemStorage implements IStorage {
+  private users: Map<number, any> = new Map();
+  private watchlists: Map<number, Map<string, Video>> = new Map();
+  private videos: Map<string, Video> = new Map();
+
+  async createUser(user: any): Promise<any> {
+    const id = this.users.size + 1;
+    const newUser = { ...user, id };
+    this.users.set(id, newUser);
     return newUser;
   }
 
-  async getUserByEmail(email: string): Promise<User | undefined> {
-    const result = await db.select().from(users).where(eq(users.email, email));
-    return result[0];
+  async getUserByEmail(email: string): Promise<any | undefined> {
+    return Array.from(this.users.values()).find(user => user.email === email);
   }
 
-  async getUser(id: number): Promise<User | undefined> {
-    const result = await db.select().from(users).where(eq(users.id, id));
-    return result[0];
+  async getUser(id: number): Promise<any | undefined> {
+    return this.users.get(id);
   }
 
-  async addToWatchlist(userId: number, videoId: string, videoData: Video): Promise<WatchlistItem> {
-    // First store the video data
-    await db.insert(videos).values({
-      sourceId: videoId,
-      source: videoData.source,
-      title: videoData.title,
-      description: videoData.description,
-      thumbnail: videoData.thumbnail,
-      metadata: videoData.metadata
-    }).onConflictDoNothing();
+  async addToWatchlist(userId: number, videoId: string, videoData: Video): Promise<any> {
+    // Store video data
+    this.videos.set(videoId, videoData);
 
-    // Then add to watchlist
-    const [item] = await db.insert(watchlist)
-      .values({ userId, videoId })
-      .returning();
-    return item;
+    // Add to user's watchlist
+    if (!this.watchlists.has(userId)) {
+      this.watchlists.set(userId, new Map());
+    }
+    this.watchlists.get(userId)!.set(videoId, videoData);
+
+    return { userId, videoId };
   }
 
   async removeFromWatchlist(userId: number, videoId: string): Promise<void> {
-    await db.delete(watchlist)
-      .where(
-        and(
-          eq(watchlist.userId, userId),
-          eq(watchlist.videoId, videoId)
-        )
-      );
+    const userWatchlist = this.watchlists.get(userId);
+    if (userWatchlist) {
+      userWatchlist.delete(videoId);
+    }
   }
 
   async getWatchlist(userId: number): Promise<Video[]> {
-    // Join watchlist with videos to get full video data
-    const items = await db
-      .select({
-        id: videos.id,
-        sourceId: videos.sourceId,
-        source: videos.source,
-        title: videos.title,
-        description: videos.description,
-        thumbnail: videos.thumbnail,
-        metadata: videos.metadata
-      })
-      .from(watchlist)
-      .innerJoin(videos, eq(watchlist.videoId, videos.sourceId))
-      .where(eq(watchlist.userId, userId));
-
-    return items;
+    const userWatchlist = this.watchlists.get(userId);
+    return userWatchlist ? Array.from(userWatchlist.values()) : [];
   }
 
   async isInWatchlist(userId: number, videoId: string): Promise<boolean> {
-    const result = await db.select()
-      .from(watchlist)
-      .where(
-        and(
-          eq(watchlist.userId, userId),
-          eq(watchlist.videoId, videoId)
-        )
-      );
-    return result.length > 0;
+    const userWatchlist = this.watchlists.get(userId);
+    return userWatchlist ? userWatchlist.has(videoId) : false;
   }
 }
 
-export const storage = new DBStorage();
+const sql = neon(process.env.DATABASE_URL!);
+const db = drizzle(sql);
+
+export const storage = new MemStorage();

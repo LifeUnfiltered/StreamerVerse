@@ -24,34 +24,48 @@ export default function Header({ onAuthClick, onWatchlistClick }: HeaderProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  const { data: watchlist } = useQuery<Video[]>({
+  const { data: watchlist, isError: watchlistError } = useQuery<Video[]>({
     queryKey: ['/api/watchlist'],
     queryFn: async () => {
       try {
         const res = await apiRequest('GET', '/api/watchlist');
+        if (!res.ok) {
+          if (res.status === 401) {
+            return null;
+          }
+          throw new Error('Failed to fetch watchlist');
+        }
         return res.json();
       } catch (error) {
-        if (error instanceof Error && error.message.includes('401')) {
-          return null;
-        }
+        console.error('Watchlist error:', error);
         throw error;
       }
-    }
+    },
+    retry: false
   });
 
   const { mutate: logout } = useMutation({
     mutationFn: async () => {
-      await apiRequest('POST', '/api/auth/logout');
+      const response = await apiRequest('POST', '/api/auth/logout');
+      if (!response.ok) {
+        throw new Error('Logout failed');
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries();
       toast({
         description: "Successfully logged out"
       });
+    },
+    onError: (error) => {
+      toast({
+        variant: "destructive",
+        description: error instanceof Error ? error.message : "Failed to logout"
+      });
     }
   });
 
-  const isLoggedIn = watchlist !== null;
+  const isLoggedIn = watchlist !== null && !watchlistError;
 
   return (
     <header className="border-b">
