@@ -10,12 +10,14 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import AuthDialog from "@/components/AuthDialog";
 import SearchBar from "@/components/SearchBar";
 import ShowDetails from "@/components/ShowDetails";
+import SourceSelector from "@/components/SourceSelector";
 
 export default function VidSrc() {
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentSource, setCurrentSource] = useState<'youtube' | 'vidsrc'>('vidsrc');
 
   // Latest content queries
   const { data: movies, isLoading: moviesLoading } = useQuery<Video[]>({
@@ -65,6 +67,12 @@ export default function VidSrc() {
     setSelectedVideo(null);
   };
 
+  const handleSourceSelect = (source: 'youtube' | 'vidsrc') => {
+    setCurrentSource(source);
+    setSelectedVideo(null);
+    setSearchQuery('');
+  };
+
   // Get current show and its episodes
   const currentShow = selectedVideo && shows?.find(show => 
     show.sourceId === selectedVideo.sourceId || // For direct show selection
@@ -82,10 +90,16 @@ export default function VidSrc() {
         onWatchlistClick={() => {}}
       />
       <main className="container mx-auto px-4 py-6">
-        <SearchBar 
-          onSearch={handleSearch}
-          placeholder="Search movies and TV shows..."
-        />
+        <div className="space-y-4">
+          <SourceSelector 
+            currentSource={currentSource}
+            onSourceSelect={handleSourceSelect}
+          />
+          <SearchBar 
+            onSearch={handleSearch}
+            placeholder={`Search ${currentSource === 'youtube' ? 'YouTube videos' : 'movies and TV shows'}...`}
+          />
+        </div>
 
         <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_350px]">
           {selectedVideo ? (
