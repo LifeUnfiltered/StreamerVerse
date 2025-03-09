@@ -20,22 +20,22 @@ export default function VidSrc() {
   const [currentSource, setCurrentSource] = useState<'youtube' | 'vidsrc'>('vidsrc');
 
   // Latest content queries
-  const { data: movies, isLoading: moviesLoading } = useQuery<Video[]>({
+  const { data: movies, isLoading: moviesLoading, error: moviesError } = useQuery<Video[]>({
     queryKey: ['/api/videos/vidsrc/latest/movies', page],
     queryFn: async () => {
       const response = await apiRequest('GET', `/api/videos/vidsrc/latest/movies?page=${page}`);
       return response.json();
     },
-    enabled: !searchQuery
+    enabled: !searchQuery && currentSource === 'vidsrc'
   });
 
-  const { data: shows, isLoading: showsLoading } = useQuery<Video[]>({
+  const { data: shows, isLoading: showsLoading, error: showsError } = useQuery<Video[]>({
     queryKey: ['/api/videos/test-tv'],
     queryFn: async () => {
       const response = await apiRequest('GET', '/api/videos/test-tv');
       return response.json();
     },
-    enabled: !searchQuery
+    enabled: !searchQuery && currentSource === 'vidsrc'
   });
 
   const { data: episodes } = useQuery<Video[]>({
@@ -44,14 +44,17 @@ export default function VidSrc() {
       const response = await apiRequest('GET', `/api/videos/vidsrc/latest/episodes?page=${page}`);
       return response.json();
     },
-    enabled: !searchQuery && !!selectedVideo
+    enabled: !searchQuery && !!selectedVideo && currentSource === 'vidsrc'
   });
 
   // Search query
-  const { data: searchResults, isLoading: searchLoading } = useQuery<Video[]>({
-    queryKey: ['/api/videos/vidsrc/search', searchQuery],
+  const { data: searchResults, isLoading: searchLoading, error: searchError } = useQuery<Video[]>({
+    queryKey: [currentSource === 'youtube' ? '/api/videos/search' : '/api/videos/vidsrc/search', searchQuery, currentSource],
     queryFn: async () => {
-      const response = await apiRequest('GET', `/api/videos/vidsrc/search?query=${encodeURIComponent(searchQuery)}`);
+      const endpoint = currentSource === 'youtube' 
+        ? `/api/videos/search?query=${encodeURIComponent(searchQuery)}&source=youtube`
+        : `/api/videos/vidsrc/search?query=${encodeURIComponent(searchQuery)}`;
+      const response = await apiRequest('GET', endpoint);
       return response.json();
     },
     enabled: searchQuery.length > 0
@@ -105,7 +108,7 @@ export default function VidSrc() {
           {selectedVideo ? (
             <div className="space-y-6">
               <VideoPlayer video={selectedVideo} />
-              {currentShow && (
+              {currentShow && currentSource === 'vidsrc' && (
                 <ShowDetails
                   show={currentShow}
                   episodes={showEpisodes}
@@ -123,13 +126,13 @@ export default function VidSrc() {
                 <VideoList 
                   videos={searchResults}
                   isLoading={searchLoading}
-                  error={null}
+                  error={searchError}
                   onVideoSelect={handleVideoSelect}
                   selectedVideo={selectedVideo}
                   onAuthRequired={() => setIsAuthDialogOpen(true)}
                 />
               </div>
-            ) : (
+            ) : currentSource === 'vidsrc' ? (
               <Tabs defaultValue="movies" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
                   <TabsTrigger value="movies">Movies</TabsTrigger>
@@ -140,7 +143,7 @@ export default function VidSrc() {
                   <VideoList 
                     videos={movies}
                     isLoading={moviesLoading}
-                    error={null}
+                    error={moviesError}
                     onVideoSelect={handleVideoSelect}
                     selectedVideo={selectedVideo}
                     onAuthRequired={() => setIsAuthDialogOpen(true)}
@@ -151,14 +154,14 @@ export default function VidSrc() {
                   <VideoList 
                     videos={shows}
                     isLoading={showsLoading}
-                    error={null}
+                    error={showsError}
                     onVideoSelect={handleVideoSelect}
                     selectedVideo={selectedVideo}
                     onAuthRequired={() => setIsAuthDialogOpen(true)}
                   />
                 </TabsContent>
               </Tabs>
-            )}
+            ) : null}
           </ScrollArea>
         </div>
       </main>
