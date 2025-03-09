@@ -32,8 +32,8 @@ export default function VideoList({
 
   if (isLoading) {
     return (
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-        {[...Array(6)].map((_, i) => (
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        {[...Array(10)].map((_, i) => (
           <div key={`skeleton-${i}`} className="space-y-3">
             <Skeleton className="h-[200px] w-full rounded-lg" />
             <Skeleton className="h-4 w-3/4" />
@@ -55,7 +55,7 @@ export default function VideoList({
   }
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
       {videos.map((video) => (
         <VideoCard
           key={`${video.source}-${video.sourceId}`}
