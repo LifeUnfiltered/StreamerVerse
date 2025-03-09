@@ -7,6 +7,7 @@ import { cache } from "./lib/cache";
 import session from "express-session";
 import memorystore from "memorystore";
 import { z } from "zod";
+import express from "express";
 import { 
   fetchLatestTVShows, 
   fetchLatestEpisodes, 
@@ -23,19 +24,12 @@ declare module "express-session" {
   }
 }
 
-interface Video {
-  id: string | number;
-  sourceId: string;
-  source: 'youtube' | 'vidsrc';
-  title: string;
-  description: string | null;
-  thumbnail: string | null;
-  metadata: any;
-  chapters: any | null;
-}
-
 export async function registerRoutes(app: Express) {
   const httpServer = createServer(app);
+
+  // Body parser middleware
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
 
   // Session middleware
   app.use(
@@ -57,6 +51,37 @@ export async function registerRoutes(app: Express) {
     }
     next();
   };
+
+  // Auth routes
+  app.post('/api/auth/login', async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      if (!username || !password) {
+        return res.status(400).json({ message: 'Username and password are required' });
+      }
+
+      // Simple mock auth for testing
+      if (username === 'test' && password === 'test') {
+        req.session.userId = 1;
+        return res.json({ id: 1, username: 'test' });
+      }
+
+      res.status(401).json({ message: 'Invalid credentials' });
+    } catch (error) {
+      console.error('Login error:', error);
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
+
+  app.post('/api/auth/logout', (req, res) => {
+    req.session.destroy((err) => {
+      if (err) {
+        console.error('Logout error:', err);
+        return res.status(500).json({ message: 'Failed to logout' });
+      }
+      res.json({ message: 'Logged out successfully' });
+    });
+  });
 
   app.get('/api/videos/search', async (req, res) => {
     try {
@@ -201,4 +226,15 @@ export async function registerRoutes(app: Express) {
   });
 
   return httpServer;
+}
+
+interface Video {
+  id: string | number;
+  sourceId: string;
+  source: 'youtube' | 'vidsrc';
+  title: string;
+  description: string | null;
+  thumbnail: string | null;
+  metadata: any;
+  chapters: any | null;
 }

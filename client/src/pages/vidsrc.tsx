@@ -92,7 +92,7 @@ export default function VidSrc() {
         onAuthClick={() => setIsAuthDialogOpen(true)}
         onWatchlistClick={() => {}}
       />
-      <main className="container mx-auto px-4 py-6">
+      <main className="container mx-auto p-4 md:p-6">
         <div className="space-y-4">
           <SourceSelector 
             currentSource={currentSource}
@@ -104,7 +104,7 @@ export default function VidSrc() {
           />
         </div>
 
-        <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_350px]">
+        <div className="mt-6 grid gap-6 grid-cols-1">
           {selectedVideo ? (
             <div className="space-y-6">
               <VideoPlayer video={selectedVideo} />
@@ -119,7 +119,7 @@ export default function VidSrc() {
             </div>
           ) : null}
 
-          <ScrollArea className="h-[calc(100vh-200px)] w-full">
+          <div className="w-full">
             {searchQuery ? (
               <div>
                 <h2 className="text-xl font-semibold mb-4">Search Results</h2>
@@ -134,7 +134,7 @@ export default function VidSrc() {
               </div>
             ) : currentSource === 'vidsrc' ? (
               <Tabs defaultValue="movies" className="w-full">
-                <TabsList className="grid w-full grid-cols-2">
+                <TabsList className="grid w-full grid-cols-2 mb-6">
                   <TabsTrigger value="movies">Movies</TabsTrigger>
                   <TabsTrigger value="shows">TV Shows</TabsTrigger>
                 </TabsList>
@@ -162,7 +162,7 @@ export default function VidSrc() {
                 </TabsContent>
               </Tabs>
             ) : null}
-          </ScrollArea>
+          </div>
         </div>
       </main>
 
