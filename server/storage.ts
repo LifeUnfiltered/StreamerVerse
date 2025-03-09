@@ -10,7 +10,7 @@ import { and, eq } from 'drizzle-orm';
 export interface IStorage {
   // User operations
   createUser(user: any): Promise<any>;
-  getUserByEmail(email: string): Promise<any | undefined>;
+  getUserByUsername(username: string): Promise<any | undefined>;
   getUser(id: number): Promise<any | undefined>;
 
   // Watchlist operations
@@ -33,8 +33,8 @@ class MemStorage implements IStorage {
     return newUser;
   }
 
-  async getUserByEmail(email: string): Promise<any | undefined> {
-    return Array.from(this.users.values()).find(user => user.email === email);
+  async getUserByUsername(username: string): Promise<any | undefined> {
+    return Array.from(this.users.values()).find(user => user.username === username);
   }
 
   async getUser(id: number): Promise<any | undefined> {
@@ -71,8 +71,5 @@ class MemStorage implements IStorage {
     return userWatchlist ? userWatchlist.has(videoId) : false;
   }
 }
-
-const sql = neon(process.env.DATABASE_URL!);
-const db = drizzle(sql);
 
 export const storage = new MemStorage();

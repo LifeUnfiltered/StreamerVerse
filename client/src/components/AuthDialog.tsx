@@ -71,6 +71,8 @@ export default function AuthDialog({ isOpen, onOpenChange, onSuccess }: AuthDial
     onSuccess: () => {
       toast({ description: "Registered successfully! You can now log in." });
       setIsLogin(true);
+      setUsername("");
+      setPassword("");
     },
     onError: (error) => {
       toast({
@@ -146,12 +148,6 @@ export default function AuthDialog({ isOpen, onOpenChange, onSuccess }: AuthDial
                 : (isRegisterPending ? "Creating account..." : "Create Account")}
             </Button>
           </div>
-
-          {isLogin && (
-            <div className="text-sm text-muted-foreground text-center">
-              You can use username: "test" and password: "test" to try the demo
-            </div>
-          )}
         </form>
       </DialogContent>
     </Dialog>

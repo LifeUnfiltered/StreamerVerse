@@ -8,12 +8,12 @@ import session from "express-session";
 import memorystore from "memorystore";
 import { z } from "zod";
 import express from "express";
-import { 
-  fetchLatestTVShows, 
-  fetchLatestEpisodes, 
-  searchContent, 
+import {
+  fetchLatestTVShows,
+  fetchLatestEpisodes,
+  searchContent,
   fetchTVShowEpisodes,
-  fetchLatestMovies 
+  fetchLatestMovies
 } from './lib/tmdb';
 
 const MemoryStore = memorystore(session);
@@ -66,6 +66,7 @@ export async function registerRoutes(app: Express) {
       }
 
       const user = await storage.createUser({ username, password });
+      req.session.userId = user.id;
       res.status(201).json(user);
     } catch (error) {
       console.error('Registration error:', error);
@@ -80,17 +81,17 @@ export async function registerRoutes(app: Express) {
         return res.status(400).json({ message: 'Username and password are required' });
       }
 
-      // Simple mock auth for testing
+      // First check registered users
+      const user = await storage.getUserByUsername(username);
+      if (user && user.password === password) {
+        req.session.userId = user.id;
+        return res.json({ id: user.id, username: user.username });
+      }
+
+      // Fallback to test user
       if (username === 'test' && password === 'test') {
         req.session.userId = 1;
         return res.json({ id: 1, username: 'test' });
-      }
-
-      // Check for registered users
-      const user = await storage.getUserByUsername(username);
-      if (user && user.password === password) { // In a real app, use proper password hashing
-        req.session.userId = user.id;
-        return res.json({ id: user.id, username: user.username });
       }
 
       res.status(401).json({ message: 'Invalid credentials' });
@@ -129,7 +130,7 @@ export async function registerRoutes(app: Express) {
         res.status(400).json({ message: 'Unsupported video source' });
       }
     } catch (error) {
-      res.status(400).json({ 
+      res.status(400).json({
         message: error instanceof Error ? error.message : 'Invalid request parameters'
       });
     }
@@ -153,7 +154,7 @@ export async function registerRoutes(app: Express) {
       res.json(videos);
     } catch (error) {
       console.error('VidSrc Search Error:', error);
-      res.status(400).json({ 
+      res.status(400).json({
         message: error instanceof Error ? error.message : 'Failed to search VidSrc'
       });
     }
@@ -202,7 +203,7 @@ export async function registerRoutes(app: Express) {
       res.json(videos);
     } catch (error) {
       console.error('VidSrc Latest Content Error:', error);
-      res.status(400).json({ 
+      res.status(400).json({
         message: error instanceof Error ? error.message : 'Failed to fetch latest content'
       });
     }
