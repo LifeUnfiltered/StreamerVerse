@@ -4,32 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>StreamFlex</title>
-    
-    <!-- Minimal ad blocking without breaking functionality -->
-    <script>
-      // Wait for the page to be fully loaded before running any cleanup
-      window.addEventListener('load', function() {
-        // Only target obvious ad elements
-        setTimeout(function() {
-          const adSelectors = [
-            'iframe[src*="ads."]',
-            'iframe[src*="pop."]',
-            'iframe[src*="ad."]',
-            'div[id*="pop-"]',
-            'div[id*="adb-"]'
-          ];
-          
-          for (const selector of adSelectors) {
-            document.querySelectorAll(selector).forEach(el => {
-              if (el.parentNode) {
-                console.log('Removing potential ad element:', el);
-                el.parentNode.removeChild(el);
-              }
-            });
-          }
-        }, 2000); // Delay to ensure the main content has loaded
-      });
-    </script>
   </head>
   <body>
     <div id="root"></div>
