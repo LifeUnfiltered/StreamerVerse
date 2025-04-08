@@ -13,82 +13,73 @@ interface VideoPlayerProps {
 export default function VideoPlayer({ video }: VideoPlayerProps) {
   const [isLoading, setIsLoading] = useState(true);
   const iframeRef = useRef<HTMLIFrameElement>(null);
-
-  // Ad blocking for VidSrc
-  useEffect(() => {
-    if (video.source === 'vidsrc' && iframeRef.current) {
-      const handleIframeLoad = () => {
-        setIsLoading(false);
-        
-        if (!iframeRef.current) return;
-
-        try {
-          // Access iframe content
-          const iframeDocument = iframeRef.current.contentDocument || 
-                               (iframeRef.current.contentWindow?.document);
-          
-          if (!iframeDocument) return;
-
-          // Remove ads and popups
-          const observer = new MutationObserver(() => {
-            // Function to hide ad elements
-            const hideAds = () => {
-              // Target common ad selectors
-              const adSelectors = [
-                '[id*="pop"]', 
-                '[class*="ad"]', 
-                '[id*="ads"]', 
-                '[class*="ads"]',
-                '[id*="banner"]',
-                '[class*="banner"]',
-                'iframe:not([src*="player"])',
-                'div[style*="z-index: 99999"]',
-                'div[style*="position: fixed"]'
-              ];
-              
-              // Select all ad elements
-              adSelectors.forEach(selector => {
-                try {
-                  const elements = iframeDocument.querySelectorAll(selector);
-                  elements.forEach((el: Element) => {
-                    (el as HTMLElement).style.display = 'none';
-                  });
-                } catch (e) {
-                  // Ignore errors for cross-origin frames
-                }
-              });
-            };
-            
-            // Run initially and on any DOM change
-            hideAds();
-          });
-          
-          // Start observing the iframe document
-          observer.observe(iframeDocument.body, { 
-            childList: true, 
-            subtree: true 
-          });
-          
-          return () => observer.disconnect();
-        } catch (error) {
-          console.log('Cannot access iframe content due to cross-origin policy');
-        }
-      };
-
-      // Add load event listener to iframe
-      const iframe = iframeRef.current;
-      iframe.addEventListener('load', handleIframeLoad);
-      
-      return () => {
-        iframe.removeEventListener('load', handleIframeLoad);
-      };
-    }
-  }, [video.source, video.sourceId]);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Get the embed URL based on the source
   const embedUrl = video.source === 'youtube'
     ? `https://www.youtube.com/embed/${video.sourceId}?autoplay=1&modestbranding=1&rel=0`
     : video.metadata?.embedUrl || '';
+
+  // Ad blocking for VidSrc - different approach
+  useEffect(() => {
+    if (video.source === 'vidsrc') {
+      // Function to handle loaded iframe
+      const handleLoad = () => {
+        setIsLoading(false);
+      };
+
+      // Add event listener
+      const iframe = iframeRef.current;
+      if (iframe) {
+        iframe.addEventListener('load', handleLoad);
+        
+        // Clean up function
+        return () => {
+          iframe.removeEventListener('load', handleLoad);
+        };
+      }
+    }
+  }, [video.source, video.sourceId]);
+
+  // For VidSrc, intercept and block ad requests
+  useEffect(() => {
+    // For VidSrc videos, we need to monitor for ad scripts and popups  
+    if (video.source === 'vidsrc') {
+      // This function is called every second to check for and remove ad elements
+      const cleanupInterval = setInterval(() => {
+        if (containerRef.current) {
+          // Find and remove any ad-related iframes in our container that appeared
+          const popupIframes = document.querySelectorAll('iframe[src*="acscdn"]');
+          const popupDivs = document.querySelectorAll('div[style*="z-index: 9999"]');
+          const adDivs = document.querySelectorAll('div[id*="ad"], div[class*="ad"], div[id*="pop"], div[class*="pop"]');
+          
+          // Remove all these elements
+          const removeElement = (el: Element) => {
+            if (el.parentNode) {
+              el.parentNode.removeChild(el);
+            }
+          };
+          
+          // Handle each collection individually to avoid spread syntax issues
+          popupIframes.forEach(removeElement);
+          popupDivs.forEach(removeElement);
+          adDivs.forEach(removeElement);
+          
+          // Also look for any appended scripts with ad-related URLs
+          const adScripts = document.querySelectorAll('script[src*="ad"], script[src*="pop"], script[src*="banner"]');
+          adScripts.forEach(script => {
+            if (script.parentNode) {
+              script.parentNode.removeChild(script);
+            }
+          });
+        }
+      }, 500);
+      
+      return () => {
+        clearInterval(cleanupInterval);
+      };
+    }
+  }, [video.source]);
 
   if (!embedUrl) {
     return (
@@ -106,7 +97,7 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full" ref={containerRef}>
       <Card>
         <CardHeader>
           <CardTitle className="line-clamp-1">{video.title}</CardTitle>
@@ -121,7 +112,6 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
                 title={video.title}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
-                sandbox="allow-same-origin allow-scripts allow-forms allow-presentation"
                 className="absolute inset-0 w-full h-full"
                 onLoad={() => video.source === 'youtube' && setIsLoading(false)}
               />
