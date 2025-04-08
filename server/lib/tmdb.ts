@@ -36,7 +36,7 @@ function showToVideo(show: any): Video {
       type: 'tv',
       tmdbId: show.id,
       embedUrl: show.external_ids?.imdb_id ? 
-        `https://vidsrc.to/embed/tv/${show.external_ids.imdb_id}` : null,
+        `https://vidsrc.to/embed/tv/${show.external_ids.imdb_id}?autonext=1` : null,
       totalSeasons: show.number_of_seasons
     },
     chapters: null
@@ -63,7 +63,7 @@ function episodeToVideo(episode: any, show: any): Video {
       type: 'tv',
       tmdbId: show.id,
       embedUrl: imdbId ? 
-        `https://vidsrc.to/embed/tv/${imdbId}/${seasonNum}-${episodeNum}` : null,
+        `https://vidsrc.to/embed/tv/${imdbId}/${seasonNum}-${episodeNum}?autonext=1` : null,
       season: seasonNum,
       episode: episodeNum
     },

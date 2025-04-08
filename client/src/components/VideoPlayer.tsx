@@ -13,21 +13,63 @@ interface VideoPlayerProps {
 export default function VideoPlayer({ video }: VideoPlayerProps) {
   const [isLoading, setIsLoading] = useState(true);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const adCleanupIntervalRef = useRef<number | null>(null);
 
-  // Simple ad blocking for VidSrc - only handle on load
+  // Simple ad blocking and loading handling for VidSrc
   useEffect(() => {
-    if (video.source === 'vidsrc' && iframeRef.current) {
+    if (video.source === 'vidsrc') {
+      // Set up event handler
       const handleIframeLoad = () => {
         setIsLoading(false);
+        
+        // Start ad-blocking interval
+        if (adCleanupIntervalRef.current) {
+          window.clearInterval(adCleanupIntervalRef.current);
+        }
+        
+        // Simple ad-blocker that cleans ads but doesn't interfere with player 
+        adCleanupIntervalRef.current = window.setInterval(() => {
+          // Remove common VidSrc ads
+          const adSelectors = [
+            'div[class*="adi"]', 
+            'iframe[src*="ads"]',
+            'div[id*="AdDisplay"]', 
+            'div[class*="opads"]',
+            'div[class*="anchorads"]',
+            'iframe:not([src*="vidsrc"]):not([src*="youtube"])'
+          ];
+          
+          // Use document.querySelector to avoid errors when elements don't exist
+          adSelectors.forEach(selector => {
+            try {
+              const elements = document.querySelectorAll(selector);
+              elements.forEach(el => {
+                if (el.parentNode) {
+                  el.parentNode.removeChild(el);
+                }
+              });
+            } catch (e) {
+              // Silently fail on selector errors
+            }
+          });
+        }, 1000);
       };
 
       // Add load event listener to iframe
-      const iframe = iframeRef.current;
-      iframe.addEventListener('load', handleIframeLoad);
-      
-      return () => {
-        iframe.removeEventListener('load', handleIframeLoad);
-      };
+      if (iframeRef.current) {
+        const iframe = iframeRef.current;
+        iframe.addEventListener('load', handleIframeLoad);
+        
+        return () => {
+          iframe.removeEventListener('load', handleIframeLoad);
+          if (adCleanupIntervalRef.current) {
+            window.clearInterval(adCleanupIntervalRef.current);
+            adCleanupIntervalRef.current = null;
+          }
+        };
+      }
+    } else if (video.source === 'youtube') {
+      // YouTube loading is handled by onLoad prop
     }
   }, [video.source, video.sourceId]);
 
@@ -67,6 +109,7 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
                 title={video.title}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
+                sandbox="allow-same-origin allow-scripts allow-forms"
                 className="absolute inset-0 w-full h-full"
                 onLoad={() => video.source === 'youtube' && setIsLoading(false)}
               />
