@@ -4,6 +4,18 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>StreamFlex</title>
+    
+    <!-- Simple popup blocker -->
+    <script>
+      // Override window.open to block popups
+      window.addEventListener('DOMContentLoaded', function() {
+        const originalOpen = window.open;
+        window.open = function() {
+          console.log('Popup blocked');
+          return null;
+        };
+      });
+    </script>
   </head>
   <body>
     <div id="root"></div>
