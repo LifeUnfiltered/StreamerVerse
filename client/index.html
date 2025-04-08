@@ -3,76 +3,28 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' *.youtube.com *.googleapis.com *.gstatic.com *.google.com *.tmdb.org *.themoviedb.org; frame-src 'self' *.youtube.com *.vidsrc.me *.vidsrc.to vidsrc.* *.themoviedb.org *.tmdb.org; img-src 'self' data: https: blob:; connect-src 'self' https: wss:; block-all-mixed-content;" />
     <title>StreamFlex</title>
     
-    <!-- Ad Blocking Script -->
+    <!-- Simple ad-blocker without breaking the app -->
     <script>
-      // Block known ad domains
-      const blockList = [
-        'acscdn.com',
-        'popcash',
-        'popads',
-        'popup',
-        'banner',
-        'ads',
-        'analytics',
-        'tracker'
-      ];
-      
-      // Override fetch to block ad requests
-      const originalFetch = window.fetch;
-      window.fetch = function(...args) {
-        const url = args[0].toString().toLowerCase();
-        if (blockList.some(term => url.includes(term))) {
-          console.log('Blocked fetch request to:', url);
-          return Promise.resolve(new Response('', {status: 200}));
-        }
-        return originalFetch.apply(this, args);
-      };
-      
-      // Block third-party scripts 
-      const originalCreateElement = document.createElement;
-      Document.prototype.createElement = function(tagName) {
-        const element = originalCreateElement.call(this, tagName);
-        if (tagName.toLowerCase() === 'script') {
-          const originalSetAttribute = element.setAttribute;
-          element.setAttribute = function(name, value) {
-            if (name === 'src') {
-              const url = value.toLowerCase();
-              if (blockList.some(term => url.includes(term))) {
-                console.log('Blocked script:', url);
-                return;
-              }
-            }
-            return originalSetAttribute.call(this, name, value);
-          };
-        }
-        return element;
-      };
-      
-      // Clean up any existing ad elements periodically
-      setInterval(() => {
-        // Target ad elements
-        const adSelectors = [
-          'iframe[src*="acscdn"]',
-          'div[style*="z-index: 9999"]',
-          'div[id*="ad"]', 
-          'div[class*="ad"]', 
-          'div[id*="pop"]', 
-          'div[class*="pop"]',
-          'script[src*="ad"]', 
-          'script[src*="pop"]'
+      // Quick cleanup on page load - remove any stray ad elements
+      document.addEventListener('DOMContentLoaded', function() {
+        // Remove common popup and ad elements that might persist
+        const selectors = [
+          'iframe:not([src*="vidsrc"]):not([src*="youtube"])',
+          'div[style*="position: fixed"][style*="z-index:"]',
+          'div[id*="pop"], div[id*="ad"]'
         ];
         
-        adSelectors.forEach(selector => {
+        for (const selector of selectors) {
           document.querySelectorAll(selector).forEach(el => {
             if (el.parentNode) {
+              console.log('Removing ad element:', el);
               el.parentNode.removeChild(el);
             }
           });
-        });
-      }, 500);
+        }
+      });
     </script>
   </head>
   <body>

@@ -53,7 +53,7 @@ export async function registerRoutes(app: Express) {
   };
 
   // Auth routes
-  app.post(['/api/auth/register', '/api/register'], async (req, res) => {
+  app.post('/api/auth/register', async (req, res) => {
     try {
       const { username, password } = req.body;
       if (!username || !password) {
@@ -74,7 +74,7 @@ export async function registerRoutes(app: Express) {
     }
   });
 
-  app.post(['/api/auth/login', '/api/login'], async (req, res) => {
+  app.post('/api/auth/login', async (req, res) => {
     try {
       const { username, password } = req.body;
       if (!username || !password) {
@@ -101,7 +101,7 @@ export async function registerRoutes(app: Express) {
     }
   });
 
-  app.post(['/api/auth/logout', '/api/logout'], (req, res) => {
+  app.post('/api/auth/logout', (req, res) => {
     req.session.destroy((err) => {
       if (err) {
         console.error('Logout error:', err);
@@ -112,7 +112,7 @@ export async function registerRoutes(app: Express) {
   });
   
   // Get current user
-  app.get(['/api/auth/user', '/api/user'], async (req, res) => {
+  app.get('/api/auth/user', async (req, res) => {
     if (!req.session.userId) {
       return res.status(401).json({ message: 'Unauthorized' });
     }

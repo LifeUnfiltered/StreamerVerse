@@ -27,7 +27,7 @@ export default function AuthDialog({ isOpen, onOpenChange, onSuccess }: AuthDial
 
   const { mutate: login, isPending: isLoginPending } = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/login", {
+      const response = await apiRequest("POST", "/api/auth/login", {
         username,
         password,
       });
@@ -69,7 +69,7 @@ export default function AuthDialog({ isOpen, onOpenChange, onSuccess }: AuthDial
 
   const { mutate: register, isPending: isRegisterPending } = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest("POST", "/api/register", {
+      const response = await apiRequest("POST", "/api/auth/register", {
         username,
         password,
       });
