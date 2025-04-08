@@ -33,11 +33,24 @@ export default function AuthDialog({ isOpen, onOpenChange, onSuccess }: AuthDial
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Login failed');
+        const text = await response.text();
+        let errorMessage = 'Login failed';
+        try {
+          const error = JSON.parse(text);
+          errorMessage = error.message || errorMessage;
+        } catch (e) {
+          console.error('Failed to parse error response:', text);
+        }
+        throw new Error(errorMessage);
       }
 
-      return response.json();
+      const text = await response.text();
+      try {
+        return text ? JSON.parse(text) : {};
+      } catch (e) {
+        console.error('Failed to parse response:', text);
+        return {};
+      }
     },
     onSuccess: () => {
       toast({ description: "Logged in successfully" });
@@ -62,11 +75,24 @@ export default function AuthDialog({ isOpen, onOpenChange, onSuccess }: AuthDial
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Registration failed');
+        const text = await response.text();
+        let errorMessage = 'Registration failed';
+        try {
+          const error = JSON.parse(text);
+          errorMessage = error.message || errorMessage;
+        } catch (e) {
+          console.error('Failed to parse error response:', text);
+        }
+        throw new Error(errorMessage);
       }
 
-      return response.json();
+      const text = await response.text();
+      try {
+        return text ? JSON.parse(text) : {};
+      } catch (e) {
+        console.error('Failed to parse response:', text);
+        return {};
+      }
     },
     onSuccess: () => {
       toast({ description: "Registered successfully! You can now log in." });

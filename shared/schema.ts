@@ -60,7 +60,7 @@ export const watchlistSchema = createInsertSchema(watchlist).pick({
 
 export const searchSchema = z.object({
   query: z.string().min(1),
-  source: z.enum(['youtube']).default('youtube')
+  source: z.string().default('youtube')
 });
 
 // Types

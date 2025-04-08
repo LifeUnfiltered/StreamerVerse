@@ -67,7 +67,7 @@ export async function registerRoutes(app: Express) {
 
       const user = await storage.createUser({ username, password });
       req.session.userId = user.id;
-      res.status(201).json(user);
+      res.status(201).json({ id: user.id, username: user.username });
     } catch (error) {
       console.error('Registration error:', error);
       res.status(500).json({ message: 'Failed to create account' });
@@ -259,7 +259,7 @@ export async function registerRoutes(app: Express) {
 interface Video {
   id: string | number;
   sourceId: string;
-  source: 'youtube' | 'vidsrc';
+  source: string;  // Changed from literals to accommodate library return types
   title: string;
   description: string | null;
   thumbnail: string | null;
