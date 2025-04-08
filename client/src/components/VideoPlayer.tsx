@@ -13,56 +13,62 @@ interface VideoPlayerProps {
 export default function VideoPlayer({ video }: VideoPlayerProps) {
   const [isLoading, setIsLoading] = useState(true);
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const timerRef = useRef<number | null>(null);
+  const [attempt, setAttempt] = useState(0);
 
-  // Special embed URL handling for VidSrc
-  const rawEmbedUrl = video.source === 'youtube'
+  // Get the embed URL based on the source - don't modify the original URL
+  const embedUrl = video.source === 'youtube'
     ? `https://www.youtube.com/embed/${video.sourceId}?autoplay=1&modestbranding=1&rel=0`
     : video.metadata?.embedUrl || '';
-    
-  // Modify embed URL for VidSrc to block ads
-  const embedUrl = video.source === 'vidsrc'
-    ? `${rawEmbedUrl}#block-popups=true`
-    : rawEmbedUrl;
 
-  // Handle iframe load/cleanup and ad blocking
+  // Handle iframe load and cleanup
   useEffect(() => {
-    if (video.source === 'vidsrc' && iframeRef.current) {
-      // Handle iframe load
-      const handleIframeLoad = () => {
-        setIsLoading(false);
-        
-        // Start the ad blocking timer
-        if (timerRef.current) {
-          window.clearInterval(timerRef.current);
-        }
-        
-        // Set an interval to remove dynamically added ad elements
-        timerRef.current = window.setInterval(() => {
-          // Find all popup/modal overlays at the document level (not in iframe due to security)
-          const popupOverlays = document.querySelectorAll('div[style*="z-index:"][style*="position: fixed"]');
-          const adIframes = document.querySelectorAll('iframe:not([src*="youtube"]):not([src*="vidsrc"])');
-          
-          // Remove them
-          popupOverlays.forEach(el => el.parentNode?.removeChild(el));
-          adIframes.forEach(el => el.parentNode?.removeChild(el));
-        }, 100);
-      };
+    if (!iframeRef.current) return;
 
-      // Add load event listener to iframe
-      const iframe = iframeRef.current;
-      iframe.addEventListener('load', handleIframeLoad);
+    const handleIframeLoad = () => {
+      setIsLoading(false);
+    };
+
+    const iframe = iframeRef.current;
+    iframe.addEventListener('load', handleIframeLoad);
+    
+    // Set a timeout to retry loading if it takes too long
+    const timeout = setTimeout(() => {
+      if (isLoading && video.source === 'vidsrc') {
+        setAttempt(prev => prev + 1);
+      }
+    }, 8000);
+
+    return () => {
+      iframe.removeEventListener('load', handleIframeLoad);
+      clearTimeout(timeout);
+    };
+  }, [video.source, video.sourceId, isLoading, attempt]);
+
+  // Gentle ad blocking without breaking functionality
+  useEffect(() => {
+    const adCleanupInterval = setInterval(() => {
+      // Clean up only obvious ad elements without being too aggressive
+      // Using as HTMLIFrameElement to ensure we have access to src property
+      const adIframes = document.querySelectorAll<HTMLIFrameElement>('iframe[src*="ads"], iframe[src*="ad."], iframe[src*="pop"]');
+      const popupDivs = document.querySelectorAll('div[id*="pop-"], div[id*="adb-"]');
       
-      return () => {
-        // Cleanup
-        iframe.removeEventListener('load', handleIframeLoad);
-        if (timerRef.current) {
-          window.clearInterval(timerRef.current);
-          timerRef.current = null;
+      adIframes.forEach(el => {
+        if (el.parentNode && !el.src.includes(video.sourceId)) {
+          el.parentNode.removeChild(el);
         }
-      };
-    }
-  }, [video.source, video.sourceId]);
+      });
+      
+      popupDivs.forEach(el => {
+        if (el.parentNode) {
+          el.parentNode.removeChild(el);
+        }
+      });
+    }, 500);
+
+    return () => {
+      clearInterval(adCleanupInterval);
+    };
+  }, [video.sourceId]);
 
   if (!embedUrl) {
     return (
@@ -90,16 +96,20 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
             <AspectRatio ratio={16 / 9} className="relative bg-black rounded-md overflow-hidden">
               <iframe
                 ref={iframeRef}
-                key={video.sourceId}
+                key={`${video.sourceId}-${attempt}`}
                 src={embedUrl}
                 title={video.title}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
-                className="absolute inset-0 w-full h-full"
+                className="absolute inset-0 w-full h-full z-10"
                 onLoad={() => video.source === 'youtube' && setIsLoading(false)}
               />
               <AnimatePresence>
-                {isLoading && <LoadingSpinner />}
+                {isLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center z-20 bg-background/50">
+                    <LoadingSpinner />
+                  </div>
+                )}
               </AnimatePresence>
             </AspectRatio>
             <p className="text-sm text-muted-foreground">
