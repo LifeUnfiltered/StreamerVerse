@@ -1,0 +1,103 @@
+
+Get movie embed URL:
+
+Endpoint: https://vidsrc.xyz/embed/movie
+Valid parameters:
+
+imdb or tmdb required - from imdb.com or themoviedb.com
+sub_url optional - Url encoded .srt or .vtt url. Must have CORS enabled to the URL.
+ds_lang optional - Default subtitle language, ISO639 Language code.
+Examples
+
+https://vidsrc.xyz/embed/movie/tt5433140
+
+https://vidsrc.xyz/embed/movie?imdb=tt5433140
+
+https://vidsrc.xyz/embed/movie?imdb=tt5433140&ds_lang=de
+
+https://vidsrc.xyz/embed/movie?imdb=tt5433140&sub_url=https%3A%2F%2Fvidsrc.me%2Fsample.srt
+
+https://vidsrc.xyz/embed/movie/385687
+
+https://vidsrc.xyz/embed/movie?tmdb=385687/
+
+https://vidsrc.xyz/embed/movie?tmdb=385687&ds_lang=de
+
+https://vidsrc.xyz/embed/movie?tmdb=385687&sub_url=https%3A%2F%2Fvidsrc.me%2Fsample.srt
+
+Get tv show embed URL:
+
+Endpoint: https://vidsrc.xyz/embed/tv
+Valid parameters:
+
+imdb or tmdb required - from imdb.com or themoviedb.com
+ds_lang optional - Default subtitle language, ISO639 Language code.
+Examples
+
+https://vidsrc.xyz/embed/tv/tt0944947
+
+https://vidsrc.xyz/embed/tv?imdb=tt0944947
+
+https://vidsrc.xyz/embed/tv?imdb=tt0944947&ds_lang=de
+
+https://vidsrc.xyz/embed/tv/1399
+
+https://vidsrc.xyz/embed/tv?tmdb=1399&ds_lang=de
+
+Get episode embed URL:
+
+Endpoint: https://vidsrc.xyz/embed/tv
+Valid parameters:
+
+imdb or tmdb required - from imdb.com or themoviedb.com
+season required - the season number.
+episode required - the season episode.
+sub_url optional - Url encoded .srt or .vtt url. Must have CORS enabled to the URL.
+ds_lang optional - Default subtitle language, ISO639 Language code.
+Examples
+
+https://vidsrc.xyz/embed/tv/tt0944947/1-1
+
+https://vidsrc.xyz/embed/tv?imdb=tt0944947&season=1&episode=1
+
+https://vidsrc.xyz/embed/tv?imdb=tt0944947&season=1&episode=1ds_lang=de
+
+https://vidsrc.xyz/embed/tv?imdb=tt0944947&season=1&episode=1&sub_url=https%3A%2F%2Fvidsrc.me%2Fsample.srt
+
+https://vidsrc.xyz/embed/tv/1399/1-1
+
+https://vidsrc.xyz/embed/tv?tmdb=1399&season=1&episode=1
+
+https://vidsrc.xyz/embed/tv?tmdb=1399&season=1&episode=1&ds_lang=de
+
+https://vidsrc.xyz/embed/tv?tmdb=1399&season=1&episode=1&sub_url=https%3A%2F%2Fvidsrc.me%2Fsample.srt
+
+List latest movies added:
+
+PAGE_NUMBER required
+https://vidsrc.xyz/movies/latest/page-PAGE_NUMBER.json
+Examples
+
+https://vidsrc.xyz/movies/latest/page-1.json
+
+https://vidsrc.xyz/movies/latest/page-15.json
+
+List latest tv shows added:
+
+PAGE_NUMBER required
+https://vidsrc.xyz/tvshows/latest/page-PAGE_NUMBER.json
+Examples
+
+https://vidsrc.xyz/tvshows/latest/page-1.json
+
+https://vidsrc.xyz/tvshows/latest/page-15.json
+
+List latest episodes added:
+
+PAGE_NUMBER required
+https://vidsrc.xyz/episodes/latest/page-PAGE_NUMBER.json
+Examples
+
+https://vidsrc.xyz/episodes/latest/page-1.json
+
+https://vidsrc.xyz/episodes/latest/page-25.json 

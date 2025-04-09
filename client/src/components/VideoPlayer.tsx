@@ -32,13 +32,32 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
     }
   }, [video.source, video.sourceId]);
 
-  // Get the embed URL based on the source
-  const embedUrl = video.source === 'youtube'
-    ? `https://www.youtube.com/embed/${video.sourceId}?autoplay=1&modestbranding=1&rel=0`
-    : video.metadata?.embedUrl || '';
+  // Generate the embed URL based on the source and video type
+  let embedUrl = '';
+  
+  if (video.source === 'youtube') {
+    embedUrl = `https://www.youtube.com/embed/${video.sourceId}?autoplay=1&modestbranding=1&rel=0`;
+  } else if (video.source === 'vidsrc') {
+    // Check if it's a movie or TV show episode
+    if (video.metadata?.type === 'movie') {
+      // Use the new API format from documentation
+      embedUrl = `https://vidsrc.xyz/embed/movie?imdb=${video.metadata.imdbId || video.sourceId}`;
+    } else if (video.metadata?.type === 'tv') {
+      // For TV shows, check if it has season and episode info
+      if (video.metadata.season && video.metadata.episode) {
+        embedUrl = `https://vidsrc.xyz/embed/tv?imdb=${video.metadata.imdbId || video.sourceId}&season=${video.metadata.season}&episode=${video.metadata.episode}`;
+      } else {
+        // Default to season 1, episode 1 if not specified
+        embedUrl = `https://vidsrc.xyz/embed/tv?imdb=${video.metadata.imdbId || video.sourceId}&season=1&episode=1`;
+      }
+    } else if (video.metadata?.embedUrl) {
+      // Fallback to the embedUrl if provided directly
+      embedUrl = video.metadata.embedUrl;
+    }
+  }
     
   console.log('Video metadata:', video.metadata);
-  console.log('Embed URL:', embedUrl);
+  console.log('Generated embed URL:', embedUrl);
 
   if (!embedUrl) {
     return (

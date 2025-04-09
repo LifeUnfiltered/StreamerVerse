@@ -5,35 +5,127 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>StreamFlex</title>
     
-    <!-- Lightweight Popup Blocker - Only blocks popups, not content -->
+    <!-- Advanced Ad-Blocking and Anti-Redirect Script -->
     <script>
       window.addEventListener('DOMContentLoaded', function() {
-        // Only block window.open to prevent popup ads
-        const originalOpen = window.open;
+        // Block popup windows
+        const originalWindowOpen = window.open;
         window.open = function() {
           console.log('Popup blocked:', arguments[0]);
           return null;
         };
-        
-        // Block onclick handlers that might trigger popups
-        // We'll do this periodically without using MutationObserver to be less intrusive
-        setInterval(function() {
+
+        // Create sandbox environment for iframe content
+        const handleIframeLoad = function(iframe) {
           try {
-            // Only target known popup trigger elements
-            const popupTriggers = document.querySelectorAll('a[href*="javascript:"]');
-            popupTriggers.forEach(el => {
-              if (!el.closest('.video-player') && !el.classList.contains('video-player')) {
-                el.onclick = function(e) {
-                  e.preventDefault();
-                  console.log('Blocked popup trigger');
-                  return false;
-                };
-              }
-            });
+            if (!iframe.contentWindow) return;
+            
+            // Block redirects in iframes
+            if (iframe.contentWindow.location) {
+              const originalAssign = iframe.contentWindow.location.assign;
+              const originalReplace = iframe.contentWindow.location.replace;
+              
+              iframe.contentWindow.location.assign = function(url) {
+                // Allow internal navigation but block external redirects
+                if (url.includes('vidsrc.') || url.includes('episode') || url.includes('player') || url.includes('video')) {
+                  console.log('Allowing internal iframe navigation:', url);
+                  return originalAssign.apply(iframe.contentWindow.location, arguments);
+                }
+                console.log('Blocked iframe redirect:', url);
+                return null;
+              };
+              
+              iframe.contentWindow.location.replace = function(url) {
+                // Allow internal navigation but block external redirects
+                if (url.includes('vidsrc.') || url.includes('episode') || url.includes('player') || url.includes('video')) {
+                  console.log('Allowing internal iframe navigation:', url);
+                  return originalReplace.apply(iframe.contentWindow.location, arguments);
+                }
+                console.log('Blocked iframe redirect:', url);
+                return null;
+              };
+            }
+            
+            // Block popup ads in iframes
+            if (iframe.contentWindow.open) {
+              iframe.contentWindow.open = function() {
+                console.log('Iframe popup blocked:', arguments[0]);
+                return null;
+              };
+            }
           } catch (e) {
-            console.log('Popup blocking error:', e);
+            // Cross-origin access errors are expected, we can safely ignore them
+            console.log('Cross-origin protection active (expected):', e.message);
           }
-        }, 2000);
+        };
+
+        // Monitor for new iframes and apply protection
+        const observer = new MutationObserver(function(mutations) {
+          mutations.forEach(function(mutation) {
+            if (mutation.addedNodes) {
+              mutation.addedNodes.forEach(function(node) {
+                if (node.nodeName === 'IFRAME') {
+                  node.addEventListener('load', function() {
+                    handleIframeLoad(node);
+                  });
+                  // Also handle existing loaded iframes
+                  if (node.contentDocument) {
+                    handleIframeLoad(node);
+                  }
+                }
+                
+                // If it's a parent element, check for iframes inside
+                if (node.querySelectorAll) {
+                  const iframes = node.querySelectorAll('iframe');
+                  iframes.forEach(function(iframe) {
+                    iframe.addEventListener('load', function() {
+                      handleIframeLoad(iframe);
+                    });
+                    if (iframe.contentDocument) {
+                      handleIframeLoad(iframe);
+                    }
+                  });
+                }
+              });
+            }
+          });
+        });
+
+        // Start observing the document
+        observer.observe(document, { 
+          childList: true,
+          subtree: true
+        });
+        
+        // Handle existing iframes
+        document.querySelectorAll('iframe').forEach(function(iframe) {
+          iframe.addEventListener('load', function() {
+            handleIframeLoad(iframe);
+          });
+          if (iframe.contentDocument) {
+            handleIframeLoad(iframe);
+          }
+        });
+        
+        // Intercept navigation attempts on the main page
+        const originalAssign = window.location.assign;
+        const originalReplace = window.location.replace;
+        
+        window.location.assign = function(url) {
+          if (url.startsWith('http') && !url.includes(window.location.hostname)) {
+            console.log('Blocked main window redirect:', url);
+            return null;
+          }
+          return originalAssign.apply(window.location, arguments);
+        };
+        
+        window.location.replace = function(url) {
+          if (url.startsWith('http') && !url.includes(window.location.hostname)) {
+            console.log('Blocked main window redirect:', url);
+            return null;
+          }
+          return originalReplace.apply(window.location, arguments);
+        };
       });
     </script>
   </head>

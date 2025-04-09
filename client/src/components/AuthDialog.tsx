@@ -159,20 +159,43 @@ export default function AuthDialog({ isOpen, onOpenChange, onSuccess }: AuthDial
             />
           </div>
 
-          <div className="flex justify-between items-center">
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => setIsLogin(!isLogin)}
-              className="text-sm text-muted-foreground"
-            >
-              {isLogin ? "Need an account?" : "Already have an account?"}
-            </Button>
-            <Button type="submit" disabled={isLoginPending || isRegisterPending}>
-              {isLogin 
-                ? (isLoginPending ? "Logging in..." : "Login")
-                : (isRegisterPending ? "Creating account..." : "Create Account")}
-            </Button>
+          <div className="flex flex-col gap-4">
+            <div className="flex justify-between items-center">
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={() => setIsLogin(!isLogin)}
+                className="text-sm text-muted-foreground"
+              >
+                {isLogin ? "Need an account?" : "Already have an account?"}
+              </Button>
+              <Button type="submit" disabled={isLoginPending || isRegisterPending}>
+                {isLogin 
+                  ? (isLoginPending ? "Logging in..." : "Login")
+                  : (isRegisterPending ? "Creating account..." : "Create Account")}
+              </Button>
+            </div>
+            
+            {isLogin && (
+              <div className="pt-2 border-t">
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    setUsername("test");
+                    setPassword("test");
+                    setTimeout(() => login(), 100);
+                  }}
+                  disabled={isLoginPending || isRegisterPending}
+                >
+                  Use Test Account
+                </Button>
+                <p className="text-xs text-muted-foreground mt-2 text-center">
+                  Quick access with username: "test" and password: "test"
+                </p>
+              </div>
+            )}
           </div>
         </form>
       </DialogContent>
