@@ -16,7 +16,7 @@ function movieToVideo(movie: any): Video {
       imdbId: movie.imdb_id,
       type: 'movie',
       tmdbId: movie.id,
-      embedUrl: movie.imdb_id ? `https://vidsrc.to/embed/movie/${movie.imdb_id}` : null
+      embedUrl: movie.imdb_id ? `https://vidsrc.xyz/embed/movie?imdb=${movie.imdb_id}` : null
     },
     chapters: null
   };
@@ -36,7 +36,7 @@ function showToVideo(show: any): Video {
       type: 'tv',
       tmdbId: show.id,
       embedUrl: show.external_ids?.imdb_id ? 
-        `https://vidsrc.to/embed/tv/${show.external_ids.imdb_id}?autonext=1` : null,
+        `https://vidsrc.xyz/embed/tv?imdb=${show.external_ids.imdb_id}&season=1&episode=1` : null,
       totalSeasons: show.number_of_seasons
     },
     chapters: null
@@ -63,7 +63,7 @@ function episodeToVideo(episode: any, show: any): Video {
       type: 'tv',
       tmdbId: show.id,
       embedUrl: imdbId ? 
-        `https://vidsrc.to/embed/tv/${imdbId}/${seasonNum}-${episodeNum}?autonext=1` : null,
+        `https://vidsrc.xyz/embed/tv?imdb=${imdbId}&season=${seasonNum}&episode=${episodeNum}` : null,
       season: seasonNum,
       episode: episodeNum
     },
