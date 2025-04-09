@@ -17,7 +17,7 @@ import BackButton from "@/components/BackButton";
 
 interface NavigationState {
   view: 'browse' | 'search' | 'watchlist' | 'video';
-  previousView: 'browse' | 'search' | 'watchlist' | null;
+  previousView: 'browse' | 'search' | 'watchlist' | 'video' | null;
 }
 
 export default function VidSrc() {
@@ -153,10 +153,18 @@ export default function VidSrc() {
     show.sourceId === selectedVideo.sourceId || 
     show.sourceId === selectedVideo.metadata?.imdbId 
   );
-
-  const showEpisodes = episodes?.filter(episode =>
-    episode.metadata?.imdbId === currentShow?.metadata?.imdbId
-  ) || [];
+  
+  // Fetch episodes when a show is selected
+  const { data: showEpisodes = [] } = useQuery<Video[]>({
+    queryKey: ['/api/videos/tv', currentShow?.id, '/episodes'],
+    queryFn: async () => {
+      if (!currentShow?.id) return [];
+      console.log('Fetching episodes for show:', currentShow);
+      const response = await apiRequest('GET', `/api/videos/tv/${currentShow.id}/episodes`);
+      return response.json();
+    },
+    enabled: !!currentShow?.id && currentSource === 'vidsrc' && navigation.view === 'video'
+  });
 
   return (
     <div className="min-h-screen bg-background">

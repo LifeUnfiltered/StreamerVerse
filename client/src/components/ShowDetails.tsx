@@ -33,6 +33,12 @@ export default function ShowDetails({
 
   // Get available seasons
   const seasons = Object.keys(seasonEpisodes).map(Number).sort((a, b) => a - b);
+  
+  // Log for debugging
+  console.log('Show details:', show);
+  console.log('Episodes count:', episodes.length);
+  console.log('Available seasons:', seasons);
+  console.log('Selected season:', selectedSeason);
 
   // Get episodes for current season
   const currentSeasonEpisodes = seasonEpisodes[selectedSeason] || [];

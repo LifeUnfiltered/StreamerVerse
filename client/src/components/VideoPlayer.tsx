@@ -69,9 +69,9 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
                 key={video.sourceId}
                 src={embedUrl}
                 title={video.title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                 allowFullScreen
-                sandbox="allow-same-origin allow-scripts allow-forms"
+                sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
                 className="absolute inset-0 w-full h-full video-player"
                 id="video-player-iframe"
                 onLoad={() => video.source === 'youtube' && setIsLoading(false)}

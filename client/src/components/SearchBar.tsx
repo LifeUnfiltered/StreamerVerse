@@ -5,9 +5,10 @@ import { Search } from "lucide-react";
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
+  placeholder?: string;
 }
 
-export default function SearchBar({ onSearch }: SearchBarProps) {
+export default function SearchBar({ onSearch, placeholder = "Search videos..." }: SearchBarProps) {
   const [query, setQuery] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -21,7 +22,7 @@ export default function SearchBar({ onSearch }: SearchBarProps) {
     <form onSubmit={handleSubmit} className="flex gap-2">
       <Input
         type="text"
-        placeholder="Search videos..."
+        placeholder={placeholder}
         value={query}
         onChange={(e) => setQuery(e.target.value)}
         className="flex-1"

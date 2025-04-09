@@ -229,12 +229,30 @@ export async function registerRoutes(app: Express) {
       const { showId } = req.params;
       const { season } = req.query;
 
+      console.log('Fetching episodes for showId:', showId, 'season:', season);
+      
       const episodes = await fetchTVShowEpisodes(
         parseInt(showId),
         season ? parseInt(season as string) : undefined
       );
 
-      res.json(episodes);
+      // Ensure that all episode metadata contains valid embedUrl with the new format
+      const updatedEpisodes = episodes.map(episode => {
+        if (episode.metadata && episode.metadata.imdbId && 
+            episode.metadata.season && episode.metadata.episode) {
+          return {
+            ...episode,
+            metadata: {
+              ...episode.metadata,
+              embedUrl: `https://vidsrc.xyz/embed/tv?imdb=${episode.metadata.imdbId}&season=${episode.metadata.season}&episode=${episode.metadata.episode}`
+            }
+          };
+        }
+        return episode;
+      });
+
+      console.log(`Returning ${updatedEpisodes.length} episodes for show ${showId}`);
+      res.json(updatedEpisodes);
     } catch (error) {
       console.error('Error fetching episodes:', error);
       res.status(500).json({ message: 'Failed to fetch episodes' });
