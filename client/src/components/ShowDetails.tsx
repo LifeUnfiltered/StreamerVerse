@@ -99,7 +99,7 @@ export default function ShowDetails({
         imdbId: show.metadata?.imdbId,
         type: 'tv',
         tmdbId: show.metadata?.tmdbId,
-        embedUrl: `https://vidsrc.xyz/embed/tv?imdb=${show.metadata?.imdbId}&season=${customSeasonNum}&episode=${customEpisodeNum}`,
+        embedUrl: `https://vidsrc.xyz/embed/tv?imdb=${show.metadata?.imdbId || show.sourceId}&season=${customSeasonNum}&episode=${customEpisodeNum}`,
         season: customSeasonNum,
         episode: customEpisodeNum
       },
@@ -150,7 +150,7 @@ export default function ShowDetails({
         imdbId: show.metadata?.imdbId,
         type: 'tv',
         tmdbId: show.metadata?.tmdbId,
-        embedUrl: `https://vidsrc.xyz/embed/tv?imdb=${show.metadata?.imdbId}&season=${newSeason}&episode=${newEpisodeNum}`,
+        embedUrl: `https://vidsrc.xyz/embed/tv?imdb=${show.metadata?.imdbId || show.sourceId}&season=${newSeason}&episode=${newEpisodeNum}`,
         season: newSeason,
         episode: newEpisodeNum
       },

@@ -148,22 +148,32 @@ export default function VidSrc() {
 
   const isLoggedIn = watchlist !== null;
 
-  // Get current show and its episodes
-  const currentShow = selectedVideo && shows?.find(show =>
-    show.sourceId === selectedVideo.sourceId || 
-    show.sourceId === selectedVideo.metadata?.imdbId 
-  );
+  // Determine if the selected video is a TV show
+  const isSelectedVideoTVShow = selectedVideo && 
+    (selectedVideo.metadata?.type === 'tv' || selectedVideo.metadata?.season || selectedVideo.metadata?.episode);
+  
+  // Use the selected video as the current show if it's a TV show, or find it in the shows array
+  const currentShow = isSelectedVideoTVShow ? selectedVideo : 
+    (selectedVideo && shows?.find(show =>
+      show.sourceId === selectedVideo.sourceId || 
+      show.sourceId === selectedVideo.metadata?.imdbId 
+    ));
   
   // Fetch episodes when a show is selected
   const { data: showEpisodes = [] } = useQuery<Video[]>({
-    queryKey: ['/api/videos/tv', currentShow?.id, '/episodes'],
+    queryKey: ['/api/videos/tv', currentShow?.id || currentShow?.sourceId, '/episodes'],
     queryFn: async () => {
-      if (!currentShow?.id) return [];
-      console.log('Fetching episodes for show:', currentShow);
-      const response = await apiRequest('GET', `/api/videos/tv/${currentShow.id}/episodes`);
+      if (!currentShow) return [];
+      
+      // Get the show ID or sourceId to fetch episodes
+      const showId = currentShow.id || currentShow.sourceId;
+      console.log('Fetching episodes for show:', currentShow, 'with ID:', showId);
+      
+      // Use ID or sourceId depending on what's available
+      const response = await apiRequest('GET', `/api/videos/tv/${showId}/episodes`);
       return response.json();
     },
-    enabled: !!currentShow?.id && currentSource === 'vidsrc' && navigation.view === 'video'
+    enabled: !!currentShow && currentSource === 'vidsrc' && navigation.view === 'video'
   });
 
   return (

@@ -35,24 +35,56 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
   // Generate the embed URL based on the source and video type
   let embedUrl = '';
   
+  // Define array of VidSrc domains to try (from newest to oldest)
+  const vidSrcDomains = ['vidsrc.xyz', 'vidsrc.pm', 'vidsrc.in', 'vidsrc.net'];
+  const preferredDomain = vidSrcDomains[0]; // Default to the newest domain
+  
   if (video.source === 'youtube') {
     embedUrl = `https://www.youtube.com/embed/${video.sourceId}?autoplay=1&modestbranding=1&rel=0`;
   } else if (video.source === 'vidsrc') {
     // Check if it's a movie or TV show episode
-    if (video.metadata?.type === 'movie') {
-      // Use the new API format from documentation
-      embedUrl = `https://vidsrc.xyz/embed/movie?imdb=${video.metadata.imdbId || video.sourceId}`;
-    } else if (video.metadata?.type === 'tv') {
-      // For TV shows, check if it has season and episode info
-      if (video.metadata.season && video.metadata.episode) {
-        embedUrl = `https://vidsrc.xyz/embed/tv?imdb=${video.metadata.imdbId || video.sourceId}&season=${video.metadata.season}&episode=${video.metadata.episode}`;
-      } else {
-        // Default to season 1, episode 1 if not specified
-        embedUrl = `https://vidsrc.xyz/embed/tv?imdb=${video.metadata.imdbId || video.sourceId}&season=1&episode=1`;
+    const imdbId = video.metadata?.imdbId || (video.sourceId.startsWith('tt') ? video.sourceId : null);
+
+    // If we have a valid IMDB ID
+    if (imdbId) {
+      if (video.metadata?.type === 'movie') {
+        // Use the new API format for movies
+        embedUrl = `https://${preferredDomain}/embed/movie?imdb=${imdbId}`;
+      } else if (video.metadata?.type === 'tv') {
+        // For TV shows, check if it has season and episode info
+        const season = video.metadata.season || 1;
+        const episode = video.metadata.episode || 1;
+        embedUrl = `https://${preferredDomain}/embed/tv?imdb=${imdbId}&season=${season}&episode=${episode}`;
       }
-    } else if (video.metadata?.embedUrl) {
-      // Fallback to the embedUrl if provided directly
-      embedUrl = video.metadata.embedUrl;
+    }
+    
+    // If a direct embed URL was provided in the metadata (and we couldn't generate one)
+    if (!embedUrl && video.metadata?.embedUrl) {
+      // Fallback to the embedUrl provided directly, but update the domain to preferred one
+      let directUrl = video.metadata.embedUrl;
+      
+      // Try to update the domain if it's using an old VidSrc domain
+      for (const domain of vidSrcDomains) {
+        if (directUrl.includes(domain)) {
+          // Already using this domain, no need to change
+          embedUrl = directUrl;
+          break;
+        } else if (vidSrcDomains.some(d => directUrl.includes(d))) {
+          // Replace the old domain with the preferred one
+          vidSrcDomains.forEach(d => {
+            if (directUrl.includes(d)) {
+              directUrl = directUrl.replace(d, preferredDomain);
+            }
+          });
+          embedUrl = directUrl;
+          break;
+        }
+      }
+      
+      // If we couldn't update the domain, use the original URL
+      if (!embedUrl) {
+        embedUrl = directUrl;
+      }
     }
   }
     
