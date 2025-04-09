@@ -46,7 +46,7 @@ export default function Header({ onAuthClick, onWatchlistClick }: HeaderProps) {
 
   const { mutate: logout } = useMutation({
     mutationFn: async () => {
-      const response = await apiRequest('POST', '/api/auth/logout');
+      const response = await apiRequest('POST', '/api/logout');
       if (!response.ok) {
         throw new Error('Logout failed');
       }

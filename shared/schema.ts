@@ -25,7 +25,7 @@ export const videos = pgTable("videos", {
 
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
-  email: text("email").notNull().unique(),
+  username: text("username").notNull().unique(),
   password: text("password").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -49,7 +49,7 @@ export const videoSchema = createInsertSchema(videos).pick({
 });
 
 export const userSchema = createInsertSchema(users).pick({
-  email: true,
+  username: true,
   password: true,
 });
 

@@ -32,15 +32,22 @@ export async function registerRoutes(app: Express) {
   app.use(express.urlencoded({ extended: true }));
 
   // Session middleware
+  // Generate a secure session secret or use an environment variable
+  const sessionSecret = process.env.SESSION_SECRET || 
+    require('crypto').randomBytes(64).toString('hex');
+    
   app.use(
     session({
       store: new MemoryStore({
         checkPeriod: 86400000, // prune expired entries every 24h
       }),
-      secret: "your-secret-key",
+      secret: sessionSecret,
       resave: false,
       saveUninitialized: false,
-      cookie: { secure: process.env.NODE_ENV === "production" },
+      cookie: { 
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+      },
     })
   );
 
@@ -53,7 +60,7 @@ export async function registerRoutes(app: Express) {
   };
 
   // Auth routes
-  app.post('/api/auth/register', async (req, res) => {
+  app.post('/api/register', async (req, res) => {
     try {
       const { username, password } = req.body;
       if (!username || !password) {
@@ -74,7 +81,7 @@ export async function registerRoutes(app: Express) {
     }
   });
 
-  app.post('/api/auth/login', async (req, res) => {
+  app.post('/api/login', async (req, res) => {
     try {
       const { username, password } = req.body;
       if (!username || !password) {
@@ -101,7 +108,7 @@ export async function registerRoutes(app: Express) {
     }
   });
 
-  app.post('/api/auth/logout', (req, res) => {
+  app.post('/api/logout', (req, res) => {
     req.session.destroy((err) => {
       if (err) {
         console.error('Logout error:', err);
@@ -112,7 +119,7 @@ export async function registerRoutes(app: Express) {
   });
   
   // Get current user
-  app.get('/api/auth/user', async (req, res) => {
+  app.get('/api/user', async (req, res) => {
     if (!req.session.userId) {
       return res.status(401).json({ message: 'Unauthorized' });
     }

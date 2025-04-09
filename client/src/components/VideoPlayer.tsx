@@ -48,29 +48,63 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
         
         timerRef.current = window.setInterval(() => {
           try {
-            // Remove fixed position elements with high z-index (likely popups/ads)
-            const popups = document.querySelectorAll('div[style*="position: fixed"][style*="z-index"]');
-            popups.forEach(el => {
-              const style = window.getComputedStyle(el);
-              const zIndex = parseInt(style.zIndex);
+            // More comprehensive list of ad and popup selectors
+            const selectors = [
+              // Popup containers
+              'div[style*="position: fixed"][style*="z-index"]',
+              'div[style*="position:fixed"][style*="z-index"]',
+              'div[style*="position:absolute"][style*="z-index"]',
               
-              // Only remove elements that appear to be popups
-              if (zIndex > 999 && el.parentNode) {
-                console.log('Removing popup:', el);
-                el.parentNode.removeChild(el);
-              }
+              // Common ad containers
+              'div[id*="AdDisplay"]',
+              'div[class*="ad-"]',
+              'div[class*="-ad"]',
+              'div[class*="adi"]',
+              'div[class*="opads"]',
+              'div[class*="overlay"]',
+              'div[id*="popup"]',
+              
+              // Various iframe ads
+              'iframe[src*="ads"]',
+              'iframe[src*="adst"]',
+              'iframe[src*="doubleclick"]',
+              'iframe[src*="pop"]'
+            ];
+            
+            // Apply all selectors
+            selectors.forEach(selector => {
+              const elements = document.querySelectorAll(selector);
+              elements.forEach(el => {
+                // Only remove if not part of the main content
+                if (el.parentNode && 
+                    !el.classList.contains('video-player') &&
+                    !el.id?.includes('video-player')) {
+                  
+                  // For fixed elements, check zIndex
+                  if (selector.includes('position')) {
+                    const style = window.getComputedStyle(el);
+                    const zIndex = parseInt(style.zIndex);
+                    
+                    // Only remove if it's likely an overlay
+                    if (zIndex > 999) {
+                      console.log('Removing popup overlay:', el);
+                      el.parentNode.removeChild(el);
+                    }
+                  } else {
+                    console.log('Removing ad element:', el);
+                    el.parentNode.removeChild(el);
+                  }
+                }
+              });
             });
             
-            // Remove ad iframes
-            const adIframes = document.querySelectorAll('iframe[src*="ads"], iframe[src*="pop"]');
-            adIframes.forEach(el => {
-              if (el.parentNode) {
-                console.log('Removing ad iframe:', el);
-                el.parentNode.removeChild(el);
-              }
-            });
+            // Also remove onclick handlers that might trigger popups
+            document.onclick = null;
+            document.body.onclick = null;
+            
           } catch (e) {
             // Silently ignore errors
+            console.log('Ad removal error:', e);
           }
         }, 500);
       };
@@ -125,6 +159,7 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
                 title={video.title}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
+                sandbox="allow-same-origin allow-scripts allow-forms"
                 className="absolute inset-0 w-full h-full"
                 onLoad={() => video.source === 'youtube' && setIsLoading(false)}
               />
