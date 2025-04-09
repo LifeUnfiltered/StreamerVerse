@@ -15,19 +15,10 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const timerRef = useRef<number | null>(null);
 
-  // Handle loading and popup blocking for VidSrc
+  // Handle cleanup of any ad-blocking timers
   useEffect(() => {
-    // Override window.open to block popups
-    const originalWindowOpen = window.open;
-    window.open = function() {
-      console.log('Popup blocked:', arguments[0]);
-      return null;
-    };
-
     // Clean up on unmount
     return () => {
-      window.open = originalWindowOpen;
-      
       if (timerRef.current) {
         window.clearInterval(timerRef.current);
         timerRef.current = null;

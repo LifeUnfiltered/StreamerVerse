@@ -42,12 +42,14 @@ export async function registerRoutes(app: Express) {
         checkPeriod: 86400000, // prune expired entries every 24h
       }),
       secret: sessionSecret,
-      resave: false,
-      saveUninitialized: false,
+      resave: true,
+      saveUninitialized: true,
       cookie: { 
-        secure: process.env.NODE_ENV === "production",
-        maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+        secure: false, // Set to false for development
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+        httpOnly: true
       },
+      name: 'streamer_verse_session'
     })
   );
 
@@ -88,17 +90,34 @@ export async function registerRoutes(app: Express) {
         return res.status(400).json({ message: 'Username and password are required' });
       }
 
-      // First check registered users
+      // First check the test user since it's hardcoded
+      if (username === 'test' && password === 'test') {
+        // Create test user if it doesn't exist
+        let testUser = await storage.getUserByUsername('test');
+        if (!testUser) {
+          testUser = await storage.createUser({ username: 'test', password: 'test' });
+          console.log('Created test user:', testUser);
+        }
+        
+        req.session.userId = testUser.id;
+        req.session.save((err) => {
+          if (err) console.error('Session save error:', err);
+          console.log('Session saved for user:', testUser.id);
+        });
+        
+        return res.json({ id: testUser.id, username: testUser.username });
+      }
+
+      // Then check registered users
       const user = await storage.getUserByUsername(username);
       if (user && user.password === password) {
         req.session.userId = user.id;
+        req.session.save((err) => {
+          if (err) console.error('Session save error:', err);
+          console.log('Session saved for user:', user.id);
+        });
+        
         return res.json({ id: user.id, username: user.username });
-      }
-
-      // Fallback to test user
-      if (username === 'test' && password === 'test') {
-        req.session.userId = 1;
-        return res.json({ id: 1, username: 'test' });
       }
 
       res.status(401).json({ message: 'Invalid credentials' });
