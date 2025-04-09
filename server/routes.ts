@@ -53,11 +53,18 @@ export async function registerRoutes(app: Express) {
     })
   );
 
-  // Authentication middleware
+  // Authentication middleware with enhanced debug
   const requireAuth = (req: any, res: any, next: any) => {
-    if (!req.session.userId) {
+    console.log("Auth check - Session:", req.session);
+    console.log("Auth check - userId in session:", req.session.userId);
+    console.log("Auth check - Headers:", req.headers);
+    console.log("Auth check - Cookies:", req.headers.cookie);
+    
+    if (!req.session || !req.session.userId) {
+      console.log("Authentication failed: No valid session or userId");
       return res.status(401).json({ message: "Unauthorized" });
     }
+    console.log("Authentication successful for userId:", req.session.userId);
     next();
   };
 
@@ -139,17 +146,25 @@ export async function registerRoutes(app: Express) {
   
   // Get current user
   app.get('/api/user', async (req, res) => {
+    console.log("GET /api/user - Session:", req.session);
+    console.log("GET /api/user - Cookies:", req.headers.cookie);
+    
     if (!req.session.userId) {
+      console.log("GET /api/user - No userId in session");
       return res.status(401).json({ message: 'Unauthorized' });
     }
     
     try {
+      console.log("GET /api/user - Fetching user with id:", req.session.userId);
       const user = await storage.getUser(req.session.userId);
+      
       if (!user) {
+        console.log("GET /api/user - User not found in database");
         req.session.destroy(() => {});
         return res.status(401).json({ message: 'User not found' });
       }
       
+      console.log("GET /api/user - User found:", user);
       res.json({
         id: user.id,
         username: user.username

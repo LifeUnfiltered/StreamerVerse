@@ -5,15 +5,100 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>StreamFlex</title>
     
-    <!-- Simple popup blocker -->
+    <!-- Enhanced Ad and Popup Blocker -->
     <script>
-      // Override window.open to block popups
       window.addEventListener('DOMContentLoaded', function() {
+        // 1. Override window.open to block popups
         const originalOpen = window.open;
         window.open = function() {
-          console.log('Popup blocked');
+          console.log('Popup blocked:', arguments[0]);
           return null;
         };
+        
+        // 2. Create a MutationObserver to detect and remove ad elements as they appear
+        const adSelectors = [
+          // Popup containers
+          'div[style*="position: fixed"][style*="z-index"]',
+          'div[style*="position:fixed"][style*="z-index"]',
+          'div[style*="position:absolute"][style*="z-index"]',
+          
+          // Common ad containers
+          'div[id*="AdDisplay"]',
+          'div[class*="ad-"]',
+          'div[class*="-ad"]',
+          'div[class*="adi"]',
+          'div[class*="opads"]',
+          'div[class*="overlay"]',
+          'div[id*="popup"]',
+          
+          // Various iframe ads
+          'iframe[src*="ads"]',
+          'iframe[src*="adst"]',
+          'iframe[src*="doubleclick"]',
+          'iframe[src*="pop"]'
+        ];
+
+        // Function to remove ads
+        function removeAds() {
+          adSelectors.forEach(selector => {
+            try {
+              const elements = document.querySelectorAll(selector);
+              elements.forEach(el => {
+                // Skip our own video player elements
+                if (el.closest('.video-player') || 
+                    el.id?.includes('video-player') ||
+                    el.classList.contains('video-player')) {
+                  return;
+                }
+                
+                // For fixed elements, check zIndex
+                if (selector.includes('position')) {
+                  const style = window.getComputedStyle(el);
+                  const zIndex = parseInt(style.zIndex);
+                  
+                  // Only remove if it's likely an overlay
+                  if (zIndex > 999 && el.parentNode) {
+                    console.log('Removing popup overlay:', el);
+                    el.parentNode.removeChild(el);
+                  }
+                } else if (el.parentNode) {
+                  console.log('Removing ad element:', el);
+                  el.parentNode.removeChild(el);
+                }
+              });
+            } catch (e) {
+              console.log('Ad removal error:', e);
+            }
+          });
+          
+          // Remove onclick handlers that might trigger popups
+          document.onclick = null;
+          document.body.onclick = null;
+        }
+        
+        // Set up interval to periodically remove ads
+        setInterval(removeAds, 1000);
+        
+        // Set up MutationObserver to detect new ad elements
+        const observer = new MutationObserver(mutations => {
+          removeAds();
+        });
+        
+        // Start observing when the body is available
+        if (document.body) {
+          observer.observe(document.body, { 
+            childList: true, 
+            subtree: true 
+          });
+        } else {
+          // If body isn't available yet, wait for it
+          window.addEventListener('load', () => {
+            observer.observe(document.body, { 
+              childList: true, 
+              subtree: true 
+            });
+          });
+        }
       });
     </script>
   </head>
