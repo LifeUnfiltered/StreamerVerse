@@ -1,6 +1,28 @@
 import { MovieDb } from 'moviedb-promise';
 import type { Video } from '@shared/schema';
 
+// TypeScript declarations to bridge any API type gaps
+interface EnhancedShowResponse {
+  id: number;
+  name?: string;
+  title?: string;
+  external_ids?: {
+    imdb_id?: string;
+  };
+  number_of_seasons?: number;
+  poster_path?: string;
+  overview?: string;
+}
+
+interface EnhancedEpisodeResponse {
+  id: number;
+  name?: string;
+  overview?: string;
+  season_number: number;
+  episode_number: number;
+  still_path?: string;
+}
+
 const tmdb = new MovieDb(process.env.TMDB_API_KEY!);
 
 // Convert TMDB movie to our Video type
@@ -187,25 +209,85 @@ export async function fetchTVShowEpisodes(showId: number, seasonNumber?: number)
     // If season number is provided, fetch only that season
     if (seasonNumber) {
       console.log(`Fetching season ${seasonNumber} for show ${showDetails.name}`);
-      const season = await tmdb.seasonInfo({
-        id: showId,
-        season_number: seasonNumber
-      });
+      try {
+        const season = await tmdb.seasonInfo({
+          id: showId,
+          season_number: seasonNumber,
+          append_to_response: 'episodes'  // Make sure we get all episode details
+        });
 
-      for (const episode of season.episodes || []) {
-        videos.push(episodeToVideo(episode, showDetails));
+        console.log(`Retrieved ${season.episodes?.length || 0} episodes for season ${seasonNumber}`);
+        
+        // Fetch individual episode details for more complete information
+        for (const episode of season.episodes || []) {
+          try {
+            // For each episode, get its full details including overview
+            const episodeDetails = await tmdb.episodeInfo({
+              id: showId,
+              season_number: seasonNumber,
+              episode_number: episode.episode_number
+            });
+            
+            // Use the enhanced details
+            videos.push(episodeToVideo(episodeDetails, showDetails));
+          } catch (episodeError) {
+            console.error(`Error fetching episode details for S${seasonNumber}E${episode.episode_number}:`, episodeError);
+            // Fall back to the basic episode data
+            videos.push(episodeToVideo(episode, showDetails));
+          }
+        }
+      } catch (seasonError) {
+        console.error(`Error fetching season ${seasonNumber}:`, seasonError);
       }
     } else {
       // Fetch all seasons
       console.log(`Fetching all seasons for show ${showDetails.name}`);
-      for (let i = 1; i <= (showDetails.number_of_seasons || 1); i++) {
-        const season = await tmdb.seasonInfo({
-          id: showId,
-          season_number: i
-        });
+      const totalSeasons = showDetails.number_of_seasons || 1;
+      console.log(`Show has ${totalSeasons} seasons in total`);
+      
+      for (let i = 1; i <= totalSeasons; i++) {
+        try {
+          console.log(`Fetching details for season ${i}...`);
+          const season = await tmdb.seasonInfo({
+            id: showId,
+            season_number: i,
+            append_to_response: 'episodes'  // Make sure we get all episode details
+          });
 
-        for (const episode of season.episodes || []) {
-          videos.push(episodeToVideo(episode, showDetails));
+          console.log(`Retrieved ${season.episodes?.length || 0} episodes for season ${i}`);
+          
+          if (season.episodes && season.episodes.length > 0) {
+            // For the first 5 episodes of each season, get detailed information
+            // This is to avoid making too many API calls while still getting good data
+            const episodesToFetchDetailed = season.episodes.slice(0, 5);
+            const otherEpisodes = season.episodes.slice(5);
+            
+            // Fetch detailed info for the first few episodes
+            for (const episode of episodesToFetchDetailed) {
+              try {
+                // Get full episode details for better descriptions
+                const episodeDetails = await tmdb.episodeInfo({
+                  id: showId,
+                  season_number: i,
+                  episode_number: episode.episode_number
+                });
+                
+                // Use enhanced details
+                videos.push(episodeToVideo(episodeDetails, showDetails));
+              } catch (episodeError) {
+                console.error(`Error fetching detailed info for S${i}E${episode.episode_number}:`, episodeError);
+                // Fall back to basic data
+                videos.push(episodeToVideo(episode, showDetails));
+              }
+            }
+            
+            // Use basic info for remaining episodes to save on API calls
+            for (const episode of otherEpisodes) {
+              videos.push(episodeToVideo(episode, showDetails));
+            }
+          }
+        } catch (seasonError) {
+          console.error(`Error fetching season ${i}:`, seasonError);
         }
       }
     }
@@ -230,6 +312,7 @@ export async function fetchLatestEpisodes(): Promise<Video[]> {
 
   try {
     const popular = await tmdb.tvPopular();
+    console.log(`Fetching latest episodes from ${popular.results?.length || 0} popular shows`);
 
     // For each show, get the latest season and its episodes
     for (const show of popular.results?.slice(0, 5) || []) {
@@ -240,20 +323,48 @@ export async function fetchLatestEpisodes(): Promise<Video[]> {
         });
 
         if (!showDetails.name || !showDetails.external_ids?.imdb_id) {
+          console.log(`Skipping show ${show.name || show.id}: missing required data`);
           continue;
         }
 
         const latestSeason = showDetails.number_of_seasons || 1;
-        const season = await tmdb.seasonInfo({
-          id: show.id,
-          season_number: latestSeason
-        });
+        console.log(`Fetching latest episodes from "${showDetails.name}" season ${latestSeason}`);
+        
+        try {
+          const season = await tmdb.seasonInfo({
+            id: show.id,
+            season_number: latestSeason,
+            append_to_response: 'episodes'
+          });
 
-        for (const episode of season.episodes?.slice(-3) || []) {
-          videos.push(episodeToVideo(episode, showDetails));
+          // Get the 3 most recent episodes
+          const latestEpisodes = season.episodes?.slice(-3) || [];
+          console.log(`Found ${latestEpisodes.length} recent episodes for ${showDetails.name}`);
+
+          // Get detailed information for each episode
+          for (const episode of latestEpisodes) {
+            try {
+              // Fetch detailed episode information for better descriptions
+              const episodeDetails = await tmdb.episodeInfo({
+                id: show.id,
+                season_number: latestSeason,
+                episode_number: episode.episode_number
+              });
+              
+              // Use detailed episode information
+              videos.push(episodeToVideo(episodeDetails, showDetails));
+              console.log(`Added episode ${episodeDetails.name || 'Unknown'} from ${showDetails.name}`);
+            } catch (episodeError) {
+              console.error(`Error fetching episode details for ${showDetails.name} S${latestSeason}E${episode.episode_number}:`, episodeError);
+              // Fall back to basic episode data
+              videos.push(episodeToVideo(episode, showDetails));
+            }
+          }
+        } catch (seasonError) {
+          console.error(`Error fetching season ${latestSeason} for ${showDetails.name}:`, seasonError);
         }
       } catch (error) {
-        console.error(`Error fetching show ${show.name}:`, error);
+        console.error(`Error fetching show ${show.name || 'unknown'}:`, error);
       }
     }
   } catch (error) {
