@@ -96,16 +96,16 @@ export default function ShowDetails({
       const nextEpisodeNum = currentEpisode.metadata.episode + 1;
       return {
         id: 0,
-        sourceId: `${show.metadata?.imdbId || show.sourceId}-s${currentEpisode.metadata.season}e${nextEpisodeNum}`,
+        sourceId: `${displayShow.metadata?.imdbId || displayShow.sourceId}-s${currentEpisode.metadata.season}e${nextEpisodeNum}`,
         source: 'vidsrc',
-        title: `${show.title} S${currentEpisode.metadata.season}E${nextEpisodeNum}`,
+        title: `${displayShow.title} S${currentEpisode.metadata.season}E${nextEpisodeNum}`,
         description: `Season ${currentEpisode.metadata.season}, Episode ${nextEpisodeNum}`,
-        thumbnail: show.thumbnail,
+        thumbnail: displayShow.thumbnail,
         metadata: {
-          imdbId: show.metadata?.imdbId,
+          imdbId: displayShow.metadata?.imdbId,
           type: 'tv',
-          tmdbId: show.metadata?.tmdbId,
-          embedUrl: `https://vidsrc.xyz/embed/tv?imdb=${show.metadata?.imdbId || show.sourceId}&season=${currentEpisode.metadata.season}&episode=${nextEpisodeNum}`,
+          tmdbId: displayShow.metadata?.tmdbId,
+          embedUrl: `https://vidsrc.xyz/embed/tv?imdb=${displayShow.metadata?.imdbId || displayShow.sourceId}&season=${currentEpisode.metadata.season}&episode=${nextEpisodeNum}`,
           season: currentEpisode.metadata.season,
           episode: nextEpisodeNum
         },
@@ -159,7 +159,7 @@ export default function ShowDetails({
     
     console.log('Created custom episode', newEpisode);
     onEpisodeSelect(newEpisode);
-  }, [customSeason, customEpisode, show, episodes, onEpisodeSelect]);
+  }, [customSeason, customEpisode, displayShow, episodes, onEpisodeSelect]);
 
   // Function to navigate to next/previous episode
   const navigateEpisode = useCallback((direction: 'prev' | 'next') => {
@@ -210,7 +210,7 @@ export default function ShowDetails({
     
     console.log(`Navigating ${direction} to:`, newEpisode);
     onEpisodeSelect(newEpisode);
-  }, [currentEpisode, show, onEpisodeSelect]);
+  }, [currentEpisode, displayShow, onEpisodeSelect]);
 
   return (
     <Card>
