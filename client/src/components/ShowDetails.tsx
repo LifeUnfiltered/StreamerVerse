@@ -71,17 +71,21 @@ export default function ShowDetails({
     }
   };
 
-  // Fetch and store episode titles from the API data
-  const fetchEpisodeTitles = useCallback((episodes: Video[]) => {
+  // Cache to store episode descriptions
+  const episodeDescriptionCacheRef = useRef<Record<string, string>>({});
+
+  // Fetch and store episode titles and descriptions from the API data
+  const fetchEpisodeData = useCallback((episodes: Video[]) => {
     if (!episodes.length) return;
     
     const showId = displayShow.metadata?.imdbId || displayShow.sourceId;
     
-    // Go through all episodes and cache their titles
+    // Go through all episodes and cache their titles and descriptions
     episodes.forEach(episode => {
       if (episode.metadata?.season && episode.metadata?.episode) {
         const season = episode.metadata.season;
         const episodeNum = episode.metadata.episode;
+        const cacheKey = getEpisodeKey(showId, season, episodeNum);
         
         // Try to extract the episode title
         let episodeTitle = '';
@@ -94,32 +98,43 @@ export default function ShowDetails({
           }
         }
         
-        // Also check the description if available
-        if (!episodeTitle && episode.description && episode.description !== `Season ${season}, Episode ${episodeNum}`) {
+        // Also check the description if available for episode title
+        if (!episodeTitle && episode.description && 
+            episode.description !== `Season ${season}, Episode ${episodeNum}` &&
+            !episode.description.startsWith("Season ") && 
+            !episode.description.startsWith("S")) {
           episodeTitle = episode.description;
         }
         
         // If we found a title, store it in the cache
         if (episodeTitle) {
-          const cacheKey = getEpisodeKey(showId, season, episodeNum);
           if (!episodeTitleCacheRef.current[cacheKey]) {
             episodeTitleCacheRef.current[cacheKey] = episodeTitle;
             console.log(`Cached API episode title: ${cacheKey} = "${episodeTitle}"`);
           }
         }
+        
+        // Store episode description in separate cache if it's a real description
+        if (episode.description && 
+            episode.description !== `Season ${season}, Episode ${episodeNum}` &&
+            !episode.description.startsWith("Season ") && 
+            !episode.description.startsWith("S")) {
+          episodeDescriptionCacheRef.current[cacheKey] = episode.description;
+          console.log(`Cached episode description: ${cacheKey} = "${episode.description}"`);
+        }
       }
     });
   }, [displayShow]);
   
-  // Format episode titles consistently
+  // Format episode titles consistently and include proper descriptions
   const formatEpisodes = (episodeList: Video[]): Video[] => {
     if (!episodeList.length) return [];
     
     const showId = displayShow.metadata?.imdbId || displayShow.sourceId;
     const showTitle = displayShow.title || 'Unknown Show';
     
-    // First ensure we've captured all episode titles
-    fetchEpisodeTitles(episodeList);
+    // First ensure we've captured all episode titles and descriptions
+    fetchEpisodeData(episodeList);
     
     // Process each episode to ensure consistent formatting
     return episodeList.map(episode => {
@@ -133,15 +148,18 @@ export default function ShowDetails({
         // Look up the correct title for THIS episode (not the current selected one)
         const thisEpisodeTitle = episodeTitleCacheRef.current[cacheKey];
         
-        if (thisEpisodeTitle) {
-          // Format the title consistently with the correct episode title
-          const formattedTitle = formatEpisodeTitle(showTitle, season, episodeNum, thisEpisodeTitle);
-          
-          return {
-            ...episode,
-            title: formattedTitle
-          };
-        }
+        // Format the title consistently with the correct episode title
+        const formattedTitle = formatEpisodeTitle(showTitle, season, episodeNum, thisEpisodeTitle || '');
+        
+        // Check if we have a cached description for this episode
+        const thisEpisodeDescription = episodeDescriptionCacheRef.current[cacheKey];
+        
+        // If we have title and description data, create a new episode object with both
+        return {
+          ...episode,
+          title: formattedTitle,
+          description: thisEpisodeDescription || episode.description
+        };
       }
       
       // Return original episode if no special formatting needed

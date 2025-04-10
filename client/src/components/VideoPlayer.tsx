@@ -132,7 +132,13 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
               </AnimatePresence>
             </AspectRatio>
             <p className="text-sm text-muted-foreground">
-              {video.description}
+              {/* Show a proper episode description if available for TV show episodes */}
+              {video.source === 'vidsrc' && video.metadata?.type === 'tv' && video.metadata?.season && video.metadata?.episode && 
+               (video.description && video.description !== `Season ${video.metadata.season}, Episode ${video.metadata.episode}`) 
+               ? video.description 
+               : video.metadata?.type === 'tv'
+                 ? `${video.title}${video.description && !video.description.startsWith('Season') ? `: ${video.description}` : ''}`
+                 : video.description}
             </p>
           </div>
         </CardContent>
