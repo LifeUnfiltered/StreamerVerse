@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import Header from "@/components/Header";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -148,32 +148,62 @@ export default function VidSrc() {
 
   const isLoggedIn = watchlist !== null;
 
-  // Determine if the selected video is a TV show
+  // Determine if the selected video is a TV show episode or a TV show
   const isSelectedVideoTVShow = selectedVideo && 
-    (selectedVideo.metadata?.type === 'tv' || selectedVideo.metadata?.season || selectedVideo.metadata?.episode);
+    (selectedVideo.metadata?.type === 'tv');
   
-  // Use the selected video as the current show if it's a TV show, or find it in the shows array
-  const currentShow = isSelectedVideoTVShow ? selectedVideo : 
+  const isSelectedVideoTVEpisode = selectedVideo && 
+    (selectedVideo.metadata?.season && selectedVideo.metadata?.episode);
+    
+  // Store the parent show ID if it's an episode
+  const parentShowId = selectedVideo?.metadata?.imdbId;
+  
+  // Find the proper show object - either:
+  // 1. The selected video is the show itself
+  // 2. We need to find the parent show for an episode
+  // 3. We'll look in the shows array by ID or sourceId
+  const currentShow = isSelectedVideoTVShow && !isSelectedVideoTVEpisode ? selectedVideo : 
+    (parentShowId && shows?.find(show => 
+      show.sourceId === parentShowId || 
+      show.metadata?.imdbId === parentShowId
+    )) || 
     (selectedVideo && shows?.find(show =>
       show.sourceId === selectedVideo.sourceId || 
-      show.sourceId === selectedVideo.metadata?.imdbId 
+      show.metadata?.imdbId === selectedVideo.sourceId
     ));
+  
+  // Determine what show ID to use for fetching episodes
+  // We need to handle both episodes and shows
+  let episodeFetchId: string | number | null = null;
+  
+  // If we have a current show, use its ID or sourceId
+  if (currentShow) {
+    episodeFetchId = currentShow.id || currentShow.sourceId;
+  }
+  // If we don't have a current show but have a selected TV episode,
+  // use its IMDB ID as a fallback for fetching episodes
+  else if (isSelectedVideoTVEpisode && selectedVideo?.metadata?.imdbId) {
+    episodeFetchId = selectedVideo.metadata.imdbId;
+  }
+  
+  // Log for debugging
+  console.log('Episode fetch ID:', episodeFetchId);
+  console.log('Current show:', currentShow);
+  console.log('Selected video:', selectedVideo);
   
   // Fetch episodes when a show is selected
   const { data: showEpisodes = [] } = useQuery<Video[]>({
-    queryKey: ['/api/videos/tv', currentShow?.id || currentShow?.sourceId, '/episodes'],
+    queryKey: ['/api/videos/tv', episodeFetchId, '/episodes'],
     queryFn: async () => {
-      if (!currentShow) return [];
+      if (!episodeFetchId) return [];
       
-      // Get the show ID or sourceId to fetch episodes
-      const showId = currentShow.id || currentShow.sourceId;
-      console.log('Fetching episodes for show:', currentShow, 'with ID:', showId);
+      console.log('Fetching episodes for show with ID:', episodeFetchId);
       
       // Use ID or sourceId depending on what's available
-      const response = await apiRequest('GET', `/api/videos/tv/${showId}/episodes`);
+      const response = await apiRequest('GET', `/api/videos/tv/${episodeFetchId}/episodes`);
       return response.json();
     },
-    enabled: !!currentShow && currentSource === 'vidsrc' && navigation.view === 'video'
+    enabled: !!episodeFetchId && currentSource === 'vidsrc' && navigation.view === 'video'
   });
 
   return (
