@@ -112,7 +112,7 @@ export default function ShowDetails({
       // We need to extract the episode title part and build a new title with it
       
       // First try to extract "Episode Title" from show name format
-      const titleParts = currentEpisode.title.split(' - ');
+      const titleParts = currentEpisode?.title ? currentEpisode.title.split(' - ') : [];
       const episodeTitle = titleParts.length > 1 ? titleParts[1] : '';
       
       // Build the new title
@@ -253,7 +253,7 @@ export default function ShowDetails({
     // Extract "Episode Title" part if available
     let episodeTitle = '';
     
-    if (currentEpisode.title) {
+    if (currentEpisode?.title) {
       const titleParts = currentEpisode.title.split(' - ');
       if (titleParts.length > 1) {
         episodeTitle = titleParts[1];
@@ -267,7 +267,7 @@ export default function ShowDetails({
       id: 0, // This will be ignored since we're not persisting
       sourceId: `${displayShow.metadata?.imdbId || displayShow.sourceId}-s${newSeason}e${newEpisodeNum}`,
       source: 'vidsrc',
-      title: baseTitle,
+      title: newTitle,
       description: `Season ${newSeason}, Episode ${newEpisodeNum}`,
       thumbnail: displayShow.thumbnail,
       metadata: {
