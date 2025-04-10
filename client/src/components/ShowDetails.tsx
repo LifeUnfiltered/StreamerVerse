@@ -39,14 +39,32 @@ export default function ShowDetails({
   // Get available seasons
   const seasons = Object.keys(seasonEpisodes).map(Number).sort((a, b) => a - b);
   
+  // If the current episode has a season, make sure we're on that season
+  useEffect(() => {
+    if (currentEpisode?.metadata?.season) {
+      setSelectedSeason(currentEpisode.metadata.season);
+    }
+  }, [currentEpisode]);
+  
   // Log for debugging
   console.log('Show details:', show);
   console.log('Episodes count:', episodes.length);
   console.log('Available seasons:', seasons);
   console.log('Selected season:', selectedSeason);
+  console.log('Current episode:', currentEpisode?.title);
 
   // Get episodes for current season
   const currentSeasonEpisodes = seasonEpisodes[selectedSeason] || [];
+  
+  // If we have an empty season but a valid current episode, create a simulated episode list
+  // This helps when an individual episode is selected but we don't have the full list yet
+  const hasEpisodes = currentSeasonEpisodes.length > 0;
+  const displayEpisodes = hasEpisodes ? currentSeasonEpisodes : (
+    currentEpisode?.metadata?.season === selectedSeason ? 
+    // Create a simulated list with the current episode
+    [currentEpisode] : 
+    []
+  );
 
   // Auto-select first episode of selected season if none is playing
   useEffect(() => {
@@ -58,11 +76,39 @@ export default function ShowDetails({
   // Find next episode
   const getNextEpisode = () => {
     if (!currentEpisode) return null;
-    const currentIndex = currentSeasonEpisodes.findIndex(
-      ep => ep.sourceId === currentEpisode.sourceId && 
-           ep.metadata?.episode === currentEpisode.metadata?.episode
-    );
-    return currentSeasonEpisodes[currentIndex + 1];
+    
+    // If we have a list of episodes, try to find the next one in the list
+    if (currentSeasonEpisodes.length > 0) {
+      const currentIndex = currentSeasonEpisodes.findIndex(
+        ep => ep.sourceId === currentEpisode.sourceId && 
+             ep.metadata?.episode === currentEpisode.metadata?.episode
+      );
+      return currentSeasonEpisodes[currentIndex + 1];
+    }
+    
+    // If we don't have a list, calculate the next episode based on the current one
+    if (currentEpisode?.metadata?.season && currentEpisode?.metadata?.episode) {
+      const nextEpisodeNum = currentEpisode.metadata.episode + 1;
+      return {
+        id: 0,
+        sourceId: `${show.metadata?.imdbId || show.sourceId}-s${currentEpisode.metadata.season}e${nextEpisodeNum}`,
+        source: 'vidsrc',
+        title: `${show.title} S${currentEpisode.metadata.season}E${nextEpisodeNum}`,
+        description: `Season ${currentEpisode.metadata.season}, Episode ${nextEpisodeNum}`,
+        thumbnail: show.thumbnail,
+        metadata: {
+          imdbId: show.metadata?.imdbId,
+          type: 'tv',
+          tmdbId: show.metadata?.tmdbId,
+          embedUrl: `https://vidsrc.xyz/embed/tv?imdb=${show.metadata?.imdbId || show.sourceId}&season=${currentEpisode.metadata.season}&episode=${nextEpisodeNum}`,
+          season: currentEpisode.metadata.season,
+          episode: nextEpisodeNum
+        },
+        chapters: null
+      };
+    }
+    
+    return null;
   };
 
   const nextEpisode = getNextEpisode();
@@ -191,20 +237,30 @@ export default function ShowDetails({
           <TabsContent value="episodes">
             <ScrollArea className="h-[300px] pr-4">
               <div className="space-y-2">
-                {currentSeasonEpisodes.map((episode) => (
-                  <Button
-                    key={`${episode.sourceId}-${episode.metadata?.episode}`}
-                    variant={currentEpisode?.metadata?.episode === episode.metadata?.episode ? "default" : "ghost"}
-                    className="w-full justify-start gap-2"
-                    onClick={() => onEpisodeSelect(episode)}
-                  >
-                    <PlayCircle className="h-4 w-4" />
-                    <span className="font-mono text-sm">
-                      S{episode.metadata?.season}E{episode.metadata?.episode}
-                    </span>
-                    <span className="truncate">{episode.title}</span>
-                  </Button>
-                ))}
+                {displayEpisodes.length > 0 ? (
+                  displayEpisodes.map((episode) => (
+                    <Button
+                      key={`${episode.sourceId}-${episode.metadata?.episode}`}
+                      variant={currentEpisode?.metadata?.episode === episode.metadata?.episode ? "default" : "ghost"}
+                      className="w-full justify-start gap-2"
+                      onClick={() => onEpisodeSelect(episode)}
+                    >
+                      <PlayCircle className="h-4 w-4" />
+                      <span className="font-mono text-sm">
+                        S{episode.metadata?.season}E{episode.metadata?.episode}
+                      </span>
+                      <span className="truncate">{episode.title}</span>
+                    </Button>
+                  ))
+                ) : (
+                  <div className="py-4 text-center text-muted-foreground">
+                    {currentEpisode ? (
+                      <p>Currently playing: {currentEpisode.title}</p>
+                    ) : (
+                      <p>No episodes available for this season</p>
+                    )}
+                  </div>
+                )}
               </div>
             </ScrollArea>
           </TabsContent>
