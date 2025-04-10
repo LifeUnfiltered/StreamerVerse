@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -8,6 +8,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import type { Video } from "@shared/schema";
+
+// Utility type to hold consistent episode titles
+interface EpisodeTitleCache {
+  [key: string]: string; // key format: "show-imdbId-seasonNum-episodeNum"
+}
 
 interface ShowDetailsProps {
   show: Video;
@@ -30,6 +35,41 @@ export default function ShowDetails({
   const [selectedSeason, setSelectedSeason] = useState<number>(1);
   const [customSeason, setCustomSeason] = useState<string>('1');
   const [customEpisode, setCustomEpisode] = useState<string>('1');
+  
+  // Create a persistent cache for episode titles
+  const episodeTitleCacheRef = useRef<EpisodeTitleCache>({});
+  
+  // Helper function to get a key for the cache
+  const getEpisodeKey = (showId: string, season: number, episode: number) => {
+    return `${showId}-s${season}e${episode}`;
+  };
+  
+  // Extract "real" episode title from any format
+  const extractEpisodeTitle = (fullTitle: string): string => {
+    // Check for the format: "Show Title S1E1 - Episode Title"
+    const titleParts = fullTitle.split(' - ');
+    if (titleParts.length > 1) {
+      return titleParts[1];
+    }
+    
+    // If we couldn't find a title with a dash, just return empty string
+    return '';
+  };
+  
+  // Format an episode title consistently
+  const formatEpisodeTitle = (
+    showTitle: string, 
+    season: number, 
+    episode: number, 
+    episodeTitle: string = ''
+  ): string => {
+    const seasonEpisodeText = `S${season}E${episode}`;
+    if (episodeTitle) {
+      return `${showTitle} ${seasonEpisodeText} - ${episodeTitle}`;
+    } else {
+      return `${showTitle} ${seasonEpisodeText}`;
+    }
+  };
 
   // Group episodes by season
   const seasonEpisodes = episodes.reduce((acc, episode) => {
@@ -57,6 +97,41 @@ export default function ShowDetails({
   console.log('Available seasons:', seasons);
   console.log('Selected season:', selectedSeason);
   console.log('Current episode:', currentEpisode?.title);
+  
+  // Populate the title cache from episodes when they are loaded
+  useEffect(() => {
+    const showId = displayShow.metadata?.imdbId || displayShow.sourceId;
+    
+    // Process all episodes and store their titles in the cache
+    episodes.forEach(episode => {
+      if (episode.metadata?.season && episode.metadata?.episode) {
+        const season = episode.metadata.season;
+        const episodeNum = episode.metadata.episode;
+        const episodeTitle = extractEpisodeTitle(episode.title);
+        
+        // Only store if we have a real title (not empty)
+        if (episodeTitle) {
+          const cacheKey = getEpisodeKey(showId, season, episodeNum);
+          episodeTitleCacheRef.current[cacheKey] = episodeTitle;
+          console.log(`Cached episode title: ${cacheKey} = "${episodeTitle}"`);
+        }
+      }
+    });
+    
+    // Also cache current episode if available
+    if (currentEpisode?.metadata?.season && currentEpisode?.metadata?.episode) {
+      const episodeTitle = extractEpisodeTitle(currentEpisode.title);
+      if (episodeTitle) {
+        const cacheKey = getEpisodeKey(
+          showId, 
+          currentEpisode.metadata.season, 
+          currentEpisode.metadata.episode
+        );
+        episodeTitleCacheRef.current[cacheKey] = episodeTitle;
+        console.log(`Cached current episode title: ${cacheKey} = "${episodeTitle}"`);
+      }
+    }
+  }, [episodes, displayShow, currentEpisode]);
 
   // Get episodes for current season
   const currentSeasonEpisodes = seasonEpisodes[selectedSeason] || [];
@@ -93,11 +168,13 @@ export default function ShowDetails({
     
     // If we don't have a list, calculate the next episode based on the current one
     if (currentEpisode?.metadata?.season && currentEpisode?.metadata?.episode) {
+      const currentSeason = currentEpisode.metadata.season;
       const nextEpisodeNum = currentEpisode.metadata.episode + 1;
+      const showId = displayShow.metadata?.imdbId || displayShow.sourceId;
       
       // Try to find the next episode in our episodes list
       const existingEpisode = episodes.find(ep => 
-        ep.metadata?.season === currentEpisode.metadata?.season && 
+        ep.metadata?.season === currentSeason && 
         ep.metadata?.episode === nextEpisodeNum
       );
       
@@ -107,30 +184,44 @@ export default function ShowDetails({
       
       // If no existing episode is found, create one with proper title formatting
       
-      // The expected format is either:
-      // "Show Title S#E# - Episode Title" or "S#E# - Episode Title"
-      // We need to extract the episode title part and build a new title with it
+      // Check our cache first for this episode title
+      const cacheKey = getEpisodeKey(showId, currentSeason, nextEpisodeNum);
+      let episodeTitle = episodeTitleCacheRef.current[cacheKey];
       
-      // First try to extract "Episode Title" from show name format
-      const titleParts = currentEpisode?.title ? currentEpisode.title.split(' - ') : [];
-      const episodeTitle = titleParts.length > 1 ? titleParts[1] : '';
+      // If not in cache, try to extract from current episode
+      if (!episodeTitle) {
+        episodeTitle = extractEpisodeTitle(currentEpisode.title);
+        
+        // If we found a title, store it in the cache for future use
+        if (episodeTitle) {
+          episodeTitleCacheRef.current[cacheKey] = episodeTitle;
+          console.log(`Caching title for next episode: ${cacheKey} = "${episodeTitle}"`);
+        }
+      } else {
+        console.log(`Using cached title for next episode: ${cacheKey} = "${episodeTitle}"`);
+      }
       
-      // Build the new title
-      const newTitle = `${displayShow.title} S${currentEpisode.metadata?.season}E${nextEpisodeNum} - ${episodeTitle}`;
+      // Format the title consistently
+      const newTitle = formatEpisodeTitle(
+        displayShow.title, 
+        currentSeason, 
+        nextEpisodeNum, 
+        episodeTitle
+      );
       
       return {
         id: 0,
-        sourceId: `${displayShow.metadata?.imdbId || displayShow.sourceId}-s${currentEpisode.metadata?.season}e${nextEpisodeNum}`,
+        sourceId: `${showId}-s${currentSeason}e${nextEpisodeNum}`,
         source: 'vidsrc',
         title: newTitle,
-        description: `Season ${currentEpisode.metadata?.season}, Episode ${nextEpisodeNum}`,
+        description: `Season ${currentSeason}, Episode ${nextEpisodeNum}`,
         thumbnail: displayShow.thumbnail,
         metadata: {
           imdbId: displayShow.metadata?.imdbId,
           type: 'tv',
           tmdbId: displayShow.metadata?.tmdbId,
-          embedUrl: `https://vidsrc.xyz/embed/tv?imdb=${displayShow.metadata?.imdbId || displayShow.sourceId}&season=${currentEpisode.metadata?.season}&episode=${nextEpisodeNum}`,
-          season: currentEpisode.metadata?.season,
+          embedUrl: `https://vidsrc.xyz/embed/tv?imdb=${showId}&season=${currentSeason}&episode=${nextEpisodeNum}`,
+          season: currentSeason,
           episode: nextEpisodeNum
         },
         chapters: null
@@ -147,6 +238,7 @@ export default function ShowDetails({
     // Create a custom episode based on the show
     const customSeasonNum = parseInt(customSeason) || 1;
     const customEpisodeNum = parseInt(customEpisode) || 1;
+    const showId = displayShow.metadata?.imdbId || displayShow.sourceId;
     
     console.log(`Creating custom episode for S${customSeasonNum}E${customEpisodeNum}`);
     
@@ -163,28 +255,35 @@ export default function ShowDetails({
     }
     
     // Create a custom episode object if one doesn't exist
-    // Try to use the episode title format from existing episodes if possible
     
-    // The expected format is either:
-    // "Show Title S#E# - Episode Title" or "S#E# - Episode Title"
-    // We need to extract the episode title part and build a new title with it
+    // Check our cache first for this episode title
+    const cacheKey = getEpisodeKey(showId, customSeasonNum, customEpisodeNum);
+    let episodeTitle = episodeTitleCacheRef.current[cacheKey];
     
-    // Extract "Episode Title" part if available
-    let episodeTitle = '';
-    
-    if (currentEpisode?.title) {
-      const titleParts = currentEpisode.title.split(' - ');
-      if (titleParts.length > 1) {
-        episodeTitle = titleParts[1];
+    // If not in cache, try to extract from current episode or use most recent knowledge
+    if (!episodeTitle && currentEpisode?.title) {
+      episodeTitle = extractEpisodeTitle(currentEpisode.title);
+      
+      // If we found a title, store it in the cache for future use
+      if (episodeTitle) {
+        episodeTitleCacheRef.current[cacheKey] = episodeTitle;
+        console.log(`Caching title for custom episode: ${cacheKey} = "${episodeTitle}"`);
       }
+    } else if (episodeTitle) {
+      console.log(`Using cached title for custom episode: ${cacheKey} = "${episodeTitle}"`);
     }
     
-    // Build the new title - include show name for full format
-    const newTitle = `${displayShow.title} S${customSeasonNum}E${customEpisodeNum}${episodeTitle ? ' - ' + episodeTitle : ''}`;
+    // Format the title consistently
+    const newTitle = formatEpisodeTitle(
+      displayShow.title, 
+      customSeasonNum, 
+      customEpisodeNum, 
+      episodeTitle
+    );
     
     const newEpisode = {
       id: 0, // This will be ignored since we're not persisting
-      sourceId: `${displayShow.metadata?.imdbId || displayShow.sourceId}-s${customSeasonNum}e${customEpisodeNum}`,
+      sourceId: `${showId}-s${customSeasonNum}e${customEpisodeNum}`,
       source: 'vidsrc',
       title: newTitle,
       description: `Season ${customSeasonNum}, Episode ${customEpisodeNum}`,
@@ -193,7 +292,7 @@ export default function ShowDetails({
         imdbId: displayShow.metadata?.imdbId,
         type: 'tv',
         tmdbId: displayShow.metadata?.tmdbId,
-        embedUrl: `https://vidsrc.xyz/embed/tv?imdb=${displayShow.metadata?.imdbId || displayShow.sourceId}&season=${customSeasonNum}&episode=${customEpisodeNum}`,
+        embedUrl: `https://vidsrc.xyz/embed/tv?imdb=${showId}&season=${customSeasonNum}&episode=${customEpisodeNum}`,
         season: customSeasonNum,
         episode: customEpisodeNum
       },
@@ -202,7 +301,7 @@ export default function ShowDetails({
     
     console.log('Created custom episode', newEpisode);
     onEpisodeSelect(newEpisode);
-  }, [customSeason, customEpisode, displayShow, episodes, onEpisodeSelect]);
+  }, [customSeason, customEpisode, displayShow, episodes, currentEpisode, onEpisodeSelect]);
 
   // Function to navigate to next/previous episode
   const navigateEpisode = useCallback((direction: 'prev' | 'next') => {
@@ -210,6 +309,7 @@ export default function ShowDetails({
     
     const currentSeason = currentEpisode.metadata?.season || 1;
     const currentEpisodeNum = currentEpisode.metadata?.episode || 1;
+    const showId = displayShow.metadata?.imdbId || displayShow.sourceId;
     
     let newSeason = currentSeason;
     let newEpisodeNum = currentEpisodeNum;
@@ -240,32 +340,40 @@ export default function ShowDetails({
     
     if (existingEpisode) {
       console.log('Found existing episode for navigation', existingEpisode);
-      return existingEpisode;
+      onEpisodeSelect(existingEpisode);
+      return;
     }
     
     // If we couldn't find the exact episode, create a custom one
-    // Try to keep a consistent naming format
     
-    // The expected format is either:
-    // "Show Title S#E# - Episode Title" or "S#E# - Episode Title"
-    // We need to extract the episode title part and build a new title with it
+    // Check our cache first for this episode title
+    const cacheKey = getEpisodeKey(showId, newSeason, newEpisodeNum);
+    let episodeTitle = episodeTitleCacheRef.current[cacheKey];
     
-    // Extract "Episode Title" part if available
-    let episodeTitle = '';
-    
-    if (currentEpisode?.title) {
-      const titleParts = currentEpisode.title.split(' - ');
-      if (titleParts.length > 1) {
-        episodeTitle = titleParts[1];
+    // If not in cache, try to extract from current episode
+    if (!episodeTitle && currentEpisode.title) {
+      episodeTitle = extractEpisodeTitle(currentEpisode.title);
+      
+      // If we found a title, store it in the cache for future use
+      if (episodeTitle) {
+        episodeTitleCacheRef.current[cacheKey] = episodeTitle;
+        console.log(`Caching title for navigation: ${cacheKey} = "${episodeTitle}"`);
       }
+    } else if (episodeTitle) {
+      console.log(`Using cached title for navigation: ${cacheKey} = "${episodeTitle}"`);
     }
     
-    // Build the new title - include show name for full format  
-    const newTitle = `${displayShow.title} S${newSeason}E${newEpisodeNum}${episodeTitle ? ' - ' + episodeTitle : ''}`;
+    // Format the title consistently
+    const newTitle = formatEpisodeTitle(
+      displayShow.title, 
+      newSeason, 
+      newEpisodeNum, 
+      episodeTitle
+    );
     
     const newEpisode = {
       id: 0, // This will be ignored since we're not persisting
-      sourceId: `${displayShow.metadata?.imdbId || displayShow.sourceId}-s${newSeason}e${newEpisodeNum}`,
+      sourceId: `${showId}-s${newSeason}e${newEpisodeNum}`,
       source: 'vidsrc',
       title: newTitle,
       description: `Season ${newSeason}, Episode ${newEpisodeNum}`,
@@ -274,7 +382,7 @@ export default function ShowDetails({
         imdbId: displayShow.metadata?.imdbId,
         type: 'tv',
         tmdbId: displayShow.metadata?.tmdbId,
-        embedUrl: `https://vidsrc.xyz/embed/tv?imdb=${displayShow.metadata?.imdbId || displayShow.sourceId}&season=${newSeason}&episode=${newEpisodeNum}`,
+        embedUrl: `https://vidsrc.xyz/embed/tv?imdb=${showId}&season=${newSeason}&episode=${newEpisodeNum}`,
         season: newSeason,
         episode: newEpisodeNum
       },
