@@ -71,6 +71,46 @@ export default function ShowDetails({
     }
   };
 
+  // Fetch and store episode titles from the API data
+  const fetchEpisodeTitles = useCallback((episodes: Video[]) => {
+    if (!episodes.length) return;
+    
+    const showId = displayShow.metadata?.imdbId || displayShow.sourceId;
+    
+    // Go through all episodes and cache their titles
+    episodes.forEach(episode => {
+      if (episode.metadata?.season && episode.metadata?.episode) {
+        const season = episode.metadata.season;
+        const episodeNum = episode.metadata.episode;
+        
+        // Try to extract the episode title
+        let episodeTitle = '';
+        
+        // Check if the title follows the pattern "Show Name S1E1 - Episode Title"
+        if (episode.title && episode.title.includes(' - ')) {
+          const parts = episode.title.split(' - ');
+          if (parts.length > 1) {
+            episodeTitle = parts[1];
+          }
+        }
+        
+        // Also check the description if available
+        if (!episodeTitle && episode.description && episode.description !== `Season ${season}, Episode ${episodeNum}`) {
+          episodeTitle = episode.description;
+        }
+        
+        // If we found a title, store it in the cache
+        if (episodeTitle) {
+          const cacheKey = getEpisodeKey(showId, season, episodeNum);
+          if (!episodeTitleCacheRef.current[cacheKey]) {
+            episodeTitleCacheRef.current[cacheKey] = episodeTitle;
+            console.log(`Cached API episode title: ${cacheKey} = "${episodeTitle}"`);
+          }
+        }
+      }
+    });
+  }, [displayShow]);
+  
   // Format episode titles consistently
   const formatEpisodes = (episodeList: Video[]): Video[] => {
     if (!episodeList.length) return [];
@@ -78,32 +118,25 @@ export default function ShowDetails({
     const showId = displayShow.metadata?.imdbId || displayShow.sourceId;
     const showTitle = displayShow.title || 'Unknown Show';
     
+    // First ensure we've captured all episode titles
+    fetchEpisodeTitles(episodeList);
+    
     // Process each episode to ensure consistent formatting
     return episodeList.map(episode => {
       if (episode.metadata?.season && episode.metadata?.episode) {
         const season = episode.metadata.season;
         const episodeNum = episode.metadata.episode;
         
-        // Check if we have a cached title for this episode
+        // Create the episode-specific cache key
         const cacheKey = getEpisodeKey(showId, season, episodeNum);
-        let episodeTitle = episodeTitleCacheRef.current[cacheKey];
         
-        // If no cached title, try to extract from current title
-        if (!episodeTitle) {
-          episodeTitle = extractEpisodeTitle(episode.title);
+        // Look up the correct title for THIS episode (not the current selected one)
+        const thisEpisodeTitle = episodeTitleCacheRef.current[cacheKey];
+        
+        if (thisEpisodeTitle) {
+          // Format the title consistently with the correct episode title
+          const formattedTitle = formatEpisodeTitle(showTitle, season, episodeNum, thisEpisodeTitle);
           
-          // If we found a title, cache it
-          if (episodeTitle) {
-            episodeTitleCacheRef.current[cacheKey] = episodeTitle;
-            console.log(`Cached extracted episode title: ${cacheKey} = "${episodeTitle}"`);
-          }
-        }
-        
-        // Format the title consistently
-        const formattedTitle = formatEpisodeTitle(showTitle, season, episodeNum, episodeTitle);
-        
-        // If the title changed, create a new episode object
-        if (episode.title !== formattedTitle) {
           return {
             ...episode,
             title: formattedTitle
@@ -111,7 +144,7 @@ export default function ShowDetails({
         }
       }
       
-      // Return original episode if no changes needed
+      // Return original episode if no special formatting needed
       return episode;
     });
   };
@@ -485,11 +518,26 @@ export default function ShowDetails({
                       <span className="font-mono text-sm">
                         S{episode.metadata?.season}E{episode.metadata?.episode}
                       </span>
-                      {episode.title && episode.title.includes(' - ') ? (
-                        <span className="truncate">- {episode.title.split(' - ')[1]}</span>
-                      ) : (
-                        <span className="truncate">{episode.title}</span>
-                      )}
+                      {/* Extract and display just the unique episode name without show name */}
+                      <span className="truncate">
+                        {episode.metadata?.season && episode.metadata?.episode ? (
+                          <>
+                            {(() => {
+                              // Get the correct episode title from our cache
+                              const showId = displayShow.metadata?.imdbId || displayShow.sourceId;
+                              const cacheKey = getEpisodeKey(showId, episode.metadata.season, episode.metadata.episode);
+                              const episodeTitle = episodeTitleCacheRef.current[cacheKey];
+                              
+                              return episodeTitle ? `- ${episodeTitle}` : 
+                                (episode.title && episode.title.includes(' - ') ? 
+                                  `- ${episode.title.split(' - ')[1]}` : 
+                                  episode.title);
+                            })()}
+                          </>
+                        ) : (
+                          episode.title
+                        )}
+                      </span>
                     </Button>
                   ))
                 ) : (
