@@ -120,7 +120,66 @@ export default function VidSrc() {
   };
 
   const handleVideoSelect = (video: Video) => {
-    setSelectedVideo(video);
+    // Apply cached episode title if available for selected episode
+    let updatedVideo = { ...video };
+    
+    // Only process TV episodes
+    if (video.metadata?.type === 'tv' && video.metadata?.season && video.metadata?.episode) {
+      const showId = video.metadata?.imdbId || video.sourceId?.split('-')[0];
+      const season = video.metadata.season;
+      const episodeNum = video.metadata.episode;
+      
+      // Check if this episode has a cached title
+      if (showId) {
+        const cacheKey = getEpisodeKey(showId, season, episodeNum);
+        const cachedTitle = episodeTitleCache.get(cacheKey);
+        
+        // If we have a cached title and the current title doesn't have it
+        if (cachedTitle) {
+          // Get the show title - either from currentShow or from the video title
+          let showTitle = currentShow?.title || '';
+          if (!showTitle && video.title && video.title.includes(`S${season}E${episodeNum}`)) {
+            const titleParts = video.title.split(`S${season}E${episodeNum}`);
+            if (titleParts.length > 0) {
+              showTitle = titleParts[0].trim();
+            }
+          }
+          
+          // Default to a generic show title if we couldn't extract one
+          if (!showTitle) {
+            showTitle = 'Show';
+          }
+          
+          // Create a formatted title
+          const newTitle = formatEpisodeTitle(showTitle, season, episodeNum, cachedTitle);
+          console.log(`Applying cached title: "${video.title}" → "${newTitle}"`);
+          
+          // Update the video with the formatted title
+          updatedVideo.title = newTitle;
+        } 
+        // If we don't have a cached title but the video has one in the proper format, cache it
+        else if (video.title && video.title.includes(' - ')) {
+          const titleParts = video.title.split(' - ');
+          if (titleParts.length > 1) {
+            const extractedTitle = titleParts[1];
+            episodeTitleCache.set(cacheKey, extractedTitle);
+            console.log(`Caching title from selected video: ${cacheKey} = "${extractedTitle}"`);
+          }
+        }
+        // If we have a generic title, try to apply a better format
+        else if (video.title && video.title.includes('Season') && video.title.includes('Episode')) {
+          // Get the show title from the current show
+          const showTitle = currentShow?.title || 'Show';
+          // Create a better formatted title (without episode title)
+          const newTitle = formatEpisodeTitle(showTitle, season, episodeNum);
+          console.log(`Formatting generic title: "${video.title}" → "${newTitle}"`);
+          updatedVideo.title = newTitle;
+        }
+      }
+    }
+    
+    // Update the selected video
+    setSelectedVideo(updatedVideo);
     setNavigation({ 
       view: 'video',
       previousView: navigation.view
@@ -191,6 +250,24 @@ export default function VidSrc() {
   console.log('Current show:', currentShow);
   console.log('Selected video:', selectedVideo);
   
+  // Helper function to format episode titles consistently
+  const formatEpisodeTitle = (showTitle: string, season: number, episode: number, episodeTitle: string = '') => {
+    const seasonEpisodeText = `S${season}E${episode}`;
+    if (episodeTitle) {
+      return `${showTitle} ${seasonEpisodeText} - ${episodeTitle}`;
+    } else {
+      return `${showTitle} ${seasonEpisodeText}`;
+    }
+  };
+
+  // Maintain a cache of episode titles
+  const episodeTitleCache = useMemo(() => new Map<string, string>(), []);
+
+  // Function to get a key for the episode cache
+  const getEpisodeKey = (showId: string, season: number, episode: number) => {
+    return `${showId}-s${season}e${episode}`;
+  };
+
   // Fetch episodes when a show is selected
   const { data: showEpisodes = [] } = useQuery<Video[]>({
     queryKey: ['/api/videos/tv', episodeFetchId, '/episodes'],
@@ -201,7 +278,52 @@ export default function VidSrc() {
       
       // Use ID or sourceId depending on what's available
       const response = await apiRequest('GET', `/api/videos/tv/${episodeFetchId}/episodes`);
-      return response.json();
+      const episodes = await response.json();
+
+      // Process episodes to extract titles and store them in the cache
+      if (currentShow) {
+        const showTitle = currentShow.title || 'Unknown Show';
+        const showId = currentShow.metadata?.imdbId || currentShow.sourceId;
+        
+        // Process each episode to extract and store titles and update their format
+        const processedEpisodes = episodes.map((episode: Video) => {
+          if (episode.metadata?.season && episode.metadata?.episode) {
+            const season = episode.metadata.season;
+            const episodeNum = episode.metadata.episode;
+            
+            // Extract episode title if it has one
+            const titleParts = episode.title?.split(' - ');
+            let episodeTitle = '';
+            
+            if (titleParts && titleParts.length > 1) {
+              episodeTitle = titleParts[1];
+              const cacheKey = getEpisodeKey(showId, season, episodeNum);
+              episodeTitleCache.set(cacheKey, episodeTitle);
+              console.log(`Cached episode title from API: ${cacheKey} = "${episodeTitle}"`);
+            }
+            
+            // Check if generic title ("Season X, Episode Y")
+            if (episode.title && episode.title.includes('Season') && episode.title.includes('Episode')) {
+              // Format a consistent title
+              const newTitle = formatEpisodeTitle(showTitle, season, episodeNum, episodeTitle);
+              console.log(`Formatting API episode title: "${episode.title}" → "${newTitle}"`);
+              
+              // Return a new episode object with the updated title
+              return {
+                ...episode,
+                title: newTitle
+              };
+            }
+          }
+          
+          // Return the original episode if no changes needed
+          return episode;
+        });
+        
+        return processedEpisodes;
+      }
+      
+      return episodes;
     },
     enabled: !!episodeFetchId && currentSource === 'vidsrc' && navigation.view === 'video'
   });
