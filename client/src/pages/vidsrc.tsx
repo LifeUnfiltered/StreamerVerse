@@ -243,9 +243,9 @@ export default function VidSrc() {
           {selectedVideo ? (
             <div className="space-y-6">
               <VideoPlayer video={selectedVideo} />
-              {currentShow && currentSource === 'vidsrc' && (
+              {currentSource === 'vidsrc' && (
                 <ShowDetails
-                  show={currentShow}
+                  show={currentShow || (selectedVideo?.metadata?.type === 'tv' ? selectedVideo : undefined)}
                   episodes={showEpisodes}
                   onEpisodeSelect={handleVideoSelect}
                   currentEpisode={selectedVideo}

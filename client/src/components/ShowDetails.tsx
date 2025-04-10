@@ -22,6 +22,11 @@ export default function ShowDetails({
   onEpisodeSelect,
   currentEpisode
 }: ShowDetailsProps) {
+  // If no show is provided but we have a currentEpisode, use that
+  const displayShow = show || currentEpisode;
+  if (!displayShow) {
+    return null;
+  }
   const [selectedSeason, setSelectedSeason] = useState<number>(1);
   const [customSeason, setCustomSeason] = useState<string>('1');
   const [customEpisode, setCustomEpisode] = useState<string>('1');
@@ -136,16 +141,16 @@ export default function ShowDetails({
     // Create a custom episode object if one doesn't exist
     const newEpisode = {
       id: 0, // This will be ignored since we're not persisting
-      sourceId: `${show.metadata?.imdbId || show.sourceId}-s${customSeasonNum}e${customEpisodeNum}`,
+      sourceId: `${displayShow.metadata?.imdbId || displayShow.sourceId}-s${customSeasonNum}e${customEpisodeNum}`,
       source: 'vidsrc',
-      title: `${show.title} S${customSeasonNum}E${customEpisodeNum}`,
+      title: `${displayShow.title} S${customSeasonNum}E${customEpisodeNum}`,
       description: `Season ${customSeasonNum}, Episode ${customEpisodeNum}`,
-      thumbnail: show.thumbnail,
+      thumbnail: displayShow.thumbnail,
       metadata: {
-        imdbId: show.metadata?.imdbId,
+        imdbId: displayShow.metadata?.imdbId,
         type: 'tv',
-        tmdbId: show.metadata?.tmdbId,
-        embedUrl: `https://vidsrc.xyz/embed/tv?imdb=${show.metadata?.imdbId || show.sourceId}&season=${customSeasonNum}&episode=${customEpisodeNum}`,
+        tmdbId: displayShow.metadata?.tmdbId,
+        embedUrl: `https://vidsrc.xyz/embed/tv?imdb=${displayShow.metadata?.imdbId || displayShow.sourceId}&season=${customSeasonNum}&episode=${customEpisodeNum}`,
         season: customSeasonNum,
         episode: customEpisodeNum
       },
@@ -187,16 +192,16 @@ export default function ShowDetails({
     // Creating the custom episode
     const newEpisode = {
       id: 0, // This will be ignored since we're not persisting
-      sourceId: `${show.metadata?.imdbId || show.sourceId}-s${newSeason}e${newEpisodeNum}`,
+      sourceId: `${displayShow.metadata?.imdbId || displayShow.sourceId}-s${newSeason}e${newEpisodeNum}`,
       source: 'vidsrc',
-      title: `${show.title} S${newSeason}E${newEpisodeNum}`,
+      title: `${displayShow.title} S${newSeason}E${newEpisodeNum}`,
       description: `Season ${newSeason}, Episode ${newEpisodeNum}`,
-      thumbnail: show.thumbnail,
+      thumbnail: displayShow.thumbnail,
       metadata: {
-        imdbId: show.metadata?.imdbId,
+        imdbId: displayShow.metadata?.imdbId,
         type: 'tv',
-        tmdbId: show.metadata?.tmdbId,
-        embedUrl: `https://vidsrc.xyz/embed/tv?imdb=${show.metadata?.imdbId || show.sourceId}&season=${newSeason}&episode=${newEpisodeNum}`,
+        tmdbId: displayShow.metadata?.tmdbId,
+        embedUrl: `https://vidsrc.xyz/embed/tv?imdb=${displayShow.metadata?.imdbId || displayShow.sourceId}&season=${newSeason}&episode=${newEpisodeNum}`,
         season: newSeason,
         episode: newEpisodeNum
       },
@@ -210,7 +215,7 @@ export default function ShowDetails({
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-2xl">{show.title}</CardTitle>
+        <CardTitle className="text-2xl">{displayShow.title}</CardTitle>
         <Select 
           value={selectedSeason.toString()}
           onValueChange={(value) => setSelectedSeason(Number(value))}
