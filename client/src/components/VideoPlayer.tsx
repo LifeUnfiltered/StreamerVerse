@@ -131,15 +131,42 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
                 {isLoading && <LoadingSpinner />}
               </AnimatePresence>
             </AspectRatio>
-            <p className="text-sm text-muted-foreground">
-              {/* Show a proper episode description if available for TV show episodes */}
-              {video.source === 'vidsrc' && video.metadata?.type === 'tv' && video.metadata?.season && video.metadata?.episode && 
-               (video.description && video.description !== `Season ${video.metadata.season}, Episode ${video.metadata.episode}`) 
-               ? video.description 
-               : video.metadata?.type === 'tv'
-                 ? `${video.title}${video.description && !video.description.startsWith('Season') ? `: ${video.description}` : ''}`
-                 : video.description}
-            </p>
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">
+                {/* Show a proper episode description if available for TV show episodes */}
+                {video.source === 'vidsrc' && video.metadata?.type === 'tv' && video.metadata?.season && video.metadata?.episode ? (
+                  <>
+                    {(() => {
+                      // Check if we have a non-generic description
+                      const isGenericDescription = !video.description || 
+                        video.description === `Season ${video.metadata.season}, Episode ${video.metadata.episode}` ||
+                        video.description.startsWith("Season ") || 
+                        video.description.startsWith("S");
+                      
+                      if (!isGenericDescription) {
+                        // Real description available, use it
+                        return video.description;
+                      } else if (video.title && video.title.includes(' - ')) {
+                        // Extract the episode title to use as minimal description
+                        const parts = video.title.split(' - ');
+                        return `${parts[0]}: ${parts[1]}`;
+                      } else {
+                        // Fall back to showing the full title as descriptor
+                        return video.title;
+                      }
+                    })()}
+                  </>
+                ) : (
+                  // For non-TV content or content without proper metadata
+                  video.description || video.title
+                )}
+              </p>
+              {video.metadata?.type === 'tv' && video.metadata?.season && video.metadata?.episode && (
+                <p className="text-xs text-muted-foreground font-mono">
+                  Season {video.metadata.season}, Episode {video.metadata.episode}
+                </p>
+              )}
+            </div>
           </div>
         </CardContent>
       </Card>

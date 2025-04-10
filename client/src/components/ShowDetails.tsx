@@ -80,6 +80,8 @@ export default function ShowDetails({
     
     const showId = displayShow.metadata?.imdbId || displayShow.sourceId;
     
+    console.log('Fetching episode data from API for show ID:', showId);
+    
     // Go through all episodes and cache their titles and descriptions
     episodes.forEach(episode => {
       if (episode.metadata?.season && episode.metadata?.episode) {
@@ -99,11 +101,18 @@ export default function ShowDetails({
         }
         
         // Also check the description if available for episode title
-        if (!episodeTitle && episode.description && 
-            episode.description !== `Season ${season}, Episode ${episodeNum}` &&
-            !episode.description.startsWith("Season ") && 
-            !episode.description.startsWith("S")) {
-          episodeTitle = episode.description;
+        const isGenericDescription = 
+          !episode.description || 
+          episode.description === `Season ${season}, Episode ${episodeNum}` ||
+          episode.description.startsWith("Season ") || 
+          episode.description.startsWith("S");
+          
+        if (!episodeTitle && !isGenericDescription) {
+          // If the description looks like a real description (not just season/episode),
+          // we can try to use it as a title if we don't have one
+          if (episode.description && episode.description.length < 50) {
+            episodeTitle = episode.description;
+          }
         }
         
         // If we found a title, store it in the cache
@@ -115,12 +124,22 @@ export default function ShowDetails({
         }
         
         // Store episode description in separate cache if it's a real description
-        if (episode.description && 
-            episode.description !== `Season ${season}, Episode ${episodeNum}` &&
-            !episode.description.startsWith("Season ") && 
-            !episode.description.startsWith("S")) {
+        if (!isGenericDescription && episode.description) {
           episodeDescriptionCacheRef.current[cacheKey] = episode.description;
           console.log(`Cached episode description: ${cacheKey} = "${episode.description}"`);
+        } else {
+          console.log(`Generic description for ${cacheKey}, attempting to populate from TMDB data...`);
+          
+          // For seasons other than season 1, attempt to fetch descriptions directly from TMDB if possible
+          if (season > 1) {
+            // We'll set up a placeholder to be filled in later when the detailed data is fetched
+            if (!episodeDescriptionCacheRef.current[cacheKey]) {
+              // If we have a title, use it as a description for now, but flag it as a placeholder
+              if (episodeTitle) {
+                episodeDescriptionCacheRef.current[cacheKey] = episodeTitle;
+              }
+            }
+          }
         }
       }
     });
