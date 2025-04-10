@@ -71,6 +71,51 @@ export default function ShowDetails({
     }
   };
 
+  // Format episode titles consistently
+  const formatEpisodes = (episodeList: Video[]): Video[] => {
+    if (!episodeList.length) return [];
+    
+    const showId = displayShow.metadata?.imdbId || displayShow.sourceId;
+    const showTitle = displayShow.title || 'Unknown Show';
+    
+    // Process each episode to ensure consistent formatting
+    return episodeList.map(episode => {
+      if (episode.metadata?.season && episode.metadata?.episode) {
+        const season = episode.metadata.season;
+        const episodeNum = episode.metadata.episode;
+        
+        // Check if we have a cached title for this episode
+        const cacheKey = getEpisodeKey(showId, season, episodeNum);
+        let episodeTitle = episodeTitleCacheRef.current[cacheKey];
+        
+        // If no cached title, try to extract from current title
+        if (!episodeTitle) {
+          episodeTitle = extractEpisodeTitle(episode.title);
+          
+          // If we found a title, cache it
+          if (episodeTitle) {
+            episodeTitleCacheRef.current[cacheKey] = episodeTitle;
+            console.log(`Cached extracted episode title: ${cacheKey} = "${episodeTitle}"`);
+          }
+        }
+        
+        // Format the title consistently
+        const formattedTitle = formatEpisodeTitle(showTitle, season, episodeNum, episodeTitle);
+        
+        // If the title changed, create a new episode object
+        if (episode.title !== formattedTitle) {
+          return {
+            ...episode,
+            title: formattedTitle
+          };
+        }
+      }
+      
+      // Return original episode if no changes needed
+      return episode;
+    });
+  };
+
   // Group episodes by season
   const seasonEpisodes = episodes.reduce((acc, episode) => {
     const season = episode.metadata?.season || 1;
@@ -139,12 +184,17 @@ export default function ShowDetails({
   // If we have an empty season but a valid current episode, create a simulated episode list
   // This helps when an individual episode is selected but we don't have the full list yet
   const hasEpisodes = currentSeasonEpisodes.length > 0;
-  const displayEpisodes = hasEpisodes ? currentSeasonEpisodes : (
+  
+  // Ensure all episode titles are properly formatted with show name and episode titles
+  let rawEpisodes = hasEpisodes ? currentSeasonEpisodes : (
     currentEpisode?.metadata?.season === selectedSeason ? 
     // Create a simulated list with the current episode
     [currentEpisode] : 
     []
   );
+  
+  // Apply consistent formatting to all episodes in the list
+  const displayEpisodes = formatEpisodes(rawEpisodes);
 
   // Auto-select first episode of selected season if none is playing
   useEffect(() => {
@@ -435,7 +485,11 @@ export default function ShowDetails({
                       <span className="font-mono text-sm">
                         S{episode.metadata?.season}E{episode.metadata?.episode}
                       </span>
-                      <span className="truncate">{episode.title}</span>
+                      {episode.title && episode.title.includes(' - ') ? (
+                        <span className="truncate">- {episode.title.split(' - ')[1]}</span>
+                      ) : (
+                        <span className="truncate">{episode.title}</span>
+                      )}
                     </Button>
                   ))
                 ) : (
