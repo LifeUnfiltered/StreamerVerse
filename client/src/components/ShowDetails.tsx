@@ -106,20 +106,23 @@ export default function ShowDetails({
       }
       
       // If no existing episode is found, create one with proper title formatting
-      // Extract the episode title without the S1E1 prefix if available
-      const episodeTitle = currentEpisode.title 
-        ? currentEpisode.title.replace(/S\d+E\d+\s*-?\s*/, '')
-        : '';
       
-      const baseTitle = episodeTitle 
-        ? `S${currentEpisode.metadata?.season}E${nextEpisodeNum} - ${episodeTitle}` 
-        : `${displayShow.title} S${currentEpisode.metadata?.season}E${nextEpisodeNum}`;
+      // The expected format is either:
+      // "Show Title S#E# - Episode Title" or "S#E# - Episode Title"
+      // We need to extract the episode title part and build a new title with it
+      
+      // First try to extract "Episode Title" from show name format
+      const titleParts = currentEpisode.title.split(' - ');
+      const episodeTitle = titleParts.length > 1 ? titleParts[1] : '';
+      
+      // Build the new title
+      const newTitle = `${displayShow.title} S${currentEpisode.metadata?.season}E${nextEpisodeNum} - ${episodeTitle}`;
       
       return {
         id: 0,
         sourceId: `${displayShow.metadata?.imdbId || displayShow.sourceId}-s${currentEpisode.metadata?.season}e${nextEpisodeNum}`,
         source: 'vidsrc',
-        title: baseTitle,
+        title: newTitle,
         description: `Season ${currentEpisode.metadata?.season}, Episode ${nextEpisodeNum}`,
         thumbnail: displayShow.thumbnail,
         metadata: {
@@ -161,19 +164,29 @@ export default function ShowDetails({
     
     // Create a custom episode object if one doesn't exist
     // Try to use the episode title format from existing episodes if possible
-    const episodeTitle = currentEpisode?.title 
-      ? currentEpisode.title.replace(/S\d+E\d+\s*-?\s*/, '') // Extract the title portion
-      : '';
     
-    const baseTitle = episodeTitle 
-      ? `S${customSeasonNum}E${customEpisodeNum} - ${episodeTitle}` 
-      : `${displayShow.title} S${customSeasonNum}E${customEpisodeNum}`;
+    // The expected format is either:
+    // "Show Title S#E# - Episode Title" or "S#E# - Episode Title"
+    // We need to extract the episode title part and build a new title with it
+    
+    // Extract "Episode Title" part if available
+    let episodeTitle = '';
+    
+    if (currentEpisode?.title) {
+      const titleParts = currentEpisode.title.split(' - ');
+      if (titleParts.length > 1) {
+        episodeTitle = titleParts[1];
+      }
+    }
+    
+    // Build the new title - include show name for full format
+    const newTitle = `${displayShow.title} S${customSeasonNum}E${customEpisodeNum}${episodeTitle ? ' - ' + episodeTitle : ''}`;
     
     const newEpisode = {
       id: 0, // This will be ignored since we're not persisting
       sourceId: `${displayShow.metadata?.imdbId || displayShow.sourceId}-s${customSeasonNum}e${customEpisodeNum}`,
       source: 'vidsrc',
-      title: baseTitle,
+      title: newTitle,
       description: `Season ${customSeasonNum}, Episode ${customEpisodeNum}`,
       thumbnail: displayShow.thumbnail,
       metadata: {
@@ -231,14 +244,24 @@ export default function ShowDetails({
     }
     
     // If we couldn't find the exact episode, create a custom one
-    // Try to keep a consistent naming format by using currentEpisode as a template
-    const episodeTitle = currentEpisode && currentEpisode.title 
-      ? currentEpisode.title.replace(/S\d+E\d+\s*-?\s*/, '') // Extract just the title portion
-      : '';
+    // Try to keep a consistent naming format
     
-    const baseTitle = episodeTitle 
-      ? `S${newSeason}E${newEpisodeNum} - ${episodeTitle}` 
-      : `${displayShow.title} S${newSeason}E${newEpisodeNum}`;
+    // The expected format is either:
+    // "Show Title S#E# - Episode Title" or "S#E# - Episode Title"
+    // We need to extract the episode title part and build a new title with it
+    
+    // Extract "Episode Title" part if available
+    let episodeTitle = '';
+    
+    if (currentEpisode.title) {
+      const titleParts = currentEpisode.title.split(' - ');
+      if (titleParts.length > 1) {
+        episodeTitle = titleParts[1];
+      }
+    }
+    
+    // Build the new title - include show name for full format  
+    const newTitle = `${displayShow.title} S${newSeason}E${newEpisodeNum}${episodeTitle ? ' - ' + episodeTitle : ''}`;
     
     const newEpisode = {
       id: 0, // This will be ignored since we're not persisting
