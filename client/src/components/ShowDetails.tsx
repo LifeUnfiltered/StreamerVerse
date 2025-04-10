@@ -94,19 +94,40 @@ export default function ShowDetails({
     // If we don't have a list, calculate the next episode based on the current one
     if (currentEpisode?.metadata?.season && currentEpisode?.metadata?.episode) {
       const nextEpisodeNum = currentEpisode.metadata.episode + 1;
+      
+      // Try to find the next episode in our episodes list
+      const existingEpisode = episodes.find(ep => 
+        ep.metadata?.season === currentEpisode.metadata?.season && 
+        ep.metadata?.episode === nextEpisodeNum
+      );
+      
+      if (existingEpisode) {
+        return existingEpisode;
+      }
+      
+      // If no existing episode is found, create one with proper title formatting
+      // Extract the episode title without the S1E1 prefix if available
+      const episodeTitle = currentEpisode.title 
+        ? currentEpisode.title.replace(/S\d+E\d+\s*-?\s*/, '')
+        : '';
+      
+      const baseTitle = episodeTitle 
+        ? `S${currentEpisode.metadata?.season}E${nextEpisodeNum} - ${episodeTitle}` 
+        : `${displayShow.title} S${currentEpisode.metadata?.season}E${nextEpisodeNum}`;
+      
       return {
         id: 0,
-        sourceId: `${displayShow.metadata?.imdbId || displayShow.sourceId}-s${currentEpisode.metadata.season}e${nextEpisodeNum}`,
+        sourceId: `${displayShow.metadata?.imdbId || displayShow.sourceId}-s${currentEpisode.metadata?.season}e${nextEpisodeNum}`,
         source: 'vidsrc',
-        title: `${displayShow.title} S${currentEpisode.metadata.season}E${nextEpisodeNum}`,
-        description: `Season ${currentEpisode.metadata.season}, Episode ${nextEpisodeNum}`,
+        title: baseTitle,
+        description: `Season ${currentEpisode.metadata?.season}, Episode ${nextEpisodeNum}`,
         thumbnail: displayShow.thumbnail,
         metadata: {
           imdbId: displayShow.metadata?.imdbId,
           type: 'tv',
           tmdbId: displayShow.metadata?.tmdbId,
-          embedUrl: `https://vidsrc.xyz/embed/tv?imdb=${displayShow.metadata?.imdbId || displayShow.sourceId}&season=${currentEpisode.metadata.season}&episode=${nextEpisodeNum}`,
-          season: currentEpisode.metadata.season,
+          embedUrl: `https://vidsrc.xyz/embed/tv?imdb=${displayShow.metadata?.imdbId || displayShow.sourceId}&season=${currentEpisode.metadata?.season}&episode=${nextEpisodeNum}`,
+          season: currentEpisode.metadata?.season,
           episode: nextEpisodeNum
         },
         chapters: null
@@ -139,11 +160,20 @@ export default function ShowDetails({
     }
     
     // Create a custom episode object if one doesn't exist
+    // Try to use the episode title format from existing episodes if possible
+    const episodeTitle = currentEpisode?.title 
+      ? currentEpisode.title.replace(/S\d+E\d+\s*-?\s*/, '') // Extract the title portion
+      : '';
+    
+    const baseTitle = episodeTitle 
+      ? `S${customSeasonNum}E${customEpisodeNum} - ${episodeTitle}` 
+      : `${displayShow.title} S${customSeasonNum}E${customEpisodeNum}`;
+    
     const newEpisode = {
       id: 0, // This will be ignored since we're not persisting
       sourceId: `${displayShow.metadata?.imdbId || displayShow.sourceId}-s${customSeasonNum}e${customEpisodeNum}`,
       source: 'vidsrc',
-      title: `${displayShow.title} S${customSeasonNum}E${customEpisodeNum}`,
+      title: baseTitle,
       description: `Season ${customSeasonNum}, Episode ${customEpisodeNum}`,
       thumbnail: displayShow.thumbnail,
       metadata: {
@@ -189,12 +219,32 @@ export default function ShowDetails({
     setCustomSeason(newSeason.toString());
     setCustomEpisode(newEpisodeNum.toString());
     
-    // Creating the custom episode
+    // First try to find the actual episode in the episodes list
+    const existingEpisode = episodes.find(ep => 
+      ep.metadata?.season === newSeason && 
+      ep.metadata?.episode === newEpisodeNum
+    );
+    
+    if (existingEpisode) {
+      console.log('Found existing episode for navigation', existingEpisode);
+      return existingEpisode;
+    }
+    
+    // If we couldn't find the exact episode, create a custom one
+    // Try to keep a consistent naming format by using currentEpisode as a template
+    const episodeTitle = currentEpisode && currentEpisode.title 
+      ? currentEpisode.title.replace(/S\d+E\d+\s*-?\s*/, '') // Extract just the title portion
+      : '';
+    
+    const baseTitle = episodeTitle 
+      ? `S${newSeason}E${newEpisodeNum} - ${episodeTitle}` 
+      : `${displayShow.title} S${newSeason}E${newEpisodeNum}`;
+    
     const newEpisode = {
       id: 0, // This will be ignored since we're not persisting
       sourceId: `${displayShow.metadata?.imdbId || displayShow.sourceId}-s${newSeason}e${newEpisodeNum}`,
       source: 'vidsrc',
-      title: `${displayShow.title} S${newSeason}E${newEpisodeNum}`,
+      title: baseTitle,
       description: `Season ${newSeason}, Episode ${newEpisodeNum}`,
       thumbnail: displayShow.thumbnail,
       metadata: {
@@ -210,7 +260,7 @@ export default function ShowDetails({
     
     console.log(`Navigating ${direction} to:`, newEpisode);
     onEpisodeSelect(newEpisode);
-  }, [currentEpisode, displayShow, onEpisodeSelect]);
+  }, [currentEpisode, displayShow, episodes, onEpisodeSelect]);
 
   return (
     <Card>
