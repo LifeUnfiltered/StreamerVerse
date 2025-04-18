@@ -16,8 +16,8 @@ import { AlertCircle } from "lucide-react";
 import BackButton from "@/components/BackButton";
 
 interface NavigationState {
-  view: 'browse' | 'search' | 'watchlist' | 'video' | 'genre' | 'trending';
-  previousView: 'browse' | 'search' | 'watchlist' | 'video' | 'genre' | 'trending' | null;
+  view: 'browse' | 'search' | 'watchlist' | 'video' | 'trending';
+  previousView: 'browse' | 'search' | 'watchlist' | 'video' | 'trending' | null;
 }
 
 interface GenreItem {
@@ -166,10 +166,6 @@ export default function VidSrc() {
   const handleGenreSelect = (genreId: number, type: 'movies' | 'tv') => {
     setSelectedGenreId(genreId);
     setSelectedGenreType(type);
-    setNavigation({ 
-      view: 'genre',
-      previousView: navigation.view === 'genre' ? navigation.previousView : navigation.view
-    });
     setSearchQuery('');
     setSelectedVideo(null);
   };
@@ -360,7 +356,7 @@ export default function VidSrc() {
       const response = await apiRequest('GET', '/api/genres/movies');
       return response.json();
     },
-    enabled: currentSource === 'vidsrc' && (navigation.view === 'browse' || navigation.view === 'genre')
+    enabled: currentSource === 'vidsrc' && navigation.view === 'browse'
   });
   
   // Fetch TV genres
@@ -370,7 +366,7 @@ export default function VidSrc() {
       const response = await apiRequest('GET', '/api/genres/tv');
       return response.json();
     },
-    enabled: currentSource === 'vidsrc' && (navigation.view === 'browse' || navigation.view === 'genre')
+    enabled: currentSource === 'vidsrc' && navigation.view === 'browse'
   });
   
   // Fetch trending content
@@ -405,7 +401,7 @@ export default function VidSrc() {
       const response = await apiRequest('GET', `/api/videos/movies/genre/${selectedGenreId}?page=${page}`);
       return response.json();
     },
-    enabled: currentSource === 'vidsrc' && navigation.view === 'genre' && selectedGenreType === 'movies' && selectedGenreId !== null
+    enabled: currentSource === 'vidsrc' && selectedGenreType === 'movies' && selectedGenreId !== null
   });
   
   // Fetch TV shows by genre
@@ -416,7 +412,7 @@ export default function VidSrc() {
       const response = await apiRequest('GET', `/api/videos/tv/genre/${selectedGenreId}?page=${page}`);
       return response.json();
     },
-    enabled: currentSource === 'vidsrc' && navigation.view === 'genre' && selectedGenreType === 'tv' && selectedGenreId !== null
+    enabled: currentSource === 'vidsrc' && selectedGenreType === 'tv' && selectedGenreId !== null
   });
 
   // Fetch episodes when a show is selected
@@ -674,13 +670,13 @@ export default function VidSrc() {
                     </div>
                     
                     <div>
-                      <h2 className="text-lg font-semibold mb-4">Genres</h2>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      <h2 className="text-lg font-semibold mb-4">Popular Genres</h2>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                         {movieGenres?.slice(0, 8).map(genre => (
                           <button
                             key={genre.id}
                             onClick={() => handleGenreSelect(genre.id, 'movies')}
-                            className="px-4 py-3 bg-card hover:bg-accent rounded-md text-left"
+                            className="p-4 rounded-lg shadow-sm transition-all bg-card hover:bg-accent hover:scale-105 text-left"
                           >
                             {genre.name}
                           </button>
@@ -693,12 +689,16 @@ export default function VidSrc() {
                 <TabsContent value="movies" className="w-full">
                   <div className="mb-6">
                     <h2 className="text-lg font-semibold mb-4">Movie Genres</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                       {movieGenres?.map(genre => (
                         <button
                           key={genre.id}
                           onClick={() => handleGenreSelect(genre.id, 'movies')}
-                          className="px-4 py-3 bg-card hover:bg-accent rounded-md text-left"
+                          className={`p-4 rounded-lg shadow-sm transition-all duration-200 text-left ${
+                            selectedGenreId === genre.id && selectedGenreType === 'movies' 
+                              ? 'bg-primary text-primary-foreground' 
+                              : 'bg-card hover:bg-accent hover:scale-105'
+                          }`}
                         >
                           {genre.name}
                         </button>
@@ -706,26 +706,56 @@ export default function VidSrc() {
                     </div>
                   </div>
                   
-                  <h2 className="text-lg font-semibold mb-4">Latest Movies</h2>
-                  <VideoList
-                    videos={movies}
-                    isLoading={moviesLoading}
-                    error={moviesError}
-                    onVideoSelect={handleVideoSelect}
-                    selectedVideo={selectedVideo}
-                    onAuthRequired={() => setIsAuthDialogOpen(true)}
-                  />
+                  {selectedGenreId && selectedGenreType === 'movies' ? (
+                    <>
+                      <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg font-semibold">
+                          {movieGenres?.find(g => g.id === selectedGenreId)?.name} Movies
+                        </h2>
+                        <button 
+                          onClick={() => setSelectedGenreId(null)}
+                          className="text-sm text-primary hover:underline"
+                        >
+                          Clear selection
+                        </button>
+                      </div>
+                      <VideoList
+                        videos={genreMovies}
+                        isLoading={genreMoviesLoading}
+                        error={genreMoviesError}
+                        onVideoSelect={handleVideoSelect}
+                        selectedVideo={selectedVideo}
+                        onAuthRequired={() => setIsAuthDialogOpen(true)}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <h2 className="text-lg font-semibold mb-4">Latest Movies</h2>
+                      <VideoList
+                        videos={movies}
+                        isLoading={moviesLoading}
+                        error={moviesError}
+                        onVideoSelect={handleVideoSelect}
+                        selectedVideo={selectedVideo}
+                        onAuthRequired={() => setIsAuthDialogOpen(true)}
+                      />
+                    </>
+                  )}
                 </TabsContent>
 
                 <TabsContent value="shows" className="w-full">
                   <div className="mb-6">
                     <h2 className="text-lg font-semibold mb-4">TV Genres</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
                       {tvGenres?.map(genre => (
                         <button
                           key={genre.id}
                           onClick={() => handleGenreSelect(genre.id, 'tv')}
-                          className="px-4 py-3 bg-card hover:bg-accent rounded-md text-left"
+                          className={`p-4 rounded-lg shadow-sm transition-all duration-200 text-left ${
+                            selectedGenreId === genre.id && selectedGenreType === 'tv' 
+                              ? 'bg-primary text-primary-foreground' 
+                              : 'bg-card hover:bg-accent hover:scale-105'
+                          }`}
                         >
                           {genre.name}
                         </button>
@@ -733,15 +763,41 @@ export default function VidSrc() {
                     </div>
                   </div>
                   
-                  <h2 className="text-lg font-semibold mb-4">Popular TV Shows</h2>
-                  <VideoList
-                    videos={shows}
-                    isLoading={showsLoading}
-                    error={showsError}
-                    onVideoSelect={handleVideoSelect}
-                    selectedVideo={selectedVideo}
-                    onAuthRequired={() => setIsAuthDialogOpen(true)}
-                  />
+                  {selectedGenreId && selectedGenreType === 'tv' ? (
+                    <>
+                      <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg font-semibold">
+                          {tvGenres?.find(g => g.id === selectedGenreId)?.name} TV Shows
+                        </h2>
+                        <button 
+                          onClick={() => setSelectedGenreId(null)}
+                          className="text-sm text-primary hover:underline"
+                        >
+                          Clear selection
+                        </button>
+                      </div>
+                      <VideoList
+                        videos={genreTVShows}
+                        isLoading={genreTVShowsLoading}
+                        error={genreTVShowsError}
+                        onVideoSelect={handleVideoSelect}
+                        selectedVideo={selectedVideo}
+                        onAuthRequired={() => setIsAuthDialogOpen(true)}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <h2 className="text-lg font-semibold mb-4">Popular TV Shows</h2>
+                      <VideoList
+                        videos={shows}
+                        isLoading={showsLoading}
+                        error={showsError}
+                        onVideoSelect={handleVideoSelect}
+                        selectedVideo={selectedVideo}
+                        onAuthRequired={() => setIsAuthDialogOpen(true)}
+                      />
+                    </>
+                  )}
                 </TabsContent>
               </Tabs>
             ) : null}
