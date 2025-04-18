@@ -16,8 +16,13 @@ import { AlertCircle } from "lucide-react";
 import BackButton from "@/components/BackButton";
 
 interface NavigationState {
-  view: 'browse' | 'search' | 'watchlist' | 'video';
-  previousView: 'browse' | 'search' | 'watchlist' | 'video' | null;
+  view: 'browse' | 'search' | 'watchlist' | 'video' | 'genre' | 'trending';
+  previousView: 'browse' | 'search' | 'watchlist' | 'video' | 'genre' | 'trending' | null;
+}
+
+interface GenreItem {
+  id: number;
+  name: string;
 }
 
 export default function VidSrc() {
@@ -145,6 +150,28 @@ export default function VidSrc() {
       previousView: navigation.view === 'watchlist' ? navigation.previousView : navigation.view
     });
     setSearchQuery('');
+  };
+  
+  // Handle navigation to trending content
+  const handleTrendingClick = () => {
+    setNavigation({ 
+      view: 'trending',
+      previousView: navigation.view === 'trending' ? navigation.previousView : navigation.view
+    });
+    setSearchQuery('');
+    setSelectedVideo(null);
+  };
+  
+  // Handle genre selection
+  const handleGenreSelect = (genreId: number, type: 'movies' | 'tv') => {
+    setSelectedGenreId(genreId);
+    setSelectedGenreType(type);
+    setNavigation({ 
+      view: 'genre',
+      previousView: navigation.view === 'genre' ? navigation.previousView : navigation.view
+    });
+    setSearchQuery('');
+    setSelectedVideo(null);
   };
 
   const handleVideoSelect = (video: Video) => {
@@ -321,6 +348,76 @@ export default function VidSrc() {
   
   // Store show names in a cache for reference
   const showNameCache = useMemo(() => new Map<string, string>(), []);
+  
+  // State for selected genre
+  const [selectedGenreId, setSelectedGenreId] = useState<number | null>(null);
+  const [selectedGenreType, setSelectedGenreType] = useState<'movies' | 'tv'>('movies');
+  
+  // Fetch movie genres
+  const { data: movieGenres } = useQuery<GenreItem[]>({
+    queryKey: ['/api/genres/movies'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/genres/movies');
+      return response.json();
+    },
+    enabled: currentSource === 'vidsrc' && (navigation.view === 'browse' || navigation.view === 'genre')
+  });
+  
+  // Fetch TV genres
+  const { data: tvGenres } = useQuery<GenreItem[]>({
+    queryKey: ['/api/genres/tv'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/genres/tv');
+      return response.json();
+    },
+    enabled: currentSource === 'vidsrc' && (navigation.view === 'browse' || navigation.view === 'genre')
+  });
+  
+  // Fetch trending content
+  const { data: trendingContent, isLoading: trendingLoading, error: trendingError } = useQuery<Video[]>({
+    queryKey: ['/api/videos/trending', page],
+    queryFn: async () => {
+      const timeWindow = 'week'; // Default to weekly trending
+      const response = await apiRequest('GET', `/api/videos/trending?time_window=${timeWindow}&page=${page}`);
+      const content = await response.json();
+      
+      // Cache show titles for TV shows
+      content.forEach((video: Video) => {
+        if (video.metadata?.type === 'tv') {
+          const showId = video.metadata?.imdbId || video.sourceId;
+          if (showId && video.title) {
+            showNameCache.set(showId, video.title);
+            console.log(`Cached trending show title: ${showId} = "${video.title}"`);
+          }
+        }
+      });
+      
+      return content;
+    },
+    enabled: currentSource === 'vidsrc' && navigation.view === 'trending'
+  });
+  
+  // Fetch movies by genre
+  const { data: genreMovies, isLoading: genreMoviesLoading, error: genreMoviesError } = useQuery<Video[]>({
+    queryKey: ['/api/videos/movies/genre', selectedGenreId, page],
+    queryFn: async () => {
+      if (!selectedGenreId) return [];
+      const response = await apiRequest('GET', `/api/videos/movies/genre/${selectedGenreId}?page=${page}`);
+      return response.json();
+    },
+    enabled: currentSource === 'vidsrc' && navigation.view === 'genre' && selectedGenreType === 'movies' && selectedGenreId !== null
+  });
+  
+  // Fetch TV shows by genre
+  const { data: genreTVShows, isLoading: genreTVShowsLoading, error: genreTVShowsError } = useQuery<Video[]>({
+    queryKey: ['/api/videos/tv/genre', selectedGenreId, page],
+    queryFn: async () => {
+      if (!selectedGenreId) return [];
+      const response = await apiRequest('GET', `/api/videos/tv/genre/${selectedGenreId}?page=${page}`);
+      return response.json();
+    },
+    enabled: currentSource === 'vidsrc' && navigation.view === 'genre' && selectedGenreType === 'tv' && selectedGenreId !== null
+  });
 
   // Fetch episodes when a show is selected
   const { data: showEpisodes = [] } = useQuery<Video[]>({
@@ -416,6 +513,7 @@ export default function VidSrc() {
       <Header
         onAuthClick={() => setIsAuthDialogOpen(true)}
         onWatchlistClick={handleWatchlistClick}
+        onTrendingClick={handleTrendingClick}
       />
       <main className="container mx-auto p-4 md:p-6">
         <div className="space-y-4">
@@ -495,14 +593,120 @@ export default function VidSrc() {
                   onAuthRequired={() => setIsAuthDialogOpen(true)}
                 />
               </div>
+            ) : navigation.view === 'trending' ? (
+              <>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-semibold">Trending This Week</h2>
+                </div>
+                <VideoList
+                  videos={trendingContent}
+                  isLoading={trendingLoading}
+                  error={trendingError}
+                  onVideoSelect={handleVideoSelect}
+                  selectedVideo={selectedVideo}
+                  onAuthRequired={() => setIsAuthDialogOpen(true)}
+                />
+              </>
+            ) : navigation.view === 'genre' ? (
+              <>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-semibold">
+                    {selectedGenreType === 'movies' ? 'Movies' : 'TV Shows'} - {
+                      selectedGenreType === 'movies' && movieGenres 
+                        ? movieGenres.find(g => g.id === selectedGenreId)?.name
+                        : tvGenres 
+                          ? tvGenres.find(g => g.id === selectedGenreId)?.name 
+                          : ''
+                    }
+                  </h2>
+                  <div className="space-x-2">
+                    <button 
+                      className={`px-3 py-1 rounded ${selectedGenreType === 'movies' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
+                      onClick={() => setSelectedGenreType('movies')}
+                    >
+                      Movies
+                    </button>
+                    <button 
+                      className={`px-3 py-1 rounded ${selectedGenreType === 'tv' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
+                      onClick={() => setSelectedGenreType('tv')}
+                    >
+                      TV Shows
+                    </button>
+                  </div>
+                </div>
+                <VideoList
+                  videos={selectedGenreType === 'movies' ? genreMovies : genreTVShows}
+                  isLoading={selectedGenreType === 'movies' ? genreMoviesLoading : genreTVShowsLoading}
+                  error={selectedGenreType === 'movies' ? genreMoviesError : genreTVShowsError}
+                  onVideoSelect={handleVideoSelect}
+                  selectedVideo={selectedVideo}
+                  onAuthRequired={() => setIsAuthDialogOpen(true)}
+                />
+              </>
             ) : currentSource === 'vidsrc' ? (
-              <Tabs defaultValue="movies" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-6">
+              <Tabs defaultValue="discover" className="w-full">
+                <TabsList className="grid w-full grid-cols-3 mb-6">
+                  <TabsTrigger value="discover">Discover</TabsTrigger>
                   <TabsTrigger value="movies">Movies</TabsTrigger>
                   <TabsTrigger value="shows">TV Shows</TabsTrigger>
                 </TabsList>
 
+                <TabsContent value="discover" className="w-full">
+                  <div className="grid gap-6">
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg font-semibold">Trending This Week</h2>
+                        <button 
+                          onClick={handleTrendingClick}
+                          className="text-sm text-primary hover:underline"
+                        >
+                          View all
+                        </button>
+                      </div>
+                      <VideoList
+                        videos={trendingContent?.slice(0, 6)}
+                        isLoading={trendingLoading}
+                        error={trendingError}
+                        onVideoSelect={handleVideoSelect}
+                        selectedVideo={selectedVideo}
+                        onAuthRequired={() => setIsAuthDialogOpen(true)}
+                      />
+                    </div>
+                    
+                    <div>
+                      <h2 className="text-lg font-semibold mb-4">Genres</h2>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                        {movieGenres?.slice(0, 8).map(genre => (
+                          <button
+                            key={genre.id}
+                            onClick={() => handleGenreSelect(genre.id, 'movies')}
+                            className="px-4 py-3 bg-card hover:bg-accent rounded-md text-left"
+                          >
+                            {genre.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+
                 <TabsContent value="movies" className="w-full">
+                  <div className="mb-6">
+                    <h2 className="text-lg font-semibold mb-4">Movie Genres</h2>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      {movieGenres?.map(genre => (
+                        <button
+                          key={genre.id}
+                          onClick={() => handleGenreSelect(genre.id, 'movies')}
+                          className="px-4 py-3 bg-card hover:bg-accent rounded-md text-left"
+                        >
+                          {genre.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <h2 className="text-lg font-semibold mb-4">Latest Movies</h2>
                   <VideoList
                     videos={movies}
                     isLoading={moviesLoading}
@@ -514,6 +718,22 @@ export default function VidSrc() {
                 </TabsContent>
 
                 <TabsContent value="shows" className="w-full">
+                  <div className="mb-6">
+                    <h2 className="text-lg font-semibold mb-4">TV Genres</h2>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      {tvGenres?.map(genre => (
+                        <button
+                          key={genre.id}
+                          onClick={() => handleGenreSelect(genre.id, 'tv')}
+                          className="px-4 py-3 bg-card hover:bg-accent rounded-md text-left"
+                        >
+                          {genre.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  
+                  <h2 className="text-lg font-semibold mb-4">Popular TV Shows</h2>
                   <VideoList
                     videos={shows}
                     isLoading={showsLoading}

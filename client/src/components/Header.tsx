@@ -2,7 +2,7 @@ import { SiYoutube } from "react-icons/si";
 import { Button } from "@/components/ui/button";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { LogIn, LogOut, User as UserIcon, Bookmark } from "lucide-react";
+import { LogIn, LogOut, User as UserIcon, Bookmark, TrendingUp } from "lucide-react";
 import type { Video } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { ThemeToggle } from "./theme-toggle";
@@ -18,9 +18,10 @@ import {
 interface HeaderProps {
   onAuthClick: () => void;
   onWatchlistClick: () => void;
+  onTrendingClick?: () => void;
 }
 
-export default function Header({ onAuthClick, onWatchlistClick }: HeaderProps) {
+export default function Header({ onAuthClick, onWatchlistClick, onTrendingClick }: HeaderProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -78,6 +79,12 @@ export default function Header({ onAuthClick, onWatchlistClick }: HeaderProps) {
         </div>
 
         <div className="flex items-center gap-4">
+          {onTrendingClick && (
+            <Button variant="ghost" size="sm" onClick={onTrendingClick} className="hidden md:flex">
+              <TrendingUp className="mr-2 h-4 w-4" />
+              <span>Trending</span>
+            </Button>
+          )}
           <ThemeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -99,6 +106,12 @@ export default function Header({ onAuthClick, onWatchlistClick }: HeaderProps) {
                       </span>
                     )}
                   </DropdownMenuItem>
+                  {onTrendingClick && (
+                    <DropdownMenuItem onClick={onTrendingClick} className="cursor-pointer md:hidden">
+                      <TrendingUp className="mr-2 h-4 w-4" />
+                      <span>Trending</span>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => logout()} className="cursor-pointer">
                     <LogOut className="mr-2 h-4 w-4" />
@@ -106,10 +119,18 @@ export default function Header({ onAuthClick, onWatchlistClick }: HeaderProps) {
                   </DropdownMenuItem>
                 </>
               ) : (
-                <DropdownMenuItem onClick={onAuthClick} className="cursor-pointer">
-                  <LogIn className="mr-2 h-4 w-4" />
-                  <span>Log in</span>
-                </DropdownMenuItem>
+                <>
+                  <DropdownMenuItem onClick={onAuthClick} className="cursor-pointer">
+                    <LogIn className="mr-2 h-4 w-4" />
+                    <span>Log in</span>
+                  </DropdownMenuItem>
+                  {onTrendingClick && (
+                    <DropdownMenuItem onClick={onTrendingClick} className="cursor-pointer md:hidden">
+                      <TrendingUp className="mr-2 h-4 w-4" />
+                      <span>Trending</span>
+                    </DropdownMenuItem>
+                  )}
+                </>
               )}
             </DropdownMenuContent>
           </DropdownMenu>
