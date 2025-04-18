@@ -12,12 +12,34 @@ import SearchBar from "@/components/SearchBar";
 import ShowDetails from "@/components/ShowDetails";
 import SourceSelector from "@/components/SourceSelector";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle } from "lucide-react";
+import { 
+  AlertCircle, 
+  Sword, 
+  Plane, 
+  Heart, 
+  Laugh, 
+  Ghost, 
+  Rocket, 
+  Film, 
+  Tv, 
+  Skull, 
+  Music, 
+  Castle, 
+  Umbrella, 
+  FlaskConical,
+  Bomb,
+  Baby,
+  Users,
+  Search,
+  Camera,
+  History,
+  Zap
+} from "lucide-react";
 import BackButton from "@/components/BackButton";
 
 interface NavigationState {
-  view: 'browse' | 'search' | 'watchlist' | 'video' | 'trending';
-  previousView: 'browse' | 'search' | 'watchlist' | 'video' | 'trending' | null;
+  view: 'browse' | 'search' | 'watchlist' | 'video' | 'trending' | 'genre';
+  previousView: 'browse' | 'search' | 'watchlist' | 'video' | 'trending' | 'genre' | null;
 }
 
 interface GenreItem {
@@ -345,6 +367,56 @@ export default function VidSrc() {
   // Store show names in a cache for reference
   const showNameCache = useMemo(() => new Map<string, string>(), []);
   
+  // Helper function to get genre icons
+  const getGenreIcon = (genreId: number, type: 'movies' | 'tv') => {
+    // Movie genre IDs
+    if (type === 'movies') {
+      switch (genreId) {
+        case 28: return <Sword className="h-5 w-5 mb-1" />; // Action
+        case 12: return <Plane className="h-5 w-5 mb-1" />; // Adventure
+        case 16: return <Baby className="h-5 w-5 mb-1" />; // Animation
+        case 35: return <Laugh className="h-5 w-5 mb-1" />; // Comedy
+        case 80: return <Search className="h-5 w-5 mb-1" />; // Crime
+        case 99: return <Camera className="h-5 w-5 mb-1" />; // Documentary
+        case 18: return <Heart className="h-5 w-5 mb-1" />; // Drama
+        case 10751: return <Users className="h-5 w-5 mb-1" />; // Family
+        case 14: return <Castle className="h-5 w-5 mb-1" />; // Fantasy
+        case 36: return <History className="h-5 w-5 mb-1" />; // History
+        case 27: return <Ghost className="h-5 w-5 mb-1" />; // Horror
+        case 10402: return <Music className="h-5 w-5 mb-1" />; // Music
+        case 9648: return <Search className="h-5 w-5 mb-1" />; // Mystery
+        case 10749: return <Heart className="h-5 w-5 mb-1" />; // Romance
+        case 878: return <Rocket className="h-5 w-5 mb-1" />; // Science Fiction
+        case 53: return <Bomb className="h-5 w-5 mb-1" />; // Thriller
+        case 10752: return <Sword className="h-5 w-5 mb-1" />; // War
+        case 37: return <Film className="h-5 w-5 mb-1" />; // Western
+        default: return <Film className="h-5 w-5 mb-1" />;
+      }
+    }
+    // TV genre IDs
+    else {
+      switch (genreId) {
+        case 10759: return <Plane className="h-5 w-5 mb-1" />; // Action & Adventure
+        case 16: return <Baby className="h-5 w-5 mb-1" />; // Animation
+        case 35: return <Laugh className="h-5 w-5 mb-1" />; // Comedy
+        case 80: return <Search className="h-5 w-5 mb-1" />; // Crime
+        case 99: return <Camera className="h-5 w-5 mb-1" />; // Documentary
+        case 18: return <Heart className="h-5 w-5 mb-1" />; // Drama
+        case 10751: return <Users className="h-5 w-5 mb-1" />; // Family
+        case 10762: return <Baby className="h-5 w-5 mb-1" />; // Kids
+        case 9648: return <Search className="h-5 w-5 mb-1" />; // Mystery
+        case 10763: return <Film className="h-5 w-5 mb-1" />; // News
+        case 10764: return <Tv className="h-5 w-5 mb-1" />; // Reality
+        case 10765: return <Rocket className="h-5 w-5 mb-1" />; // Sci-Fi & Fantasy
+        case 10766: return <Heart className="h-5 w-5 mb-1" />; // Soap
+        case 10767: return <Film className="h-5 w-5 mb-1" />; // Talk
+        case 10768: return <Sword className="h-5 w-5 mb-1" />; // War & Politics
+        case 37: return <Film className="h-5 w-5 mb-1" />; // Western
+        default: return <Tv className="h-5 w-5 mb-1" />;
+      }
+    }
+  };
+  
   // State for selected genre
   const [selectedGenreId, setSelectedGenreId] = useState<number | null>(null);
   const [selectedGenreType, setSelectedGenreType] = useState<'movies' | 'tv'>('movies');
@@ -640,51 +712,13 @@ export default function VidSrc() {
                 />
               </>
             ) : currentSource === 'vidsrc' ? (
-              <Tabs defaultValue="discover" className="w-full">
-                <TabsList className="grid w-full grid-cols-3 mb-6">
-                  <TabsTrigger value="discover">Discover</TabsTrigger>
+              <Tabs defaultValue="movies" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 mb-6">
                   <TabsTrigger value="movies">Movies</TabsTrigger>
                   <TabsTrigger value="shows">TV Shows</TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="discover" className="w-full">
-                  <div className="grid gap-6">
-                    <div>
-                      <div className="flex items-center justify-between mb-4">
-                        <h2 className="text-lg font-semibold">Trending This Week</h2>
-                        <button 
-                          onClick={handleTrendingClick}
-                          className="text-sm text-primary hover:underline"
-                        >
-                          View all
-                        </button>
-                      </div>
-                      <VideoList
-                        videos={trendingContent?.slice(0, 6)}
-                        isLoading={trendingLoading}
-                        error={trendingError}
-                        onVideoSelect={handleVideoSelect}
-                        selectedVideo={selectedVideo}
-                        onAuthRequired={() => setIsAuthDialogOpen(true)}
-                      />
-                    </div>
-                    
-                    <div>
-                      <h2 className="text-lg font-semibold mb-4">Popular Genres</h2>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                        {movieGenres?.slice(0, 8).map(genre => (
-                          <button
-                            key={genre.id}
-                            onClick={() => handleGenreSelect(genre.id, 'movies')}
-                            className="p-4 rounded-lg shadow-sm transition-all bg-card hover:bg-accent hover:scale-105 text-left"
-                          >
-                            {genre.name}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </TabsContent>
+
 
                 <TabsContent value="movies" className="w-full">
                   <div className="mb-6">
@@ -700,7 +734,10 @@ export default function VidSrc() {
                               : 'bg-card hover:bg-accent hover:scale-105'
                           }`}
                         >
-                          {genre.name}
+                          <div className="flex flex-col items-center">
+                            {getGenreIcon(genre.id, 'movies')}
+                            {genre.name}
+                          </div>
                         </button>
                       ))}
                     </div>
@@ -757,7 +794,10 @@ export default function VidSrc() {
                               : 'bg-card hover:bg-accent hover:scale-105'
                           }`}
                         >
-                          {genre.name}
+                          <div className="flex flex-col items-center">
+                            {getGenreIcon(genre.id, 'tv')}
+                            {genre.name}
+                          </div>
                         </button>
                       ))}
                     </div>
