@@ -373,3 +373,142 @@ export async function fetchLatestEpisodes(): Promise<Video[]> {
 
   return videos;
 }
+
+// Fetch trending content (movies and TV shows) for the day or week
+export async function fetchTrending(timeWindow: 'day' | 'week' = 'week', page: number = 1): Promise<Video[]> {
+  const videos: Video[] = [];
+  try {
+    console.log(`Fetching trending content for the ${timeWindow}`);
+    const trending = await tmdb.trending({
+      media_type: 'all',
+      time_window: timeWindow,
+      page
+    });
+
+    for (const item of trending.results || []) {
+      try {
+        if (item.media_type === 'movie') {
+          // Fetch complete movie details
+          const movieDetails = await tmdb.movieInfo({
+            id: item.id,
+            append_to_response: 'external_ids'
+          });
+          
+          if (movieDetails.imdb_id) {
+            videos.push(movieToVideo(movieDetails));
+          }
+        } else if (item.media_type === 'tv') {
+          // Fetch complete TV show details
+          const showDetails = await tmdb.tvInfo({
+            id: item.id,
+            append_to_response: 'external_ids'
+          });
+          
+          if (showDetails.name && showDetails.external_ids?.imdb_id) {
+            videos.push(showToVideo(showDetails));
+          }
+        }
+      } catch (error) {
+        console.error(`Error fetching trending item details:`, error);
+      }
+    }
+    
+    console.log(`Found ${videos.length} trending items`);
+  } catch (error) {
+    console.error('TMDB Trending Error:', error);
+  }
+
+  return videos;
+}
+
+// Fetch all movie genres 
+export async function fetchMovieGenres() {
+  try {
+    const genreData = await tmdb.genreMovieList();
+    return genreData.genres || [];
+  } catch (error) {
+    console.error('Error fetching movie genres:', error);
+    return [];
+  }
+}
+
+// Fetch all TV show genres
+export async function fetchTVGenres() {
+  try {
+    const genreData = await tmdb.genreTvList();
+    return genreData.genres || [];
+  } catch (error) {
+    console.error('Error fetching TV genres:', error);
+    return [];
+  }
+}
+
+// Fetch movies by genre
+export async function fetchMoviesByGenre(genreId: number, page: number = 1): Promise<Video[]> {
+  const videos: Video[] = [];
+  
+  try {
+    console.log(`Fetching movies for genre ID: ${genreId}`);
+    const discovered = await tmdb.discoverMovie({
+      with_genres: genreId.toString(),
+      page
+    });
+    
+    // Process first 10 results to avoid too many API calls
+    for (const movie of discovered.results?.slice(0, 10) || []) {
+      try {
+        const movieDetails = await tmdb.movieInfo({
+          id: movie.id,
+          append_to_response: 'external_ids'
+        });
+        
+        if (movieDetails.imdb_id) {
+          videos.push(movieToVideo(movieDetails));
+        }
+      } catch (error) {
+        console.error(`Error fetching movie details for genre:`, error);
+      }
+    }
+    
+    console.log(`Found ${videos.length} movies for genre ID: ${genreId}`);
+  } catch (error) {
+    console.error(`Error fetching movies by genre (${genreId}):`, error);
+  }
+  
+  return videos;
+}
+
+// Fetch TV shows by genre
+export async function fetchTVShowsByGenre(genreId: number, page: number = 1): Promise<Video[]> {
+  const videos: Video[] = [];
+  
+  try {
+    console.log(`Fetching TV shows for genre ID: ${genreId}`);
+    const discovered = await tmdb.discoverTv({
+      with_genres: genreId.toString(),
+      page
+    });
+    
+    // Process first 10 results to avoid too many API calls
+    for (const show of discovered.results?.slice(0, 10) || []) {
+      try {
+        const showDetails = await tmdb.tvInfo({
+          id: show.id,
+          append_to_response: 'external_ids'
+        });
+        
+        if (showDetails.name && showDetails.external_ids?.imdb_id) {
+          videos.push(showToVideo(showDetails));
+        }
+      } catch (error) {
+        console.error(`Error fetching TV show details for genre:`, error);
+      }
+    }
+    
+    console.log(`Found ${videos.length} TV shows for genre ID: ${genreId}`);
+  } catch (error) {
+    console.error(`Error fetching TV shows by genre (${genreId}):`, error);
+  }
+  
+  return videos;
+}

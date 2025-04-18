@@ -13,7 +13,12 @@ import {
   fetchLatestEpisodes,
   searchContent,
   fetchTVShowEpisodes,
-  fetchLatestMovies
+  fetchLatestMovies,
+  fetchTrending,
+  fetchMovieGenres,
+  fetchTVGenres,
+  fetchMoviesByGenre,
+  fetchTVShowsByGenre
 } from './lib/tmdb';
 
 const MemoryStore = memorystore(session);
@@ -351,6 +356,80 @@ export async function registerRoutes(app: Express) {
     } catch (error) {
       console.error('Error fetching TV shows:', error);
       res.status(500).json({ message: 'Failed to fetch TV shows' });
+    }
+  });
+  
+  // New endpoints for genres and trending
+  
+  // Get trending content (movies and TV shows)
+  app.get('/api/videos/trending', async (req, res) => {
+    try {
+      const timeWindow = (req.query.time_window === 'day' ? 'day' : 'week') as 'day' | 'week';
+      const page = parseInt(req.query.page as string) || 1;
+      
+      const videos = await fetchTrending(timeWindow, page);
+      res.json(videos);
+    } catch (error) {
+      console.error('Error fetching trending content:', error);
+      res.status(500).json({ message: 'Failed to fetch trending content' });
+    }
+  });
+  
+  // Get all movie genres
+  app.get('/api/genres/movies', async (req, res) => {
+    try {
+      const genres = await fetchMovieGenres();
+      res.json(genres);
+    } catch (error) {
+      console.error('Error fetching movie genres:', error);
+      res.status(500).json({ message: 'Failed to fetch movie genres' });
+    }
+  });
+  
+  // Get all TV show genres
+  app.get('/api/genres/tv', async (req, res) => {
+    try {
+      const genres = await fetchTVGenres();
+      res.json(genres);
+    } catch (error) {
+      console.error('Error fetching TV genres:', error);
+      res.status(500).json({ message: 'Failed to fetch TV genres' });
+    }
+  });
+  
+  // Get movies by genre
+  app.get('/api/videos/movies/genre/:genreId', async (req, res) => {
+    try {
+      const genreId = parseInt(req.params.genreId);
+      const page = parseInt(req.query.page as string) || 1;
+      
+      if (isNaN(genreId)) {
+        return res.status(400).json({ message: 'Invalid genre ID' });
+      }
+      
+      const videos = await fetchMoviesByGenre(genreId, page);
+      res.json(videos);
+    } catch (error) {
+      console.error('Error fetching movies by genre:', error);
+      res.status(500).json({ message: 'Failed to fetch movies by genre' });
+    }
+  });
+  
+  // Get TV shows by genre
+  app.get('/api/videos/tv/genre/:genreId', async (req, res) => {
+    try {
+      const genreId = parseInt(req.params.genreId);
+      const page = parseInt(req.query.page as string) || 1;
+      
+      if (isNaN(genreId)) {
+        return res.status(400).json({ message: 'Invalid genre ID' });
+      }
+      
+      const videos = await fetchTVShowsByGenre(genreId, page);
+      res.json(videos);
+    } catch (error) {
+      console.error('Error fetching TV shows by genre:', error);
+      res.status(500).json({ message: 'Failed to fetch TV shows by genre' });
     }
   });
 
