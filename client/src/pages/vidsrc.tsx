@@ -38,8 +38,8 @@ import {
 import BackButton from "@/components/BackButton";
 
 interface NavigationState {
-  view: 'browse' | 'search' | 'watchlist' | 'video' | 'trending' | 'genre';
-  previousView: 'browse' | 'search' | 'watchlist' | 'video' | 'trending' | 'genre' | null;
+  view: 'browse' | 'search' | 'watchlist' | 'video' | 'trending';
+  previousView: 'browse' | 'search' | 'watchlist' | 'video' | 'trending' | null;
 }
 
 interface GenreItem {
@@ -670,42 +670,6 @@ export default function VidSrc() {
                   videos={trendingContent}
                   isLoading={trendingLoading}
                   error={trendingError}
-                  onVideoSelect={handleVideoSelect}
-                  selectedVideo={selectedVideo}
-                  onAuthRequired={() => setIsAuthDialogOpen(true)}
-                />
-              </>
-            ) : navigation.view === 'genre' ? (
-              <>
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-semibold">
-                    {selectedGenreType === 'movies' ? 'Movies' : 'TV Shows'} - {
-                      selectedGenreType === 'movies' && movieGenres 
-                        ? movieGenres.find(g => g.id === selectedGenreId)?.name
-                        : tvGenres 
-                          ? tvGenres.find(g => g.id === selectedGenreId)?.name 
-                          : ''
-                    }
-                  </h2>
-                  <div className="space-x-2">
-                    <button 
-                      className={`px-3 py-1 rounded ${selectedGenreType === 'movies' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
-                      onClick={() => setSelectedGenreType('movies')}
-                    >
-                      Movies
-                    </button>
-                    <button 
-                      className={`px-3 py-1 rounded ${selectedGenreType === 'tv' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
-                      onClick={() => setSelectedGenreType('tv')}
-                    >
-                      TV Shows
-                    </button>
-                  </div>
-                </div>
-                <VideoList
-                  videos={selectedGenreType === 'movies' ? genreMovies : genreTVShows}
-                  isLoading={selectedGenreType === 'movies' ? genreMoviesLoading : genreTVShowsLoading}
-                  error={selectedGenreType === 'movies' ? genreMoviesError : genreTVShowsError}
                   onVideoSelect={handleVideoSelect}
                   selectedVideo={selectedVideo}
                   onAuthRequired={() => setIsAuthDialogOpen(true)}
