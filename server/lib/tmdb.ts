@@ -38,6 +38,8 @@ function movieToVideo(movie: any): Video {
       imdbId: movie.imdb_id,
       type: 'movie',
       tmdbId: movie.id,
+      releaseDate: movie.release_date || null,
+      voteAverage: movie.vote_average || null,
       embedUrl: movie.imdb_id ? `https://vidsrc.xyz/embed/movie?imdb=${movie.imdb_id}` : null
     },
     chapters: null
@@ -57,6 +59,9 @@ function showToVideo(show: any): Video {
       imdbId: show.external_ids?.imdb_id,
       type: 'tv',
       tmdbId: show.id,
+      firstAirDate: show.first_air_date || null,
+      lastAirDate: show.last_air_date || null,
+      voteAverage: show.vote_average || null,
       embedUrl: show.external_ids?.imdb_id ? 
         `https://vidsrc.xyz/embed/tv?imdb=${show.external_ids.imdb_id}&season=1&episode=1` : null,
       totalSeasons: show.number_of_seasons
@@ -84,6 +89,8 @@ function episodeToVideo(episode: any, show: any): Video {
       imdbId: imdbId,
       type: 'tv',
       tmdbId: show.id,
+      airDate: episode.air_date || null,
+      voteAverage: episode.vote_average || null,
       embedUrl: imdbId ? 
         `https://vidsrc.xyz/embed/tv?imdb=${imdbId}&season=${seasonNum}&episode=${episodeNum}` : null,
       season: seasonNum,

@@ -73,9 +73,30 @@ export default function VideoCard({
               {video.title}
             </h3>
             {!isCompact && (
-              <p className="text-sm text-muted-foreground mt-1 line-clamp-2 transition-colors duration-300">
-                {video.description}
-              </p>
+              <>
+                <p className="text-sm text-muted-foreground mt-1 line-clamp-2 transition-colors duration-300">
+                  {video.description}
+                </p>
+                {/* Display release date for movies */}
+                {video.metadata?.type === 'movie' && video.metadata.releaseDate && (
+                  <p className="text-xs text-primary mt-1 font-medium">
+                    Released: {new Date(video.metadata.releaseDate).toLocaleDateString()}
+                  </p>
+                )}
+                {/* Display first air date for TV shows */}
+                {video.metadata?.type === 'tv' && video.metadata.firstAirDate && (
+                  <p className="text-xs text-primary mt-1 font-medium">
+                    First aired: {new Date(video.metadata.firstAirDate).toLocaleDateString()}
+                  </p>
+                )}
+                {/* Display air date for TV episodes */}
+                {video.metadata?.type === 'tv' && video.metadata.airDate && 
+                 video.metadata.season && video.metadata.episode && (
+                  <p className="text-xs text-primary mt-1 font-medium">
+                    Aired: {new Date(video.metadata.airDate).toLocaleDateString()}
+                  </p>
+                )}
+              </>
             )}
           </div>
         </div>
