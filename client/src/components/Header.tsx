@@ -5,7 +5,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { LogIn, LogOut, User as UserIcon, Bookmark, TrendingUp } from "lucide-react";
 import type { Video } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
-import { ThemeToggle } from "./theme-toggle";
+import ThemeSwitcher from "./ThemeSwitcher";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -85,7 +85,7 @@ export default function Header({ onAuthClick, onWatchlistClick, onTrendingClick 
               <span>Trending</span>
             </Button>
           )}
-          <ThemeToggle />
+          <ThemeSwitcher />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="icon">

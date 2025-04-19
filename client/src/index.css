@@ -14,7 +14,8 @@
 
 /* Add smooth transition for theme changes */
 :root {
-  --transition-duration: 200ms;
+  --transition-duration: 350ms;
+  --transition-timing: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .dark,
@@ -39,11 +40,36 @@
   --border: 240 5.9% 90%;
   --input: 240 5.9% 90%;
   --ring: 240 5.9% 10%;
+}
 
+/* Theme transition animations */
+* {
   transition: 
-    color var(--transition-duration) ease-in-out,
-    background-color var(--transition-duration) ease-in-out,
-    border-color var(--transition-duration) ease-in-out;
+    color var(--transition-duration) var(--transition-timing),
+    background-color var(--transition-duration) var(--transition-timing),
+    border-color var(--transition-duration) var(--transition-timing),
+    box-shadow var(--transition-duration) var(--transition-timing),
+    transform var(--transition-duration) var(--transition-timing);
+}
+
+/* Theme switch effect */
+.theme-transition {
+  animation: theme-fade 0.5s ease-in-out;
+}
+
+@keyframes theme-fade {
+  0% { 
+    opacity: 0.7;
+    transform: scale(0.98);
+  }
+  50% {
+    opacity: 0.9;
+    transform: scale(1.02);
+  }
+  100% { 
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .dark {
