@@ -644,17 +644,29 @@ export default function ShowDetails({
                           episode.title
                         )}
                       </span>
-                      {/* Show rating and date in a consistent manner only when data is good quality */}
-                      {episode.metadata?.voteAverage && episode.metadata?.releaseDate && (
-                        <>
-                          <Badge variant="secondary" className="ml-auto">
+                      {/* Show rating, date, runtime, and content rating when available */}
+                      <div className="flex items-center ml-auto gap-1">
+                        {episode.metadata?.runtime && (
+                          <Badge variant="outline" className="text-xs">
+                            {episode.metadata.runtime} min
+                          </Badge>
+                        )}
+                        {episode.metadata?.contentRating && (
+                          <Badge variant="outline" className="text-xs">
+                            {episode.metadata.contentRating}
+                          </Badge>
+                        )}
+                        {episode.metadata?.voteAverage && (
+                          <Badge variant="secondary">
                             {episode.metadata.voteAverage.toFixed(1)}★
                           </Badge>
-                          <span className="text-xs text-muted-foreground ml-2">
+                        )}
+                        {episode.metadata?.releaseDate && (
+                          <span className="text-xs text-muted-foreground ml-1">
                             {new Date(episode.metadata.releaseDate).toLocaleDateString()}
                           </span>
-                        </>
-                      )}
+                        )}
+                      </div>
                     </Button>
                   ))
                 ) : (
@@ -735,11 +747,23 @@ export default function ShowDetails({
                 <span className="text-muted-foreground">
                   Next: S{nextEpisode.metadata?.season}E{nextEpisode.metadata?.episode}
                 </span>
-                {nextEpisode.metadata?.voteAverage && nextEpisode.metadata?.releaseDate && (
-                  <Badge variant="secondary" className="ml-2">
-                    {nextEpisode.metadata.voteAverage.toFixed(1)}★
-                  </Badge>
-                )}
+                <div className="flex items-center gap-1 ml-2">
+                  {nextEpisode.metadata?.runtime && (
+                    <Badge variant="outline" className="text-xs">
+                      {nextEpisode.metadata.runtime} min
+                    </Badge>
+                  )}
+                  {nextEpisode.metadata?.contentRating && (
+                    <Badge variant="outline" className="text-xs">
+                      {nextEpisode.metadata.contentRating}
+                    </Badge>
+                  )}
+                  {nextEpisode.metadata?.voteAverage && (
+                    <Badge variant="secondary">
+                      {nextEpisode.metadata.voteAverage.toFixed(1)}★
+                    </Badge>
+                  )}
+                </div>
               </div>
               {(() => {
                 const showId = displayShow.metadata?.imdbId || displayShow.sourceId;

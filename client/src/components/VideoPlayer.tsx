@@ -136,7 +136,7 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
             <div className="space-y-3">
               {/* Release date information */}
               <div className="flex flex-wrap gap-2">
-                {/* Movie release date */}
+                {/* Movie release date & info */}
                 {video.metadata?.type === 'movie' && video.metadata.releaseDate && (
                   <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
                     <span>Released: {new Date(video.metadata.releaseDate).toLocaleDateString()}</span>
@@ -145,6 +145,20 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
                         ★ {video.metadata.voteAverage.toFixed(1)}
                       </span>
                     }
+                  </div>
+                )}
+                
+                {/* Movie runtime */}
+                {video.metadata?.type === 'movie' && video.metadata.runtime && (
+                  <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                    <span>Duration: {video.metadata.runtime} min</span>
+                  </div>
+                )}
+                
+                {/* Movie content rating */}
+                {video.metadata?.type === 'movie' && video.metadata.contentRating && (
+                  <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                    <span>Rated: {video.metadata.contentRating}</span>
                   </div>
                 )}
                 
