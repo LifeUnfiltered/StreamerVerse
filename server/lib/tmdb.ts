@@ -520,7 +520,12 @@ export async function fetchEpisodeDetailsByImdbId(
   imdbId: string, 
   seasonNumber: number, 
   episodeNumber: number
-): Promise<{ title: string, description: string } | null> {
+): Promise<{ 
+  title: string, 
+  description: string,
+  releaseDate?: string,
+  voteAverage?: number 
+} | null> {
   try {
     console.log(`Looking up TMDB ID for IMDB ID: ${imdbId}`);
     
@@ -549,7 +554,9 @@ export async function fetchEpisodeDetailsByImdbId(
     
     return {
       title: episodeDetails.name || `Episode ${episodeNumber}`,
-      description: episodeDetails.overview || `Season ${seasonNumber}, Episode ${episodeNumber}`
+      description: episodeDetails.overview || `Season ${seasonNumber}, Episode ${episodeNumber}`,
+      releaseDate: episodeDetails.air_date,
+      voteAverage: episodeDetails.vote_average
     };
   } catch (error) {
     console.error(`Error fetching episode details for ${imdbId} S${seasonNumber}E${episodeNumber}:`, error);

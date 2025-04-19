@@ -287,6 +287,8 @@ export async function registerRoutes(app: Express) {
                     type: 'tv',
                     season: s,
                     episode: e,
+                    releaseDate: episodeDetails?.releaseDate,
+                    voteAverage: episodeDetails?.voteAverage, 
                     // Support multiple domains (client will handle domain fallbacks)
                     embedUrl: `https://vidsrc.xyz/embed/tv?imdb=${showId}&season=${s}&episode=${e}`
                   },

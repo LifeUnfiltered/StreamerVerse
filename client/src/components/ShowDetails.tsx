@@ -625,7 +625,7 @@ export default function ShowDetails({
                         S{episode.metadata?.season}E{episode.metadata?.episode}
                       </span>
                       {/* Extract and display just the unique episode name without show name */}
-                      <span className="truncate">
+                      <span className="truncate flex-grow">
                         {episode.metadata?.season && episode.metadata?.episode ? (
                           <>
                             {(() => {
@@ -644,6 +644,18 @@ export default function ShowDetails({
                           episode.title
                         )}
                       </span>
+                      {/* Show rating badge if available */}
+                      {episode.metadata?.voteAverage && (
+                        <Badge variant="secondary" className="ml-auto">
+                          {episode.metadata.voteAverage.toFixed(1)}★
+                        </Badge>
+                      )}
+                      {/* Show release date if available */}
+                      {episode.metadata?.releaseDate && (
+                        <span className="text-xs text-muted-foreground ml-2">
+                          {new Date(episode.metadata.releaseDate).toLocaleDateString()}
+                        </span>
+                      )}
                     </Button>
                   ))
                 ) : (
@@ -719,8 +731,39 @@ export default function ShowDetails({
         
         {nextEpisode && (
           <div className="mt-4 flex items-center justify-between border-t pt-4">
-            <div className="text-sm text-muted-foreground">
-              Next: S{nextEpisode.metadata?.season}E{nextEpisode.metadata?.episode}
+            <div className="text-sm">
+              <div className="flex items-center">
+                <span className="text-muted-foreground">
+                  Next: S{nextEpisode.metadata?.season}E{nextEpisode.metadata?.episode}
+                </span>
+                {nextEpisode.metadata?.voteAverage && (
+                  <Badge variant="secondary" className="ml-2">
+                    {nextEpisode.metadata.voteAverage.toFixed(1)}★
+                  </Badge>
+                )}
+              </div>
+              {(() => {
+                const showId = displayShow.metadata?.imdbId || displayShow.sourceId;
+                const cacheKey = getEpisodeKey(
+                  showId, 
+                  nextEpisode.metadata?.season || 1, 
+                  nextEpisode.metadata?.episode || 1
+                );
+                const episodeTitle = episodeTitleCacheRef.current[cacheKey];
+                
+                return episodeTitle ? (
+                  <div className="font-medium">{episodeTitle}</div>
+                ) : (
+                  nextEpisode.title && nextEpisode.title.includes(' - ') && (
+                    <div className="font-medium">{nextEpisode.title.split(' - ')[1]}</div>
+                  )
+                );
+              })()}
+              {nextEpisode.metadata?.releaseDate && (
+                <div className="text-xs text-muted-foreground">
+                  {new Date(nextEpisode.metadata.releaseDate).toLocaleDateString()}
+                </div>
+              )}
             </div>
             <Button
               size="sm"
