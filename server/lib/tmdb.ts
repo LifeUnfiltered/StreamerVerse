@@ -111,11 +111,13 @@ function episodeToVideo(episode: any, show: any): Video {
         `https://vidsrc.xyz/embed/tv?imdb=${imdbId}&season=${seasonNum}&episode=${episodeNum}` : null,
       season: seasonNum,
       episode: episodeNum,
-      // Include cast and crew from the show
-      cast: show.credits?.cast?.slice(0, 10) || [],
-      crew: show.credits?.crew?.filter((person: any) => 
-        ['Creator', 'Executive Producer', 'Producer', 'Director', 'Writer'].includes(person.job)
-      ).slice(0, 10) || [],
+      // Try to use episode credits first, fall back to show credits if not available
+      cast: episode.credits?.cast?.slice(0, 10) || show.credits?.cast?.slice(0, 10) || [],
+      crew: (episode.credits?.crew?.filter((person: any) => 
+        ['Director', 'Writer', 'Producer', 'Executive Producer'].includes(person.job)) || 
+        show.credits?.crew?.filter((person: any) => 
+          ['Creator', 'Executive Producer', 'Producer', 'Director', 'Writer'].includes(person.job))
+      )?.slice(0, 10) || [],
       createdBy: show.created_by || [],
       networks: show.networks || [],
       productionCompanies: show.production_companies || []
@@ -252,11 +254,12 @@ export async function fetchTVShowEpisodes(showId: number, seasonNumber?: number)
         // Fetch individual episode details for more complete information
         for (const episode of season.episodes || []) {
           try {
-            // For each episode, get its full details including overview
+            // For each episode, get its full details including overview and credits
             const episodeDetails = await tmdb.episodeInfo({
               id: showId,
               season_number: seasonNumber,
-              episode_number: episode.episode_number
+              episode_number: episode.episode_number,
+              append_to_response: 'credits'
             });
             
             // Use the enhanced details
@@ -296,11 +299,12 @@ export async function fetchTVShowEpisodes(showId: number, seasonNumber?: number)
             // Fetch detailed info for the first few episodes
             for (const episode of episodesToFetchDetailed) {
               try {
-                // Get full episode details for better descriptions
+                // Get full episode details with credits for better descriptions
                 const episodeDetails = await tmdb.episodeInfo({
                   id: showId,
                   season_number: i,
-                  episode_number: episode.episode_number
+                  episode_number: episode.episode_number,
+                  append_to_response: 'credits'
                 });
                 
                 // Use enhanced details
@@ -379,7 +383,8 @@ export async function fetchLatestEpisodes(): Promise<Video[]> {
               const episodeDetails = await tmdb.episodeInfo({
                 id: show.id,
                 season_number: latestSeason,
-                episode_number: episode.episode_number
+                episode_number: episode.episode_number,
+                append_to_response: 'credits'
               });
               
               // Use detailed episode information

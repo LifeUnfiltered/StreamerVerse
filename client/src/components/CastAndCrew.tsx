@@ -138,18 +138,35 @@ export default function CastAndCrew({ video }: CastAndCrewProps) {
         <TabsContent value="cast" className="mt-4">
           {cast.length > 0 ? (
             <ScrollArea className="h-full max-h-[300px]">
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {cast.map(person => (
-                  <div key={person.id} className="flex flex-col items-center text-center">
-                    {renderAvatar(person)}
-                    <div className="mt-2">
-                      <p className="font-medium text-sm">{person.name}</p>
-                      {person.character && (
-                        <p className="text-xs text-muted-foreground">{person.character}</p>
-                      )}
-                    </div>
+              <div className="space-y-4">
+                {/* Main Cast */}
+                <div>
+                  <Button 
+                    variant="ghost" 
+                    className="flex w-full justify-between p-2"
+                    onClick={() => toggleSection('cast')}
+                  >
+                    <span className="font-medium">Cast</span>
+                    <span>{expandedSection === 'cast' ? '−' : '+'}</span>
+                  </Button>
+                  
+                  <div className={cn(
+                    "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-2",
+                    expandedSection !== 'cast' && 'hidden'
+                  )}>
+                    {cast.map(person => (
+                      <div key={person.id} className="flex flex-col items-center text-center">
+                        {renderAvatar(person)}
+                        <div className="mt-2">
+                          <p className="font-medium text-sm">{person.name}</p>
+                          {person.character && (
+                            <p className="text-xs text-muted-foreground">{person.character}</p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
               </div>
             </ScrollArea>
           ) : (
