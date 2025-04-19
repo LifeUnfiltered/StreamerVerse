@@ -8,32 +8,41 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 const themes = [
   { 
     name: "light", 
     icon: Sun, 
     label: "Light",
-    className: "bg-white text-black"
+    className: "bg-amber-50 text-amber-600 border border-amber-200"
   },
   { 
     name: "dark", 
     icon: Moon, 
     label: "Dark",
-    className: "bg-zinc-900 text-white" 
+    className: "bg-zinc-900 text-blue-400 border border-zinc-700" 
   },
   { 
     name: "system", 
     icon: SunMoon, 
     label: "System",
-    className: "bg-gradient-to-r from-sky-400 to-purple-500 text-white"
+    className: "bg-gradient-to-r from-sky-500 to-indigo-500 text-white border border-sky-600"
   }
 ];
 
 export default function ThemeSwitcher() {
   const { theme, setTheme } = useTheme();
+  const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedTheme, setSelectedTheme] = useState(theme);
+  const [previousTheme, setPreviousTheme] = useState(theme);
   
   // Update selected theme when the theme changes externally
   useEffect(() => {
@@ -42,6 +51,22 @@ export default function ThemeSwitcher() {
 
   // Add transition effect to body when theme changes
   useEffect(() => {
+    if (theme !== previousTheme) {
+      // Get theme label
+      const themeInfo = themes.find(t => t.name === theme) || themes[0];
+      const Icon = themeInfo.icon;
+      
+      // Show toast notification
+      toast({
+        title: `Theme changed to ${themeInfo.label}`,
+        description: "Your viewing experience has been updated.",
+        variant: "default",
+      });
+      
+      // Update previous theme
+      setPreviousTheme(theme);
+    }
+    
     const body = document.body;
     body.classList.add('theme-transition');
     
@@ -51,32 +76,41 @@ export default function ThemeSwitcher() {
     }, 500);
     
     return () => clearTimeout(timeout);
-  }, [theme]);
+  }, [theme, previousTheme, toast]);
 
   const currentTheme = themes.find(t => t.name === selectedTheme) || themes[0];
   const Icon = currentTheme.icon;
 
   return (
     <div className="relative">
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => setIsOpen(!isOpen)}
-        className={`relative h-9 w-9 rounded-full transition-all ${
-          isOpen ? 
-            'bg-primary/10 shadow-lg shadow-primary/20' : 
-            'hover:shadow-md hover:shadow-primary/10'
-        }`}
-        aria-label="Toggle theme switcher"
-      >
-        <motion.div
-          initial={{ rotate: 0 }}
-          animate={{ rotate: isOpen ? 90 : 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          {isOpen ? <Palette className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
-        </motion.div>
-      </Button>
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setIsOpen(!isOpen)}
+              className={`relative h-9 w-9 rounded-full transition-all ${
+                isOpen ? 
+                  'bg-primary/10 shadow-lg shadow-primary/20' : 
+                  'hover:shadow-md hover:shadow-primary/10'
+              }`}
+              aria-label="Toggle theme switcher"
+            >
+              <motion.div
+                initial={{ rotate: 0 }}
+                animate={{ rotate: isOpen ? 90 : 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                {isOpen ? <Palette className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
+              </motion.div>
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            <p className="text-xs">Change appearance</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
 
       <AnimatePresence>
         {isOpen && (
