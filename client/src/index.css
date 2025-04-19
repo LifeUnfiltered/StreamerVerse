@@ -12,10 +12,19 @@
   }
 }
 
-/* Add smooth transition for theme changes */
+/* Custom theme variables and smooth transitions */
 :root {
+  /* Default transition settings */
   --transition-duration: 350ms;
   --transition-timing: cubic-bezier(0.34, 1.56, 0.64, 1);
+  
+  /* Theme color variables (can be changed via JS) */
+  --theme-primary: #3b82f6; /* Default blue */
+  --theme-primary-light: #60a5fa;
+  --theme-primary-dark: #2563eb;
+  
+  /* Define magic angle for gradients */
+  --magic-rainbow-angle: 135deg;
 }
 
 .dark,
@@ -40,6 +49,27 @@
   --border: 240 5.9% 90%;
   --input: 240 5.9% 90%;
   --ring: 240 5.9% 10%;
+}
+
+/* Apply custom theme color to certain elements */
+.btn-themed,
+.themed-border,
+.themed-text {
+  color: var(--theme-primary);
+  border-color: var(--theme-primary);
+}
+
+.themed-bg {
+  background-color: var(--theme-primary);
+}
+
+.themed-gradient {
+  background: linear-gradient(
+    var(--magic-rainbow-angle),
+    var(--theme-primary-light),
+    var(--theme-primary),
+    var(--theme-primary-dark)
+  );
 }
 
 /* Theme transition animations */
@@ -129,6 +159,53 @@
   }
 }
 
+/* Button rotation effects */
+.rotate-clockwise {
+  animation: rotate-cw 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.rotate-counter-clockwise {
+  animation: rotate-ccw 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes rotate-cw {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes rotate-ccw {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(-360deg); }
+}
+
+/* Theme icon pop effect */
+.theme-icon-container {
+  position: relative;
+  z-index: 10;
+}
+
+.theme-icon-container::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: radial-gradient(circle, var(--theme-primary-light) 0%, transparent 70%);
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  z-index: -1;
+  opacity: 0;
+  transition: all 0.3s ease-out;
+}
+
+.theme-icon-container:hover::after {
+  width: 200%;
+  height: 200%;
+  opacity: 0.3;
+}
+
+/* Dark theme settings */
 .dark {
   --background: 240 10% 3.9%;
   --foreground: 0 0% 98%;
@@ -149,4 +226,9 @@
   --border: 240 3.7% 15.9%;
   --input: 240 3.7% 15.9%;
   --ring: 240 4.9% 83.9%;
+  
+  /* Dark theme override for icon glow */
+  .theme-icon-container::after {
+    background: radial-gradient(circle, var(--theme-primary-dark) 0%, transparent 70%);
+  }
 }
