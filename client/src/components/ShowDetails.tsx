@@ -476,7 +476,12 @@ export default function ShowDetails({
         tmdbId: displayShow.metadata?.tmdbId,
         embedUrl: `https://vidsrc.xyz/embed/tv?imdb=${showId}&season=${customSeasonNum}&episode=${customEpisodeNum}`,
         season: customSeasonNum,
-        episode: customEpisodeNum
+        episode: customEpisodeNum,
+        // Preserve these fields from the parent show or current episode for consistency
+        runtime: currentEpisode?.metadata?.runtime || displayShow.metadata?.runtime,
+        contentRating: displayShow.metadata?.contentRating || currentEpisode?.metadata?.contentRating,
+        voteAverage: currentEpisode?.metadata?.voteAverage || displayShow.metadata?.voteAverage,
+        releaseDate: currentEpisode?.metadata?.releaseDate
       },
       chapters: null
     };

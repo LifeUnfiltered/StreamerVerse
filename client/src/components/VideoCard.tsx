@@ -72,11 +72,53 @@ export default function VideoCard({
             )}>
               {video.title}
             </h3>
+            
+            {/* For compact view, show badges in a single row */}
+            {isCompact && (
+              <div className="flex flex-wrap gap-1 mt-1">
+                {video.metadata?.contentRating && (
+                  <span className="inline-flex items-center rounded-sm bg-secondary/50 px-1.5 py-0.5 text-[10px] font-medium">
+                    {video.metadata.contentRating}
+                  </span>
+                )}
+                {video.metadata?.runtime && (
+                  <span className="inline-flex items-center rounded-sm bg-secondary/50 px-1.5 py-0.5 text-[10px] font-medium">
+                    {video.metadata.runtime}m
+                  </span>
+                )}
+                {video.metadata?.voteAverage && (
+                  <span className="inline-flex items-center rounded-sm bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
+                    {video.metadata.voteAverage.toFixed(1)}★
+                  </span>
+                )}
+              </div>
+            )}
+            
             {!isCompact && (
               <>
                 <p className="text-sm text-muted-foreground mt-1 line-clamp-2 transition-colors duration-300">
                   {video.description}
                 </p>
+                
+                {/* Display metadata badges (Content Rating, Runtime) */}
+                <div className="flex gap-2 mt-1.5 mb-1">
+                  {video.metadata?.contentRating && (
+                    <span className="inline-flex items-center rounded-md bg-secondary/50 px-2 py-1 text-xs font-medium">
+                      {video.metadata.contentRating}
+                    </span>
+                  )}
+                  {video.metadata?.runtime && (
+                    <span className="inline-flex items-center rounded-md bg-secondary/50 px-2 py-1 text-xs font-medium">
+                      {video.metadata.runtime} min
+                    </span>
+                  )}
+                  {video.metadata?.voteAverage && (
+                    <span className="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary">
+                      {video.metadata.voteAverage.toFixed(1)}★
+                    </span>
+                  )}
+                </div>
+                
                 {/* Display release date for movies */}
                 {video.metadata?.type === 'movie' && video.metadata.releaseDate && (
                   <p className="text-xs text-primary mt-1 font-medium">
