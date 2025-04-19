@@ -131,14 +131,40 @@ export default function VidSrc() {
       const response = await apiRequest('GET', endpoint);
       const results = await response.json();
       
-      // Cache show titles for TV shows
+      // Process results to cache metadata
       if (currentSource === 'vidsrc') {
         results.forEach((video: Video) => {
-          if (video.metadata?.type === 'tv') {
+          // For TV shows, cache the title
+          if (video.metadata?.type === 'tv' && !video.metadata?.season) {
             const showId = video.metadata?.imdbId || video.sourceId;
             if (showId && video.title) {
               showNameCache.set(showId, video.title);
-              console.log(`Cached show title: ${showId} = "${video.title}"`);
+              console.log(`Cached show title from search: ${showId} = "${video.title}"`);
+            }
+          }
+          
+          // For TV episodes, cache title and description
+          if (video.metadata?.type === 'tv' && video.metadata?.season && video.metadata?.episode) {
+            const showId = video.metadata?.imdbId || video.sourceId?.split('-')[0];
+            const season = video.metadata.season;
+            const episodeNum = video.metadata.episode;
+            
+            // Cache the episode description if available
+            if (video.description) {
+              const cacheKey = getEpisodeKey(showId, season, episodeNum);
+              episodeDescriptionCache.set(cacheKey, video.description);
+              console.log(`Cached episode description from search: ${cacheKey}`);
+            }
+            
+            // Extract and cache episode title if it follows our format
+            if (video.title && video.title.includes(' - ')) {
+              const titleParts = video.title.split(' - ');
+              if (titleParts.length > 1) {
+                const episodeTitle = titleParts[1];
+                const cacheKey = getEpisodeKey(showId, season, episodeNum);
+                episodeTitleCache.set(cacheKey, episodeTitle);
+                console.log(`Cached episode title from search: ${cacheKey} = "${episodeTitle}"`);
+              }
             }
           }
         });
@@ -150,9 +176,15 @@ export default function VidSrc() {
   });
 
   const handleSearch = (query: string) => {
+    console.log('Searching for:', query);
     setSearchQuery(query);
     setSelectedVideo(null);
-    setNavigation({ view: 'search', previousView: navigation.view === 'search' ? navigation.previousView : navigation.view });
+    
+    // Keep the searchQuery in the navigation state, but update the view
+    setNavigation({ 
+      view: 'search', 
+      previousView: navigation.view === 'search' ? navigation.previousView : navigation.view 
+    });
   };
 
   const handleSourceSelect = (source: 'youtube' | 'vidsrc') => {
@@ -199,8 +231,20 @@ export default function VidSrc() {
     // Find a complete version of the video to preserve all metadata
     let completeVideo = null;
     
+    // Print current video selection information for debugging
+    console.log('Selected video:', video.title, 'with metadata:', video.metadata);
+    
     // For TV episodes, search in the episodes array
     if (video.metadata?.type === 'tv' && video.metadata?.season && video.metadata?.episode) {
+      const showId = video.metadata?.imdbId || video.sourceId?.split('-')[0];
+      const season = video.metadata.season;
+      const episodeNum = video.metadata.episode;
+      
+      // Calculate the cache key for this episode
+      const cacheKey = getEpisodeKey(showId, season, episodeNum);
+      
+      console.log('Current episode:', updatedVideo.title);
+      
       // First try to find this episode in the showEpisodes array to get complete metadata
       completeVideo = showEpisodes.find(ep => 
         ep.id === video.id || 
@@ -208,10 +252,6 @@ export default function VidSrc() {
          ep.metadata?.season === video.metadata?.season && 
          ep.metadata?.episode === video.metadata?.episode)
       );
-      
-      const showId = video.metadata?.imdbId || video.sourceId?.split('-')[0];
-      const season = video.metadata.season;
-      const episodeNum = video.metadata.episode;
       
       // If found in episodes, use that instead but keep current values we want to preserve
       if (completeVideo) {
@@ -224,10 +264,16 @@ export default function VidSrc() {
         
         // Store the description in the cache
         if (updatedVideo.description) {
-          const cacheKey = getEpisodeKey(showId, season, episodeNum);
           episodeDescriptionCache.set(cacheKey, updatedVideo.description);
           console.log(`Caching episode description: ${cacheKey} = "${updatedVideo.description}"`);
         }
+      }
+      
+      // If we have a cached description but the video doesn't have one, apply it
+      const cachedDescription = episodeDescriptionCache.get(cacheKey);
+      if (cachedDescription && (!updatedVideo.description || updatedVideo.description === '')) {
+        console.log(`Applying cached description to episode: ${cacheKey}`);
+        updatedVideo.description = cachedDescription;
       }
       
       // Check if this episode has a cached title
@@ -544,7 +590,7 @@ export default function VidSrc() {
     queryFn: async () => {
       if (!episodeFetchId) return [];
       
-      console.log('Fetching episodes for show with ID:', episodeFetchId);
+      console.log('Fetching episode data from API for show ID:', episodeFetchId);
       
       // Use ID or sourceId depending on what's available
       const response = await apiRequest('GET', `/api/videos/tv/${episodeFetchId}/episodes`);

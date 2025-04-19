@@ -155,6 +155,26 @@ export default function ShowDetails({
     // First ensure we've captured all episode titles and descriptions
     fetchEpisodeData(episodeList);
     
+    // Print debug info about current episode
+    if (currentEpisode?.metadata?.season && currentEpisode?.metadata?.episode) {
+      const season = currentEpisode.metadata.season;
+      const episodeNum = currentEpisode.metadata.episode;
+      const cacheKey = getEpisodeKey(showId, season, episodeNum);
+      console.log(`Current episode: ${currentEpisode.title}, Description: ${currentEpisode.description?.substring(0, 50)}...`);
+      console.log(`Available cached description: ${episodeDescriptionCacheRef.current[cacheKey]?.substring(0, 50)}...`);
+      console.log(`Episodes count:`, episodeList.length);
+      console.log(`Available seasons:`, seasons);
+      console.log(`Selected season:`, selectedSeason);
+      console.log(`Current episode:`, currentEpisode.title);
+      console.log(`Fetching episode data from API for show ID:`, showId);
+    }
+    
+    // Check if there are any cached descriptions to use
+    const cachedDescriptionKeys = Object.keys(episodeDescriptionCacheRef.current);
+    if (cachedDescriptionKeys.length > 0) {
+      console.log(`Cached episode descriptions available: ${cachedDescriptionKeys.length}`);
+    }
+    
     // Process each episode to ensure consistent formatting
     return episodeList.map(episode => {
       if (episode.metadata?.season && episode.metadata?.episode) {
@@ -173,12 +193,29 @@ export default function ShowDetails({
         // Check if we have a cached description for this episode
         const thisEpisodeDescription = episodeDescriptionCacheRef.current[cacheKey];
         
-        // If we have title and description data, create a new episode object with both
-        return {
+        // Create updated episode with cached metadata
+        const updatedEpisode = {
           ...episode,
-          title: formattedTitle,
-          description: thisEpisodeDescription || episode.description
+          title: formattedTitle
         };
+        
+        // Apply cached description if available
+        if (thisEpisodeDescription) {
+          updatedEpisode.description = thisEpisodeDescription;
+        }
+        
+        // If this is the current episode, make sure to use the parent component's cached description
+        if (currentEpisode && 
+            currentEpisode.metadata?.season === season && 
+            currentEpisode.metadata?.episode === episodeNum && 
+            currentEpisode.description) {
+          
+          // Update our local cache with the latest description from the parent component
+          episodeDescriptionCacheRef.current[cacheKey] = currentEpisode.description;
+          updatedEpisode.description = currentEpisode.description;
+        }
+        
+        return updatedEpisode;
       }
       
       // Return original episode if no special formatting needed
