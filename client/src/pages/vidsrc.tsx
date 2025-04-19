@@ -209,6 +209,10 @@ export default function VidSrc() {
          ep.metadata?.episode === video.metadata?.episode)
       );
       
+      const showId = video.metadata?.imdbId || video.sourceId?.split('-')[0];
+      const season = video.metadata.season;
+      const episodeNum = video.metadata.episode;
+      
       // If found in episodes, use that instead but keep current values we want to preserve
       if (completeVideo) {
         console.log('Found complete episode in episodes list with all metadata:', completeVideo);
@@ -217,11 +221,14 @@ export default function VidSrc() {
           // Preserve the updated title if needed
           title: updatedVideo.title !== video.title ? updatedVideo.title : completeVideo.title
         };
+        
+        // Store the description in the cache
+        if (updatedVideo.description) {
+          const cacheKey = getEpisodeKey(showId, season, episodeNum);
+          episodeDescriptionCache.set(cacheKey, updatedVideo.description);
+          console.log(`Caching episode description: ${cacheKey} = "${updatedVideo.description}"`);
+        }
       }
-      
-      const showId = video.metadata?.imdbId || video.sourceId?.split('-')[0];
-      const season = video.metadata.season;
-      const episodeNum = video.metadata.episode;
       
       // Check if this episode has a cached title
       if (showId) {
@@ -271,6 +278,13 @@ export default function VidSrc() {
           
           // Update the video with the formatted title
           updatedVideo.title = newTitle;
+          
+          // Check if we have a cached description for this episode
+          const cachedDescription = episodeDescriptionCache.get(cacheKey);
+          if (cachedDescription) {
+            console.log(`Applying cached episode description for ${cacheKey}`);
+            updatedVideo.description = cachedDescription;
+          }
         } 
         // If we don't have a cached title but the video has one in the proper format, cache it
         else if (updatedVideo.title && updatedVideo.title.includes(' - ')) {
@@ -392,6 +406,9 @@ export default function VidSrc() {
 
   // Maintain a cache of episode titles
   const episodeTitleCache = useMemo(() => new Map<string, string>(), []);
+  
+  // Maintain a cache of episode descriptions
+  const episodeDescriptionCache = useMemo(() => new Map<string, string>(), []);
 
   // Function to get a key for the episode cache
   const getEpisodeKey = (showId: string, season: number, episode: number) => {
@@ -592,6 +609,15 @@ export default function VidSrc() {
           
           if (episode.title !== newTitle) {
             console.log(`Reformatting episode title: "${episode.title}" → "${newTitle}"`);
+          }
+          
+          // Cache the episode description if it's not a generic one
+          if (episode.description && 
+              !episode.description.startsWith('Season ') && 
+              !episode.description.startsWith(`S${season}E`)) {
+            const cacheKey = getEpisodeKey(episodeShowId, season, episodeNum);
+            episodeDescriptionCache.set(cacheKey, episode.description);
+            console.log(`Cached episode description from API: ${cacheKey} = "${episode.description}"`);
           }
           
           // Return a new episode object with the updated title
