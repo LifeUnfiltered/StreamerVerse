@@ -15,6 +15,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import confetti from 'canvas-confetti';
 
 const themes = [
   { 
@@ -43,11 +44,21 @@ export default function ThemeSwitcher() {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedTheme, setSelectedTheme] = useState(theme);
   const [previousTheme, setPreviousTheme] = useState(theme);
+  const [showIntroAnim, setShowIntroAnim] = useState(true);
   
   // Update selected theme when the theme changes externally
   useEffect(() => {
     setSelectedTheme(theme);
   }, [theme]);
+  
+  // Remove intro animation after a few seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowIntroAnim(false);
+    }, 3000);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   // Add transition effect to body when theme changes
   useEffect(() => {
@@ -94,7 +105,7 @@ export default function ThemeSwitcher() {
                 isOpen ? 
                   'bg-primary/10 shadow-lg shadow-primary/20' : 
                   'hover:shadow-md hover:shadow-primary/10'
-              }`}
+              } ${showIntroAnim ? 'theme-button-attention' : ''}`}
               aria-label="Toggle theme switcher"
             >
               <motion.div
@@ -133,6 +144,25 @@ export default function ThemeSwitcher() {
                     "bg-accent font-medium text-accent-foreground" : 
                     "text-foreground hover:bg-accent/50 hover:text-accent-foreground"}`}
                   onClick={() => {
+                    // Only trigger confetti if actually changing themes
+                    if (theme !== item.name) {
+                      // Customize confetti based on theme
+                      const colors = item.name === 'light' 
+                        ? ['#FFDD67', '#FFB800', '#fff'] 
+                        : item.name === 'dark'
+                          ? ['#3b82f6', '#1e40af', '#172554']
+                          : ['#6366f1', '#3b82f6', '#06b6d4'];
+                      
+                      // Fire confetti from the button area
+                      confetti({
+                        particleCount: 50,
+                        spread: 70,
+                        origin: { y: 0.15, x: 0.9 },
+                        colors: colors,
+                        disableForReducedMotion: true
+                      });
+                    }
+                    
                     setTheme(item.name as "light" | "dark" | "system");
                     setIsOpen(false);
                   }}
