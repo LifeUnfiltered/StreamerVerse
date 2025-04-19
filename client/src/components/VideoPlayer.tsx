@@ -183,7 +183,7 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
                   </div>
                 )}
                 
-                {/* TV Episode air date */}
+                {/* TV Episode air date & info */}
                 {video.metadata?.type === 'tv' && video.metadata.season && video.metadata.episode && (
                   <div className="flex flex-wrap gap-2">
                     <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
@@ -192,6 +192,16 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
                     {video.metadata.airDate && (
                       <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
                         <span>Aired: {new Date(video.metadata.airDate).toLocaleDateString()}</span>
+                      </div>
+                    )}
+                    {video.metadata.runtime && (
+                      <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                        <span>Duration: {video.metadata.runtime} min</span>
+                      </div>
+                    )}
+                    {video.metadata.contentRating && (
+                      <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                        <span>Rated: {video.metadata.contentRating}</span>
                       </div>
                     )}
                     {video.metadata.voteAverage && (
