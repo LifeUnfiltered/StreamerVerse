@@ -193,10 +193,14 @@ export default function ShowDetails({
         // Check if we have a cached description for this episode
         const thisEpisodeDescription = episodeDescriptionCacheRef.current[cacheKey];
         
-        // Create updated episode with cached metadata
+        // Create updated episode with cached metadata, preserving ALL original metadata
         const updatedEpisode = {
           ...episode,
-          title: formattedTitle
+          title: formattedTitle,
+          metadata: {
+            ...episode.metadata,
+            // Ensure we keep all metadata fields that might have been added
+          }
         };
         
         // Apply cached description if available
@@ -388,7 +392,12 @@ export default function ShowDetails({
           tmdbId: displayShow.metadata?.tmdbId,
           embedUrl: `https://vidsrc.xyz/embed/tv?imdb=${showId}&season=${currentSeason}&episode=${nextEpisodeNum}`,
           season: currentSeason,
-          episode: nextEpisodeNum
+          episode: nextEpisodeNum,
+          // Preserve these fields from the current episode for consistency
+          runtime: currentEpisode.metadata?.runtime,
+          contentRating: currentEpisode.metadata?.contentRating,
+          voteAverage: currentEpisode.metadata?.voteAverage,
+          releaseDate: currentEpisode.metadata?.releaseDate
         },
         chapters: null
       };
@@ -564,7 +573,12 @@ export default function ShowDetails({
         tmdbId: displayShow.metadata?.tmdbId,
         embedUrl: `https://vidsrc.xyz/embed/tv?imdb=${showId}&season=${newSeason}&episode=${newEpisodeNum}`,
         season: newSeason,
-        episode: newEpisodeNum
+        episode: newEpisodeNum,
+        // Preserve these fields from the current episode for consistency
+        runtime: currentEpisode.metadata?.runtime,
+        contentRating: currentEpisode.metadata?.contentRating,
+        voteAverage: currentEpisode.metadata?.voteAverage,
+        releaseDate: currentEpisode.metadata?.releaseDate
       },
       chapters: null
     };

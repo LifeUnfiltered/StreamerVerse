@@ -109,14 +109,19 @@ export default function ThemeSwitcher() {
             size="icon"
             onClick={toggleTheme}
             className={`relative h-9 w-9 rounded-full transition-all 
-              hover:shadow-md hover:shadow-primary/10
+              hover:bg-primary/10 hover:shadow-md hover:shadow-primary/10
+              hover:rotate-12 hover:scale-110
               ${showIntroAnim ? 'theme-button-attention' : ''}`}
             aria-label="Toggle dark mode"
           >
             <motion.div
               initial={false}
-              animate={{ rotate: isDarkMode ? 180 : 0, scale: 1 }}
-              transition={{ duration: 0.3, type: 'spring' }}
+              animate={{ rotate: isDarkMode ? 180 : 0, scale: [1, 1.2, 1] }}
+              transition={{ 
+                duration: 0.5, 
+                rotate: { type: 'spring', stiffness: 100 },
+                scale: { times: [0, 0.5, 1] }
+              }}
               className="relative"
             >
               {isDarkMode ? (
