@@ -259,7 +259,15 @@ export default function VidSrc() {
         updatedVideo = {
           ...completeVideo,
           // Preserve the updated title if needed
-          title: updatedVideo.title !== video.title ? updatedVideo.title : completeVideo.title
+          title: updatedVideo.title !== video.title ? updatedVideo.title : completeVideo.title,
+          // CRITICAL: Make sure to preserve metadata values from both current selection and complete data
+          metadata: {
+            ...completeVideo.metadata,
+            ...updatedVideo.metadata,
+            // Explicitly preserve runtime and content rating
+            runtime: completeVideo.metadata?.runtime || updatedVideo.metadata?.runtime,
+            contentRating: completeVideo.metadata?.contentRating || updatedVideo.metadata?.contentRating
+          }
         };
         
         // Store the description in the cache
@@ -364,7 +372,17 @@ export default function VidSrc() {
       
       if (completeVideo) {
         console.log('Found complete show in shows list with all metadata:', completeVideo);
-        updatedVideo = completeVideo;
+        updatedVideo = {
+          ...completeVideo,
+          // Make sure to keep original metadata values
+          metadata: {
+            ...completeVideo.metadata,
+            ...updatedVideo.metadata,
+            // Explicitly ensure runtime is preserved 
+            runtime: completeVideo.metadata?.runtime || updatedVideo.metadata?.runtime,
+            contentRating: completeVideo.metadata?.contentRating || updatedVideo.metadata?.contentRating
+          }
+        };
       }
     }
     
