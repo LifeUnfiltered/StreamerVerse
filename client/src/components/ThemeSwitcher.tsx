@@ -137,40 +137,47 @@ export default function ThemeSwitcher() {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleTheme}
-            className={`relative h-9 w-9 rounded-full transition-all 
-              hover:bg-primary/10 hover:shadow-md hover:shadow-primary/10
-              hover:scale-110
-              ${showIntroAnim ? 'theme-button-attention' : ''}`}
-            aria-label="Toggle theme"
+          <motion.div
+            initial={false}
+            animate={{ 
+              rotate: rotateDirection,
+              scale: [1, 1.2, 0.95, 1.1, 1]
+            }}
+            transition={{ 
+              duration: 0.7, 
+              rotate: { 
+                type: 'spring', 
+                stiffness: 80,
+                damping: 15
+              },
+              scale: {
+                duration: 0.5,
+                times: [0, 0.2, 0.5, 0.8, 1]
+              }
+            }}
+            whileTap={{ scale: 0.9 }}
+            whileHover={{ scale: 1.1 }}
+            className="theme-button-wrapper"
           >
-            <motion.div
-              initial={false}
-              animate={{ 
-                rotate: rotateDirection, 
-                scale: [1, 1.2, 1] 
-              }}
-              transition={{ 
-                duration: 0.7, 
-                rotate: { 
-                  type: 'spring', 
-                  stiffness: 80,
-                  damping: 15
-                },
-                scale: { times: [0, 0.5, 1] }
-              }}
-              className="relative theme-icon-container"
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              className={`relative h-9 w-9 rounded-full shadow-sm
+                hover:bg-primary/10 hover:shadow-md hover:shadow-primary/10
+                spin-button bg-gradient-to-br from-background to-background/80
+                ${showIntroAnim ? 'theme-button-attention' : ''}`}
+              aria-label="Toggle theme"
             >
-              {isDarkMode ? (
-                <Moon className="h-5 w-5 text-blue-400" />
-              ) : (
-                <Sun className="h-5 w-5 text-amber-500" />
-              )}
-            </motion.div>
-          </Button>
+              <div className="relative theme-icon-container">
+                {isDarkMode ? (
+                  <Moon className="h-5 w-5 text-blue-400" />
+                ) : (
+                  <Sun className="h-5 w-5 text-amber-500" />
+                )}
+              </div>
+            </Button>
+          </motion.div>
         </TooltipTrigger>
         <TooltipContent side="bottom">
           <p className="text-xs">Toggle {isDarkMode ? "light" : "dark"} mode</p>
@@ -234,14 +241,20 @@ export function ColorThemeButton() {
         <Tooltip>
           <TooltipTrigger asChild>
             <DialogTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                className="h-9 w-9 rounded-full transition-all hover:bg-primary/10 hover:scale-110"
-                aria-label="Color themes"
+              <motion.div
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                className="theme-button-wrapper"
               >
-                <Palette className="h-5 w-5 text-primary/80" />
-              </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="h-9 w-9 rounded-full shadow-sm bg-gradient-to-br from-background to-background/80"
+                  aria-label="Color themes"
+                >
+                  <Palette className="h-5 w-5 text-primary/80" />
+                </Button>
+              </motion.div>
             </DialogTrigger>
           </TooltipTrigger>
           <TooltipContent side="bottom">

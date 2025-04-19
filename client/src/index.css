@@ -168,6 +168,14 @@
   animation: rotate-ccw 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
+.spin-button {
+  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.spin-button:active {
+  transform: rotate(180deg) scale(0.9);
+}
+
 @keyframes rotate-cw {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -178,7 +186,36 @@
   100% { transform: rotate(-360deg); }
 }
 
-/* Theme icon pop effect */
+/* Theme icon and button effects */
+.theme-button-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  will-change: transform;
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.theme-button-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.theme-button-wrapper:hover::before {
+  opacity: 1;
+}
+
 .theme-icon-container {
   position: relative;
   z-index: 10;
