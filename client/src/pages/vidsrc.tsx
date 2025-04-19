@@ -633,7 +633,7 @@ export default function VidSrc() {
       
       return processedEpisodes;
     },
-    enabled: !!episodeFetchId && currentSource === 'vidsrc' && navigation.view === 'video'
+    enabled: !!episodeFetchId && currentSource === 'vidsrc' && (navigation.view === 'video' || selectedVideo?.metadata?.type === 'tv')
   });
 
   return (
