@@ -131,7 +131,62 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
                 {isLoading && <LoadingSpinner />}
               </AnimatePresence>
             </AspectRatio>
-            <div className="space-y-2">
+            <div className="space-y-3">
+              {/* Release date information */}
+              <div className="flex flex-wrap gap-2">
+                {/* Movie release date */}
+                {video.metadata?.type === 'movie' && video.metadata.releaseDate && (
+                  <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                    <span>Released: {new Date(video.metadata.releaseDate).toLocaleDateString()}</span>
+                    {video.metadata.voteAverage && 
+                      <span className="ml-2 px-2 py-0.5 bg-primary/20 rounded-full">
+                        ★ {video.metadata.voteAverage.toFixed(1)}
+                      </span>
+                    }
+                  </div>
+                )}
+                
+                {/* TV Show air dates */}
+                {video.metadata?.type === 'tv' && !video.metadata.season && (
+                  <div className="flex flex-wrap gap-2">
+                    {video.metadata.firstAirDate && (
+                      <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                        <span>First aired: {new Date(video.metadata.firstAirDate).toLocaleDateString()}</span>
+                      </div>
+                    )}
+                    {video.metadata.lastAirDate && video.metadata.lastAirDate !== video.metadata.firstAirDate && (
+                      <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                        <span>Last aired: {new Date(video.metadata.lastAirDate).toLocaleDateString()}</span>
+                      </div>
+                    )}
+                    {video.metadata.voteAverage && (
+                      <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-medium">
+                        <span>★ {video.metadata.voteAverage.toFixed(1)}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {/* TV Episode air date */}
+                {video.metadata?.type === 'tv' && video.metadata.season && video.metadata.episode && (
+                  <div className="flex flex-wrap gap-2">
+                    <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                      <span>S{video.metadata.season} E{video.metadata.episode}</span>
+                    </div>
+                    {video.metadata.airDate && (
+                      <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-medium">
+                        <span>Aired: {new Date(video.metadata.airDate).toLocaleDateString()}</span>
+                      </div>
+                    )}
+                    {video.metadata.voteAverage && (
+                      <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-medium">
+                        <span>★ {video.metadata.voteAverage.toFixed(1)}</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              
               <p className="text-sm text-muted-foreground">
                 {/* Show a proper episode description if available for TV show episodes */}
                 {video.source === 'vidsrc' && video.metadata?.type === 'tv' && video.metadata?.season && video.metadata?.episode ? (
@@ -161,11 +216,6 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
                   video.description || video.title
                 )}
               </p>
-              {video.metadata?.type === 'tv' && video.metadata?.season && video.metadata?.episode && (
-                <p className="text-xs text-muted-foreground font-mono">
-                  Season {video.metadata.season}, Episode {video.metadata.episode}
-                </p>
-              )}
             </div>
           </div>
         </CardContent>
