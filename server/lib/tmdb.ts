@@ -126,7 +126,7 @@ export async function fetchLatestMovies(page: number = 1): Promise<Video[]> {
       try {
         const movieDetails = await tmdb.movieInfo({
           id: movie.id,
-          append_to_response: 'external_ids'
+          append_to_response: 'external_ids,credits,production_companies,networks'
         });
 
         if (movieDetails.imdb_id) {
@@ -156,7 +156,7 @@ export async function searchContent(query: string): Promise<Video[]> {
           // Fetch complete movie details including IMDB ID
           const movieDetails = await tmdb.movieInfo({
             id: result.id,
-            append_to_response: 'external_ids'
+            append_to_response: 'external_ids,credits,production_companies,networks'
           });
 
           if (movieDetails.imdb_id) {
@@ -166,7 +166,7 @@ export async function searchContent(query: string): Promise<Video[]> {
           // Fetch complete TV show details including external IDs
           const showDetails = await tmdb.tvInfo({
             id: result.id,
-            append_to_response: 'external_ids'
+            append_to_response: 'external_ids,credits,production_companies,networks'
           });
 
           if (showDetails.name && showDetails.external_ids?.imdb_id) {
@@ -197,7 +197,7 @@ export async function fetchLatestTVShows(page: number = 1): Promise<Video[]> {
       try {
         const showDetails = await tmdb.tvInfo({
           id: show.id,
-          append_to_response: 'external_ids'
+          append_to_response: 'external_ids,credits,production_companies,networks'
         });
 
         if (showDetails.name && showDetails.external_ids?.imdb_id) {
@@ -221,7 +221,7 @@ export async function fetchTVShowEpisodes(showId: number, seasonNumber?: number)
   try {
     const showDetails = await tmdb.tvInfo({
       id: showId,
-      append_to_response: 'external_ids'
+      append_to_response: 'external_ids,credits,production_companies,networks'
     });
 
     if (!showDetails.name || !showDetails.external_ids?.imdb_id) {
@@ -342,7 +342,7 @@ export async function fetchLatestEpisodes(): Promise<Video[]> {
       try {
         const showDetails = await tmdb.tvInfo({
           id: show.id,
-          append_to_response: 'external_ids'
+          append_to_response: 'external_ids,credits,production_companies,networks'
         });
 
         if (!showDetails.name || !showDetails.external_ids?.imdb_id) {
@@ -414,7 +414,7 @@ export async function fetchTrending(timeWindow: 'day' | 'week' = 'week', page: n
           // Fetch complete movie details
           const movieDetails = await tmdb.movieInfo({
             id: item.id,
-            append_to_response: 'external_ids'
+            append_to_response: 'external_ids,credits,production_companies,networks'
           });
           
           if (movieDetails.imdb_id) {
@@ -424,7 +424,7 @@ export async function fetchTrending(timeWindow: 'day' | 'week' = 'week', page: n
           // Fetch complete TV show details
           const showDetails = await tmdb.tvInfo({
             id: item.id,
-            append_to_response: 'external_ids'
+            append_to_response: 'external_ids,credits,production_companies,networks'
           });
           
           if (showDetails.name && showDetails.external_ids?.imdb_id) {
@@ -482,7 +482,7 @@ export async function fetchMoviesByGenre(genreId: number, page: number = 1): Pro
       try {
         const movieDetails = await tmdb.movieInfo({
           id: movie.id,
-          append_to_response: 'external_ids'
+          append_to_response: 'external_ids,credits,production_companies,networks'
         });
         
         if (movieDetails.imdb_id) {
@@ -517,7 +517,7 @@ export async function fetchTVShowsByGenre(genreId: number, page: number = 1): Pr
       try {
         const showDetails = await tmdb.tvInfo({
           id: show.id,
-          append_to_response: 'external_ids'
+          append_to_response: 'external_ids,credits,production_companies,networks'
         });
         
         if (showDetails.name && showDetails.external_ids?.imdb_id) {

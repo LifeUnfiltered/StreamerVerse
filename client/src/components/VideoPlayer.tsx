@@ -2,8 +2,10 @@ import { useState, useEffect, useRef } from 'react';
 import type { Video } from "@shared/schema";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import FloatingActionButton from "./FloatingActionButton";
 import LoadingSpinner from "./LoadingSpinner";
+import CastAndCrew from "./CastAndCrew";
 import { AnimatePresence } from "framer-motion";
 
 interface VideoPlayerProps {
@@ -221,6 +223,11 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
         </CardContent>
       </Card>
 
+      <div className="mt-4">
+        <Separator className="mb-4" />
+        <CastAndCrew video={video} />
+      </div>
+      
       <FloatingActionButton video={video} />
     </div>
   );
