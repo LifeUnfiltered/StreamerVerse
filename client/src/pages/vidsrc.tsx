@@ -648,7 +648,7 @@ export default function VidSrc() {
           selectedVideo?.metadata?.episode) {
         
         // Find if this episode exists in the list
-        const existingEpisodeIndex = episodes.findIndex(ep => 
+        const existingEpisodeIndex = episodes.findIndex((ep: Video) => 
           (ep.metadata?.season === selectedVideo.metadata?.season && 
            ep.metadata?.episode === selectedVideo.metadata?.episode) ||
           ep.sourceId === selectedVideo.sourceId ||
@@ -662,7 +662,15 @@ export default function VidSrc() {
             ...episodes[existingEpisodeIndex],
             description: selectedVideo.description || episodes[existingEpisodeIndex].description,
             title: selectedVideo.title || episodes[existingEpisodeIndex].title,
-            thumbnail: selectedVideo.thumbnail || episodes[existingEpisodeIndex].thumbnail
+            thumbnail: selectedVideo.thumbnail || episodes[existingEpisodeIndex].thumbnail,
+            // Make sure to preserve important metadata like runtime and content rating
+            metadata: {
+              ...episodes[existingEpisodeIndex].metadata,
+              ...selectedVideo.metadata,
+              // Explicitly set runtime to make sure it's preserved
+              runtime: selectedVideo.metadata?.runtime || episodes[existingEpisodeIndex].metadata?.runtime,
+              contentRating: selectedVideo.metadata?.contentRating || episodes[existingEpisodeIndex].metadata?.contentRating
+            }
           };
           
           console.log('Updated episode in the list to preserve metadata:', episodes[existingEpisodeIndex]);
@@ -736,9 +744,16 @@ export default function VidSrc() {
           }
           
           // Return a new episode object with the updated title
+          // Make sure we also preserve runtime and content rating data
           return {
             ...episode,
-            title: newTitle
+            title: newTitle,
+            metadata: {
+              ...episode.metadata,
+              // Ensure runtime, contentRating and any other important metadata is preserved
+              runtime: episode.metadata?.runtime || null,
+              contentRating: episode.metadata?.contentRating || null
+            }
           };
         }
         

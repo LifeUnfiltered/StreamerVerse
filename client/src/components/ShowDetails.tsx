@@ -199,7 +199,10 @@ export default function ShowDetails({
           title: formattedTitle,
           metadata: {
             ...episode.metadata,
-            // Ensure we keep all metadata fields that might have been added
+            // Make sure we preserve runtime and ratings from the original show
+            runtime: episode.metadata?.runtime || displayShow?.metadata?.runtime,
+            contentRating: episode.metadata?.contentRating || displayShow?.metadata?.contentRating,
+            voteAverage: episode.metadata?.voteAverage
           }
         };
         
