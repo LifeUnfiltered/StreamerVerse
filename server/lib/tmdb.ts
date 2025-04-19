@@ -515,6 +515,48 @@ export async function fetchMoviesByGenre(genreId: number, page: number = 1): Pro
 }
 
 // Fetch TV shows by genre
+// Function to get real episode data from TMDB by IMDB ID
+export async function fetchEpisodeDetailsByImdbId(
+  imdbId: string, 
+  seasonNumber: number, 
+  episodeNumber: number
+): Promise<{ title: string, description: string } | null> {
+  try {
+    console.log(`Looking up TMDB ID for IMDB ID: ${imdbId}`);
+    
+    // First find the TMDB ID from the IMDB ID using the find API
+    const findResults = await tmdb.find({ id: imdbId, external_source: 'imdb_id' });
+    
+    if (!findResults.tv_results || findResults.tv_results.length === 0) {
+      console.log(`No TV show found for IMDB ID: ${imdbId}`);
+      return null;
+    }
+    
+    const tmdbId = findResults.tv_results[0].id;
+    console.log(`Found TMDB ID: ${tmdbId} for IMDB ID: ${imdbId}`);
+    
+    // Now get the episode details
+    const episodeDetails = await tmdb.episodeInfo({
+      id: tmdbId,
+      season_number: seasonNumber,
+      episode_number: episodeNumber
+    });
+    
+    if (!episodeDetails) {
+      console.log(`No episode details found for ${imdbId} S${seasonNumber}E${episodeNumber}`);
+      return null;
+    }
+    
+    return {
+      title: episodeDetails.name || `Episode ${episodeNumber}`,
+      description: episodeDetails.overview || `Season ${seasonNumber}, Episode ${episodeNumber}`
+    };
+  } catch (error) {
+    console.error(`Error fetching episode details for ${imdbId} S${seasonNumber}E${episodeNumber}:`, error);
+    return null;
+  }
+}
+
 export async function fetchTVShowsByGenre(genreId: number, page: number = 1): Promise<Video[]> {
   const videos: Video[] = [];
   

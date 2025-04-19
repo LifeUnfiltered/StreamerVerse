@@ -18,7 +18,8 @@ import {
   fetchMovieGenres,
   fetchTVGenres,
   fetchMoviesByGenre,
-  fetchTVShowsByGenre
+  fetchTVShowsByGenre,
+  fetchEpisodeDetailsByImdbId
 } from './lib/tmdb';
 
 const MemoryStore = memorystore(session);
@@ -266,16 +267,20 @@ export async function registerRoutes(app: Express) {
             );
           } else {
             console.log('No matching show found for IMDB ID:', showId);
-            // Create some basic episode structure for seasons 1-5
+            // Create episode structure for seasons 1-5, but with real metadata from TMDB
             // This is a fallback when we can't find the show in our database
             for (let s = 1; s <= 5; s++) {
               for (let e = 1; e <= 10; e++) {
+                // Try to get real episode details from TMDB
+                const episodeDetails = await fetchEpisodeDetailsByImdbId(showId, s, e);
+                
+                // Create episode with either real data or fallback
                 episodes.push({
                   id: parseInt(`${s}${e.toString().padStart(2, '0')}`),
                   sourceId: `${showId}-s${s}e${e}`,
                   source: 'vidsrc',
-                  title: `Season ${s}, Episode ${e}`,
-                  description: `Season ${s}, Episode ${e}`,
+                  title: episodeDetails?.title ? `Season ${s}, Episode ${e} - ${episodeDetails.title}` : `Season ${s}, Episode ${e}`,
+                  description: episodeDetails?.description || `Season ${s}, Episode ${e}`,
                   thumbnail: null,
                   metadata: {
                     imdbId: showId,
