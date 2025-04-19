@@ -476,7 +476,14 @@ export default function ShowDetails({
     
     if (existingEpisode) {
       console.log('Found existing episode for navigation', existingEpisode);
-      onEpisodeSelect(existingEpisode);
+      // Make sure we get the full episode details
+      const fullEpisode = episodes.find(e => 
+        e.id === existingEpisode.id || 
+        (e.sourceId === existingEpisode.sourceId && 
+          e.metadata?.season === existingEpisode.metadata?.season && 
+          e.metadata?.episode === existingEpisode.metadata?.episode)
+      ) || existingEpisode;
+      onEpisodeSelect(fullEpisode);
       return;
     }
     
