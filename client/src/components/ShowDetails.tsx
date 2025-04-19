@@ -269,9 +269,18 @@ export default function ShowDetails({
   // Auto-select first episode of selected season if none is playing
   useEffect(() => {
     if (!currentEpisode && currentSeasonEpisodes.length > 0) {
-      onEpisodeSelect(currentSeasonEpisodes[0]);
+      // Always use the original episodes array to get full metadata
+      const firstEpisode = currentSeasonEpisodes[0];
+      const fullEpisode = episodes.find(e => 
+        e.id === firstEpisode.id || 
+        (e.sourceId === firstEpisode.sourceId && 
+         e.metadata?.season === firstEpisode.metadata?.season && 
+         e.metadata?.episode === firstEpisode.metadata?.episode)
+      ) || firstEpisode;
+      
+      onEpisodeSelect(fullEpisode);
     }
-  }, [selectedSeason, currentSeasonEpisodes, currentEpisode, onEpisodeSelect]);
+  }, [selectedSeason, currentSeasonEpisodes, currentEpisode, episodes, onEpisodeSelect]);
 
   // Find next episode
   const getNextEpisode = () => {
@@ -370,7 +379,14 @@ export default function ShowDetails({
     
     if (existingEpisode) {
       console.log('Found existing episode', existingEpisode);
-      onEpisodeSelect(existingEpisode);
+      // Make sure we get the full episode details
+      const fullEpisode = episodes.find(e => 
+        e.id === existingEpisode.id || 
+        (e.sourceId === existingEpisode.sourceId && 
+          e.metadata?.season === existingEpisode.metadata?.season && 
+          e.metadata?.episode === existingEpisode.metadata?.episode)
+      ) || existingEpisode;
+      onEpisodeSelect(fullEpisode);
       return;
     }
     
@@ -549,7 +565,16 @@ export default function ShowDetails({
                       key={`${episode.sourceId}-${episode.metadata?.episode}`}
                       variant={currentEpisode?.metadata?.episode === episode.metadata?.episode ? "default" : "ghost"}
                       className="w-full justify-start gap-2"
-                      onClick={() => onEpisodeSelect(episode)}
+                      onClick={() => {
+                        // Find the complete episode in the original episode list to preserve all metadata
+                        const fullEpisode = episodes.find(e => 
+                          e.id === episode.id || 
+                          (e.sourceId === episode.sourceId && 
+                          e.metadata?.season === episode.metadata?.season && 
+                          e.metadata?.episode === episode.metadata?.episode)
+                        ) || episode;
+                        onEpisodeSelect(fullEpisode);
+                      }}
                     >
                       <PlayCircle className="h-4 w-4" />
                       <span className="font-mono text-sm">
@@ -655,7 +680,16 @@ export default function ShowDetails({
             </div>
             <Button
               size="sm"
-              onClick={() => onEpisodeSelect(nextEpisode)}
+              onClick={() => {
+                // Find the complete episode in the original episode list to preserve all metadata
+                const fullEpisode = episodes.find(e => 
+                  e.id === nextEpisode.id || 
+                  (e.sourceId === nextEpisode.sourceId && 
+                  e.metadata?.season === nextEpisode.metadata?.season && 
+                  e.metadata?.episode === nextEpisode.metadata?.episode)
+                ) || nextEpisode;
+                onEpisodeSelect(fullEpisode);
+              }}
               className="gap-2"
             >
               <FastForward className="h-4 w-4" />
