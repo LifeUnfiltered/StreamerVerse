@@ -1,6 +1,6 @@
 import { useTheme } from "./theme-provider";
 import { Button } from "./ui/button";
-import { Sun, Moon, Palette, Monitor } from "lucide-react";
+import { Sun, Moon, Palette } from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { useToast } from "@/hooks/use-toast";
@@ -11,18 +11,12 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuLabel,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-} from "@/components/ui/dropdown-menu";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import confetti from 'canvas-confetti';
 
 // Define theme color presets
@@ -36,13 +30,13 @@ const themePresets = {
   teal: { name: "Teal", color: "#14b8a6" },
 };
 
+// Main theme toggler component
 export default function ThemeSwitcher() {
   const { theme, setTheme } = useTheme();
   const { toast } = useToast();
   const [previousTheme, setPreviousTheme] = useState(theme);
   const [showIntroAnim, setShowIntroAnim] = useState(true);
   const [rotateDirection, setRotateDirection] = useState<number>(0);
-  const [activeColorTheme, setActiveColorTheme] = useState("blue");
   
   // Detect if system preference is dark (for initial state)
   const [systemIsDark, setSystemIsDark] = useState(
@@ -67,6 +61,13 @@ export default function ThemeSwitcher() {
     }, 3000);
     
     return () => clearTimeout(timer);
+  }, []);
+
+  // Set theme to system preference initially
+  useEffect(() => {
+    if (theme !== 'system') {
+      setTheme('system');
+    }
   }, []);
 
   // Add transition effect to body when theme changes
@@ -110,7 +111,10 @@ export default function ThemeSwitcher() {
     setRotateDirection(prev => (prev === 0 || prev === -360) ? 360 : -360);
     
     // Only trigger confetti if actually changing themes
-    if (theme !== newTheme) {
+    if ((theme === 'dark' && newTheme === 'light') || (theme === 'light' && newTheme === 'dark') || 
+        (theme === 'system' && systemIsDark && newTheme === 'light') || 
+        (theme === 'system' && !systemIsDark && newTheme === 'dark')) {
+      
       // Customize confetti based on theme
       const colors = newTheme === 'light' 
         ? ['#FFDD67', '#FFB800', '#fff'] 
@@ -129,6 +133,58 @@ export default function ThemeSwitcher() {
     setTheme(newTheme);
   };
 
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleTheme}
+            className={`relative h-9 w-9 rounded-full transition-all 
+              hover:bg-primary/10 hover:shadow-md hover:shadow-primary/10
+              hover:scale-110
+              ${showIntroAnim ? 'theme-button-attention' : ''}`}
+            aria-label="Toggle theme"
+          >
+            <motion.div
+              initial={false}
+              animate={{ 
+                rotate: rotateDirection, 
+                scale: [1, 1.2, 1] 
+              }}
+              transition={{ 
+                duration: 0.7, 
+                rotate: { 
+                  type: 'spring', 
+                  stiffness: 80,
+                  damping: 15
+                },
+                scale: { times: [0, 0.5, 1] }
+              }}
+              className="relative theme-icon-container"
+            >
+              {isDarkMode ? (
+                <Moon className="h-5 w-5 text-blue-400" />
+              ) : (
+                <Sun className="h-5 w-5 text-amber-500" />
+              )}
+            </motion.div>
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="bottom">
+          <p className="text-xs">Toggle {isDarkMode ? "light" : "dark"} mode</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+
+// Separate component for color theme settings
+export function ColorThemeButton() {
+  const { toast } = useToast();
+  const [activeColorTheme, setActiveColorTheme] = useState("blue");
+  
   // Handle color theme change
   const changeColorTheme = (color: string) => {
     setActiveColorTheme(color);
@@ -171,123 +227,50 @@ export default function ThemeSwitcher() {
     const b = Math.max(0, (num & 0xff) - amt);
     return `#${((r << 16) | (g << 8) | b).toString(16).padStart(6, '0')}`;
   };
-
+  
   return (
-    <DropdownMenu>
+    <Dialog>
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
+            <DialogTrigger asChild>
+              <Button 
+                variant="ghost" 
                 size="icon"
-                onClick={(e) => {
-                  // When directly clicking the button (not the dropdown part)
-                  if (e.target === e.currentTarget || 
-                      (e.target as HTMLElement).closest('.theme-icon-container')) {
-                    e.preventDefault();
-                    toggleTheme();
-                  }
-                }}
-                className={`relative h-9 w-9 rounded-full transition-all 
-                  hover:bg-primary/10 hover:shadow-md hover:shadow-primary/10
-                  hover:scale-110
-                  ${showIntroAnim ? 'theme-button-attention' : ''}`}
-                aria-label="Theme options"
+                className="h-9 w-9 rounded-full transition-all hover:bg-primary/10 hover:scale-110"
+                aria-label="Color themes"
               >
-                <motion.div
-                  initial={false}
-                  animate={{ 
-                    rotate: rotateDirection, 
-                    scale: [1, 1.2, 1] 
-                  }}
-                  transition={{ 
-                    duration: 0.7, 
-                    rotate: { 
-                      type: 'spring', 
-                      stiffness: 80,
-                      damping: 15
-                    },
-                    scale: { times: [0, 0.5, 1] }
-                  }}
-                  className="relative theme-icon-container"
-                >
-                  {isDarkMode ? (
-                    <Moon className="h-5 w-5 text-blue-400" />
-                  ) : (
-                    <Sun className="h-5 w-5 text-amber-500" />
-                  )}
-                </motion.div>
+                <Palette className="h-5 w-5 text-primary/80" />
               </Button>
-            </DropdownMenuTrigger>
+            </DialogTrigger>
           </TooltipTrigger>
           <TooltipContent side="bottom">
-            <p className="text-xs">Theme settings</p>
+            <p className="text-xs">Color themes</p>
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
       
-      <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>Theme Settings</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        
-        <DropdownMenuItem 
-          onClick={() => setTheme("light")}
-          className="flex items-center cursor-pointer"
-        >
-          <Sun className="mr-2 h-4 w-4 text-amber-500" />
-          <span>Light</span>
-          {theme === "light" && (
-            <span className="ml-auto text-xs text-primary">✓</span>
-          )}
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem 
-          onClick={() => setTheme("dark")}
-          className="flex items-center cursor-pointer"
-        >
-          <Moon className="mr-2 h-4 w-4 text-blue-400" />
-          <span>Dark</span>
-          {theme === "dark" && (
-            <span className="ml-auto text-xs text-primary">✓</span>
-          )}
-        </DropdownMenuItem>
-        
-        <DropdownMenuItem 
-          onClick={() => setTheme("system")}
-          className="flex items-center cursor-pointer"
-        >
-          <Monitor className="mr-2 h-4 w-4 text-gray-400" />
-          <span>System</span>
-          {theme === "system" && (
-            <span className="ml-auto text-xs text-primary">✓</span>
-          )}
-        </DropdownMenuItem>
-        
-        <DropdownMenuSeparator />
-        
-        <DropdownMenuSub>
-          <DropdownMenuSubTrigger>
-            <Palette className="mr-2 h-4 w-4" />
-            <span>Color Theme</span>
-          </DropdownMenuSubTrigger>
-          <DropdownMenuSubContent>
-            <DropdownMenuRadioGroup value={activeColorTheme} onValueChange={changeColorTheme}>
-              {Object.entries(themePresets).map(([key, { name, color }]) => (
-                <DropdownMenuRadioItem key={key} value={key} className="cursor-pointer">
-                  <div className="flex items-center">
-                    <div 
-                      className="w-3 h-3 rounded-full mr-2" 
-                      style={{ backgroundColor: color }}
-                    ></div>
-                    {name}
-                  </div>
-                </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
-          </DropdownMenuSubContent>
-        </DropdownMenuSub>
-      </DropdownMenuContent>
-    </DropdownMenu>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Choose a Color Theme</DialogTitle>
+        </DialogHeader>
+        <div className="grid grid-cols-4 gap-4 py-4">
+          {Object.entries(themePresets).map(([key, { name, color }]) => (
+            <div 
+              key={key} 
+              className={`flex flex-col items-center gap-2 cursor-pointer p-2 rounded-md transition-all
+                ${activeColorTheme === key ? 'bg-primary/10 shadow-md' : 'hover:bg-primary/5'}`}
+              onClick={() => changeColorTheme(key)}
+            >
+              <div 
+                className="w-10 h-10 rounded-full transition-transform hover:scale-110" 
+                style={{ backgroundColor: color }}
+              />
+              <span className="text-xs font-medium text-center">{name}</span>
+            </div>
+          ))}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 }
