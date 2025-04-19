@@ -196,8 +196,29 @@ export default function VidSrc() {
     // Apply cached episode title if available for selected episode
     let updatedVideo = { ...video };
     
-    // Only process TV episodes
+    // Find a complete version of the video to preserve all metadata
+    let completeVideo = null;
+    
+    // For TV episodes, search in the episodes array
     if (video.metadata?.type === 'tv' && video.metadata?.season && video.metadata?.episode) {
+      // First try to find this episode in the showEpisodes array to get complete metadata
+      completeVideo = showEpisodes.find(ep => 
+        ep.id === video.id || 
+        (ep.sourceId === video.sourceId && 
+         ep.metadata?.season === video.metadata?.season && 
+         ep.metadata?.episode === video.metadata?.episode)
+      );
+      
+      // If found in episodes, use that instead but keep current values we want to preserve
+      if (completeVideo) {
+        console.log('Found complete episode in episodes list with all metadata:', completeVideo);
+        updatedVideo = {
+          ...completeVideo,
+          // Preserve the updated title if needed
+          title: updatedVideo.title !== video.title ? updatedVideo.title : completeVideo.title
+        };
+      }
+      
       const showId = video.metadata?.imdbId || video.sourceId?.split('-')[0];
       const season = video.metadata.season;
       const episodeNum = video.metadata.episode;
@@ -246,14 +267,14 @@ export default function VidSrc() {
         if (cachedTitle) {
           // Create a formatted title
           const newTitle = formatEpisodeTitle(showTitle, season, episodeNum, cachedTitle);
-          console.log(`Applying cached episode title: "${video.title}" → "${newTitle}"`);
+          console.log(`Applying cached episode title: "${updatedVideo.title}" → "${newTitle}"`);
           
           // Update the video with the formatted title
           updatedVideo.title = newTitle;
         } 
         // If we don't have a cached title but the video has one in the proper format, cache it
-        else if (video.title && video.title.includes(' - ')) {
-          const titleParts = video.title.split(' - ');
+        else if (updatedVideo.title && updatedVideo.title.includes(' - ')) {
+          const titleParts = updatedVideo.title.split(' - ');
           if (titleParts.length > 1) {
             const extractedTitle = titleParts[1];
             episodeTitleCache.set(cacheKey, extractedTitle);
@@ -265,12 +286,25 @@ export default function VidSrc() {
           }
         }
         // If we have a generic title, try to apply a better format
-        else if (video.title && video.title.includes('Season') && video.title.includes('Episode')) {
+        else if (updatedVideo.title && updatedVideo.title.includes('Season') && updatedVideo.title.includes('Episode')) {
           // Create a better formatted title (without episode title)
           const newTitle = formatEpisodeTitle(showTitle, season, episodeNum);
-          console.log(`Formatting generic title: "${video.title}" → "${newTitle}"`);
+          console.log(`Formatting generic title: "${updatedVideo.title}" → "${newTitle}"`);
           updatedVideo.title = newTitle;
         }
+      }
+    } 
+    // For TV shows, search in the shows array
+    else if (video.metadata?.type === 'tv') {
+      completeVideo = shows?.find(show => 
+        show.id === video.id || 
+        show.sourceId === video.sourceId || 
+        show.metadata?.imdbId === video.metadata?.imdbId
+      );
+      
+      if (completeVideo) {
+        console.log('Found complete show in shows list with all metadata:', completeVideo);
+        updatedVideo = completeVideo;
       }
     }
     
