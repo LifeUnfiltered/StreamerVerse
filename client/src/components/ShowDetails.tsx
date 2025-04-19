@@ -639,7 +639,23 @@ export default function ShowDetails({
                           e.metadata?.season === episode.metadata?.season && 
                           e.metadata?.episode === episode.metadata?.episode)
                         ) || episode;
-                        onEpisodeSelect(fullEpisode);
+                        
+                        // Create a version that merges formatted data with original metadata
+                        const mergedEpisode = {
+                          ...fullEpisode,
+                          title: episode.title, // Keep our formatted title
+                          description: episode.description || fullEpisode.description,
+                          // Most importantly, ensure runtime and other metadata are preserved from both sources
+                          metadata: {
+                            ...fullEpisode.metadata,
+                            ...episode.metadata,
+                            // Explicitly preserve critical metadata
+                            runtime: episode.metadata?.runtime || fullEpisode.metadata?.runtime,
+                            contentRating: episode.metadata?.contentRating || fullEpisode.metadata?.contentRating
+                          }
+                        };
+                        
+                        onEpisodeSelect(mergedEpisode);
                       }}
                     >
                       <PlayCircle className="h-4 w-4" />
@@ -820,7 +836,23 @@ export default function ShowDetails({
                   e.metadata?.season === nextEpisode.metadata?.season && 
                   e.metadata?.episode === nextEpisode.metadata?.episode)
                 ) || nextEpisode;
-                onEpisodeSelect(fullEpisode);
+                
+                // Merge data to ensure both formatted title and runtime are preserved
+                const mergedEpisode = {
+                  ...fullEpisode,
+                  title: nextEpisode.title || fullEpisode.title,
+                  description: nextEpisode.description || fullEpisode.description,
+                  metadata: {
+                    ...fullEpisode.metadata,
+                    ...nextEpisode.metadata,
+                    // Explicitly ensure runtime and ratings are preserved
+                    runtime: nextEpisode.metadata?.runtime || fullEpisode.metadata?.runtime,
+                    contentRating: nextEpisode.metadata?.contentRating || fullEpisode.metadata?.contentRating,
+                    voteAverage: nextEpisode.metadata?.voteAverage || fullEpisode.metadata?.voteAverage
+                  }
+                };
+                
+                onEpisodeSelect(mergedEpisode);
               }}
               className="gap-2"
             >
