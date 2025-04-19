@@ -411,7 +411,10 @@ export default function VidSrc() {
   // 1. The selected video is the show itself
   // 2. We need to find the parent show for an episode
   // 3. We'll look in the shows array by ID or sourceId
-  const currentShow = isSelectedVideoTVShow && !isSelectedVideoTVEpisode ? selectedVideo : 
+  // 4. We'll look by sourceId pattern (show ID might be part of episode sourceId)
+  
+  // First try direct show selection or ID matching
+  let foundShow = (isSelectedVideoTVShow && !isSelectedVideoTVEpisode) ? selectedVideo : 
     (parentShowId && shows?.find(show => 
       show.sourceId === parentShowId || 
       show.metadata?.imdbId === parentShowId
@@ -420,6 +423,28 @@ export default function VidSrc() {
       show.sourceId === selectedVideo.sourceId || 
       show.metadata?.imdbId === selectedVideo.sourceId
     ));
+  
+  // If we still don't have a show but have a TV episode, try to extract the show ID from sourceId
+  if (!foundShow && isSelectedVideoTVEpisode && selectedVideo?.sourceId) {
+    // sourceId might be in format "showID-s1e1"
+    const parts = selectedVideo.sourceId.split('-');
+    if (parts.length > 0) {
+      const extractedShowId = parts[0];
+      console.log(`Trying to find show with extracted ID: ${extractedShowId}`);
+      
+      // Look for a show with this ID
+      foundShow = shows?.find(show => 
+        show.sourceId === extractedShowId || 
+        show.metadata?.imdbId === extractedShowId
+      );
+      
+      if (foundShow) {
+        console.log(`Found show using extracted ID: ${foundShow.title}`);
+      }
+    }
+  }
+  
+  const currentShow = foundShow;
   
   // Determine what show ID to use for fetching episodes
   // We need to handle both episodes and shows
@@ -430,9 +455,25 @@ export default function VidSrc() {
     episodeFetchId = currentShow.id || currentShow.sourceId;
   }
   // If we don't have a current show but have a selected TV episode,
-  // use its IMDB ID as a fallback for fetching episodes
-  else if (isSelectedVideoTVEpisode && selectedVideo?.metadata?.imdbId) {
-    episodeFetchId = selectedVideo.metadata.imdbId;
+  // try to extract the show ID from the episode
+  else if (isSelectedVideoTVEpisode) {
+    // Try multiple methods to get the show ID
+    if (selectedVideo?.metadata?.imdbId) {
+      // Option 1: Use the episode's IMDB ID directly if available
+      episodeFetchId = selectedVideo.metadata.imdbId;
+    } else if (selectedVideo?.sourceId) {
+      // Option 2: Try to extract from sourceId which might be formatted like "showID-s1e1"
+      const sourceIdParts = selectedVideo.sourceId.split('-');
+      if (sourceIdParts.length > 0) {
+        // Use the first part of sourceId as the show ID
+        episodeFetchId = sourceIdParts[0];
+        console.log(`Extracted show ID from sourceId: ${episodeFetchId}`);
+      }
+    }
+    // Option 3: Try to extract TMDB ID if available
+    else if (selectedVideo?.metadata?.tmdbId) {
+      episodeFetchId = selectedVideo.metadata.tmdbId;
+    }
   }
   
   // Log for debugging
