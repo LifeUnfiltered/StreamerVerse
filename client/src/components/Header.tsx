@@ -1,20 +1,11 @@
-import { useState } from "react";
 import { SiYoutube } from "react-icons/si";
 import { Button } from "@/components/ui/button";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { LogIn, LogOut, User as UserIcon, Bookmark, TrendingUp, Paintbrush } from "lucide-react";
+import { LogIn, LogOut, User as UserIcon, Bookmark, TrendingUp } from "lucide-react";
 import type { Video } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import ThemeSwitcher from "./ThemeSwitcher";
-import ColorPaletteSelector from "./ColorPaletteSelector";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle
-} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,7 +24,6 @@ interface HeaderProps {
 export default function Header({ onAuthClick, onWatchlistClick, onTrendingClick }: HeaderProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
-  const [colorPaletteOpen, setColorPaletteOpen] = useState(false);
 
   const { data: watchlist, isError: watchlistError } = useQuery<Video[]>({
     queryKey: ['/api/watchlist'],
@@ -95,14 +85,6 @@ export default function Header({ onAuthClick, onWatchlistClick, onTrendingClick 
               <span>Trending</span>
             </Button>
           )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setColorPaletteOpen(true)}
-            title="Customize theme"
-          >
-            <Paintbrush className="h-5 w-5" />
-          </Button>
           <ThemeSwitcher />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -154,13 +136,6 @@ export default function Header({ onAuthClick, onWatchlistClick, onTrendingClick 
           </DropdownMenu>
         </div>
       </div>
-      
-      {/* Color Palette Dialog */}
-      <Dialog open={colorPaletteOpen} onOpenChange={setColorPaletteOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <ColorPaletteSelector onClose={() => setColorPaletteOpen(false)} />
-        </DialogContent>
-      </Dialog>
     </header>
   );
 }
