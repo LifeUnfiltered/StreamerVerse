@@ -435,7 +435,24 @@ export default function ShowDetails({
           e.metadata?.season === existingEpisode.metadata?.season && 
           e.metadata?.episode === existingEpisode.metadata?.episode)
       ) || existingEpisode;
-      onEpisodeSelect(fullEpisode);
+      
+      // Create a merged episode that preserves ALL metadata including runtime
+      const mergedEpisode = {
+        ...fullEpisode,
+        // Make sure to preserve formatted title and description
+        title: existingEpisode.title || fullEpisode.title,
+        description: existingEpisode.description || fullEpisode.description,
+        metadata: {
+          ...fullEpisode.metadata,
+          ...existingEpisode.metadata,
+          // Explicitly preserve critical metadata
+          runtime: existingEpisode.metadata?.runtime || fullEpisode.metadata?.runtime || displayShow?.metadata?.runtime,
+          contentRating: existingEpisode.metadata?.contentRating || fullEpisode.metadata?.contentRating || displayShow?.metadata?.contentRating,
+          voteAverage: existingEpisode.metadata?.voteAverage || fullEpisode.metadata?.voteAverage
+        }
+      };
+      
+      onEpisodeSelect(mergedEpisode);
       return;
     }
     
@@ -537,7 +554,23 @@ export default function ShowDetails({
           e.metadata?.season === existingEpisode.metadata?.season && 
           e.metadata?.episode === existingEpisode.metadata?.episode)
       ) || existingEpisode;
-      onEpisodeSelect(fullEpisode);
+      
+      // Create a merged episode that preserves ALL metadata
+      const mergedEpisode = {
+        ...fullEpisode,
+        title: existingEpisode.title || fullEpisode.title,
+        description: existingEpisode.description || fullEpisode.description,
+        metadata: {
+          ...fullEpisode.metadata,
+          ...existingEpisode.metadata,
+          // Explicitly preserve runtime and content rating
+          runtime: existingEpisode.metadata?.runtime || fullEpisode.metadata?.runtime || currentEpisode?.metadata?.runtime,
+          contentRating: existingEpisode.metadata?.contentRating || fullEpisode.metadata?.contentRating || currentEpisode?.metadata?.contentRating,
+          voteAverage: existingEpisode.metadata?.voteAverage || fullEpisode.metadata?.voteAverage
+        }
+      };
+      
+      onEpisodeSelect(mergedEpisode);
       return;
     }
     
@@ -583,9 +616,9 @@ export default function ShowDetails({
         season: newSeason,
         episode: newEpisodeNum,
         // Preserve these fields from the current episode for consistency
-        runtime: currentEpisode.metadata?.runtime,
-        contentRating: currentEpisode.metadata?.contentRating,
-        voteAverage: currentEpisode.metadata?.voteAverage,
+        runtime: currentEpisode.metadata?.runtime || displayShow?.metadata?.runtime,
+        contentRating: currentEpisode.metadata?.contentRating || displayShow?.metadata?.contentRating,
+        voteAverage: currentEpisode.metadata?.voteAverage || displayShow?.metadata?.voteAverage,
         releaseDate: currentEpisode.metadata?.releaseDate
       },
       chapters: null
