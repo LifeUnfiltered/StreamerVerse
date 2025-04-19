@@ -641,6 +641,34 @@ export default function VidSrc() {
       let showTitle = 'Unknown Show';
       let showId = '';
       
+      // IMPORTANT: If we already have a selected episode with metadata, preserve it in the 
+      // episode list to ensure consistent metadata between episodes
+      if (selectedVideo?.metadata?.type === 'tv' && 
+          selectedVideo?.metadata?.season && 
+          selectedVideo?.metadata?.episode) {
+        
+        // Find if this episode exists in the list
+        const existingEpisodeIndex = episodes.findIndex(ep => 
+          (ep.metadata?.season === selectedVideo.metadata?.season && 
+           ep.metadata?.episode === selectedVideo.metadata?.episode) ||
+          ep.sourceId === selectedVideo.sourceId ||
+          ep.id === selectedVideo.id
+        );
+        
+        // If found, update with our selected metadata to preserve descriptions
+        if (existingEpisodeIndex >= 0) {
+          // Merge the existing episode with our selected one, prioritizing our selected one's metadata
+          episodes[existingEpisodeIndex] = {
+            ...episodes[existingEpisodeIndex],
+            description: selectedVideo.description || episodes[existingEpisodeIndex].description,
+            title: selectedVideo.title || episodes[existingEpisodeIndex].title,
+            thumbnail: selectedVideo.thumbnail || episodes[existingEpisodeIndex].thumbnail
+          };
+          
+          console.log('Updated episode in the list to preserve metadata:', episodes[existingEpisodeIndex]);
+        }
+      }
+      
       // If we have a current show object, use its information
       if (currentShow) {
         showTitle = currentShow.title || 'Unknown Show';
