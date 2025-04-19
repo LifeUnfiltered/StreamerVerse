@@ -40,7 +40,14 @@ function movieToVideo(movie: any): Video {
       tmdbId: movie.id,
       releaseDate: movie.release_date || null,
       voteAverage: movie.vote_average || null,
-      embedUrl: movie.imdb_id ? `https://vidsrc.xyz/embed/movie?imdb=${movie.imdb_id}` : null
+      runtime: movie.runtime || null,
+      embedUrl: movie.imdb_id ? `https://vidsrc.xyz/embed/movie?imdb=${movie.imdb_id}` : null,
+      // Cast and crew information
+      cast: movie.credits?.cast?.slice(0, 10) || [],      // Get top 10 cast members
+      crew: movie.credits?.crew?.filter(person => 
+        ['Director', 'Writer', 'Producer', 'Executive Producer'].includes(person.job)
+      ).slice(0, 10) || [],  // Get key crew members
+      productionCompanies: movie.production_companies || []
     },
     chapters: null
   };
@@ -62,9 +69,18 @@ function showToVideo(show: any): Video {
       firstAirDate: show.first_air_date || null,
       lastAirDate: show.last_air_date || null,
       voteAverage: show.vote_average || null,
+      episodeRunTime: show.episode_run_time?.[0] || null,
       embedUrl: show.external_ids?.imdb_id ? 
         `https://vidsrc.xyz/embed/tv?imdb=${show.external_ids.imdb_id}&season=1&episode=1` : null,
-      totalSeasons: show.number_of_seasons
+      totalSeasons: show.number_of_seasons,
+      // Cast and crew information
+      cast: show.credits?.cast?.slice(0, 10) || [],      // Get top 10 cast members
+      crew: show.credits?.crew?.filter(person => 
+        ['Creator', 'Executive Producer', 'Producer', 'Director', 'Writer'].includes(person.job)
+      ).slice(0, 10) || [],  // Get key crew members
+      createdBy: show.created_by || [],
+      networks: show.networks || [],
+      productionCompanies: show.production_companies || []
     },
     chapters: null
   };
