@@ -44,7 +44,7 @@ function movieToVideo(movie: any): Video {
       embedUrl: movie.imdb_id ? `https://vidsrc.xyz/embed/movie?imdb=${movie.imdb_id}` : null,
       // Cast and crew information
       cast: movie.credits?.cast?.slice(0, 10) || [],      // Get top 10 cast members
-      crew: movie.credits?.crew?.filter(person => 
+      crew: movie.credits?.crew?.filter((person: any) => 
         ['Director', 'Writer', 'Producer', 'Executive Producer'].includes(person.job)
       ).slice(0, 10) || [],  // Get key crew members
       productionCompanies: movie.production_companies || []
@@ -75,7 +75,7 @@ function showToVideo(show: any): Video {
       totalSeasons: show.number_of_seasons,
       // Cast and crew information
       cast: show.credits?.cast?.slice(0, 10) || [],      // Get top 10 cast members
-      crew: show.credits?.crew?.filter(person => 
+      crew: show.credits?.crew?.filter((person: any) => 
         ['Creator', 'Executive Producer', 'Producer', 'Director', 'Writer'].includes(person.job)
       ).slice(0, 10) || [],  // Get key crew members
       createdBy: show.created_by || [],
@@ -110,7 +110,15 @@ function episodeToVideo(episode: any, show: any): Video {
       embedUrl: imdbId ? 
         `https://vidsrc.xyz/embed/tv?imdb=${imdbId}&season=${seasonNum}&episode=${episodeNum}` : null,
       season: seasonNum,
-      episode: episodeNum
+      episode: episodeNum,
+      // Include cast and crew from the show
+      cast: show.credits?.cast?.slice(0, 10) || [],
+      crew: show.credits?.crew?.filter((person: any) => 
+        ['Creator', 'Executive Producer', 'Producer', 'Director', 'Writer'].includes(person.job)
+      ).slice(0, 10) || [],
+      createdBy: show.created_by || [],
+      networks: show.networks || [],
+      productionCompanies: show.production_companies || []
     },
     chapters: null
   };
