@@ -82,54 +82,7 @@
     transform var(--transition-duration) var(--transition-timing);
 }
 
-/* Theme switch effect */
-.theme-transition {
-  animation: theme-fade 0.5s ease-in-out;
-  position: relative;
-  overflow: hidden;
-}
-
-.theme-transition::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.08),
-    transparent
-  );
-  animation: theme-shimmer 1s ease-out;
-  pointer-events: none;
-  z-index: 9999;
-}
-
-@keyframes theme-fade {
-  0% { 
-    opacity: 0.7;
-    transform: scale(0.98);
-  }
-  50% {
-    opacity: 0.9;
-    transform: scale(1.02);
-  }
-  100% { 
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes theme-shimmer {
-  0% {
-    left: -100%;
-  }
-  100% {
-    left: 100%;
-  }
-}
+/* No theme transition animation - simple, clean switch */
 
 /* Theme button attention animation */
 .theme-button-attention {

@@ -17,7 +17,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import confetti from 'canvas-confetti';
 
 // Define theme color presets
 const themePresets = {
@@ -70,33 +69,12 @@ export default function ThemeSwitcher() {
     }
   }, []);
 
-  // Add transition effect to body when theme changes
+  // Update the previous theme without transition effects
   useEffect(() => {
     if (theme !== previousTheme) {
-      // Get theme label
-      const themeLabel = theme === 'light' ? 'Light' : theme === 'dark' ? 'Dark' : 'System';
-      
-      // Show toast notification
-      toast({
-        title: `Theme changed to ${themeLabel}`,
-        description: "Your viewing experience has been updated.",
-        variant: "default",
-      });
-      
-      // Update previous theme
       setPreviousTheme(theme);
     }
-    
-    const body = document.body;
-    body.classList.add('theme-transition');
-    
-    // Remove the class after animation completes
-    const timeout = setTimeout(() => {
-      body.classList.remove('theme-transition');
-    }, 500);
-    
-    return () => clearTimeout(timeout);
-  }, [theme, previousTheme, toast]);
+  }, [theme, previousTheme]);
 
   // Determine if the current mode is dark
   const isDarkMode = 
@@ -110,26 +88,7 @@ export default function ThemeSwitcher() {
     // Toggle rotation direction - alternate between clockwise (360) and counterclockwise (-360)
     setRotateDirection(prev => (prev === 0 || prev === -360) ? 360 : -360);
     
-    // Only trigger confetti if actually changing themes
-    if ((theme === 'dark' && newTheme === 'light') || (theme === 'light' && newTheme === 'dark') || 
-        (theme === 'system' && systemIsDark && newTheme === 'light') || 
-        (theme === 'system' && !systemIsDark && newTheme === 'dark')) {
-      
-      // Customize confetti based on theme
-      const colors = newTheme === 'light' 
-        ? ['#FFDD67', '#FFB800', '#fff'] 
-        : ['#3b82f6', '#1e40af', '#172554'];
-      
-      // Fire confetti from the button area
-      confetti({
-        particleCount: 50,
-        spread: 70,
-        origin: { y: 0.15, x: 0.9 },
-        colors: colors,
-        disableForReducedMotion: true
-      });
-    }
-    
+    // Set the theme
     setTheme(newTheme);
   };
 
