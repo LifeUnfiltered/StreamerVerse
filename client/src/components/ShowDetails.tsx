@@ -513,14 +513,56 @@ export default function ShowDetails({
     
     if (existingEpisode) {
       console.log('Found existing episode for navigation', existingEpisode);
+      
+      // First, preserve any metadata we have from the current episode
+      if (currentEpisode?.metadata?.season && currentEpisode?.metadata?.episode && currentEpisode?.description) {
+        const currentCacheKey = getEpisodeKey(
+          showId, 
+          currentEpisode.metadata.season, 
+          currentEpisode.metadata.episode
+        );
+        
+        // Cache the current episode's description before switching
+        if (currentEpisode.description) {
+          episodeDescriptionCacheRef.current[currentCacheKey] = currentEpisode.description;
+          console.log(`Cached current episode description before navigation: ${currentCacheKey}`);
+        }
+        
+        // Extract and cache the episode title if needed
+        const currentEpisodeTitle = extractEpisodeTitle(currentEpisode.title);
+        if (currentEpisodeTitle) {
+          episodeTitleCacheRef.current[currentCacheKey] = currentEpisodeTitle;
+          console.log(`Cached current episode title before navigation: ${currentCacheKey}`);
+        }
+      }
+      
       // Make sure we get the full episode details
-      const fullEpisode = episodes.find(e => 
+      let fullEpisode = episodes.find(e => 
         e.id === existingEpisode.id || 
         (e.sourceId === existingEpisode.sourceId && 
           e.metadata?.season === existingEpisode.metadata?.season && 
           e.metadata?.episode === existingEpisode.metadata?.episode)
       ) || existingEpisode;
-      onEpisodeSelect(fullEpisode);
+      
+      // Create an enhanced version with all available metadata
+      const enhancedEpisode = { ...fullEpisode };
+      
+      // Apply any cached metadata for the target episode
+      const targetCacheKey = getEpisodeKey(
+        showId, 
+        newSeason, 
+        newEpisodeNum
+      );
+      
+      // Check if we have a cached description for the target episode
+      const cachedDescription = episodeDescriptionCacheRef.current[targetCacheKey];
+      if (cachedDescription) {
+        console.log(`Applying cached description to navigation target: ${targetCacheKey}`);
+        enhancedEpisode.description = cachedDescription;
+      }
+      
+      console.log('Selecting navigation target with enhanced metadata:', enhancedEpisode);
+      onEpisodeSelect(enhancedEpisode);
       return;
     }
     
@@ -610,14 +652,59 @@ export default function ShowDetails({
                       variant={currentEpisode?.metadata?.episode === episode.metadata?.episode ? "default" : "ghost"}
                       className="w-full justify-start gap-2"
                       onClick={() => {
+                        // First, preserve any metadata we have from the current episode
+                        if (currentEpisode?.metadata?.season && currentEpisode?.metadata?.episode && currentEpisode?.description) {
+                          const showId = displayShow.metadata?.imdbId || displayShow.sourceId;
+                          const cacheKey = getEpisodeKey(
+                            showId, 
+                            currentEpisode.metadata.season, 
+                            currentEpisode.metadata.episode
+                          );
+                          
+                          // Cache the current episode's description before switching
+                          if (currentEpisode.description) {
+                            episodeDescriptionCacheRef.current[cacheKey] = currentEpisode.description;
+                            console.log(`Cached current episode description before switching: ${cacheKey}`);
+                          }
+                          
+                          // Extract and cache the episode title if needed
+                          const episodeTitle = extractEpisodeTitle(currentEpisode.title);
+                          if (episodeTitle) {
+                            episodeTitleCacheRef.current[cacheKey] = episodeTitle;
+                            console.log(`Cached current episode title before switching: ${cacheKey}`);
+                          }
+                        }
+                        
                         // Find the complete episode in the original episode list to preserve all metadata
-                        const fullEpisode = episodes.find(e => 
+                        let fullEpisode = episodes.find(e => 
                           e.id === episode.id || 
                           (e.sourceId === episode.sourceId && 
                           e.metadata?.season === episode.metadata?.season && 
                           e.metadata?.episode === episode.metadata?.episode)
                         ) || episode;
-                        onEpisodeSelect(fullEpisode);
+                        
+                        // Create an enhanced version with all available metadata
+                        const enhancedEpisode = { ...fullEpisode };
+                        
+                        // Apply any cached metadata for the target episode
+                        if (episode.metadata?.season && episode.metadata?.episode) {
+                          const showId = displayShow.metadata?.imdbId || displayShow.sourceId;
+                          const targetCacheKey = getEpisodeKey(
+                            showId, 
+                            episode.metadata.season, 
+                            episode.metadata.episode
+                          );
+                          
+                          // Check if we have a cached description for the target episode
+                          const cachedDescription = episodeDescriptionCacheRef.current[targetCacheKey];
+                          if (cachedDescription) {
+                            console.log(`Applying cached description to episode: ${targetCacheKey}`);
+                            enhancedEpisode.description = cachedDescription;
+                          }
+                        }
+                        
+                        console.log('Selecting episode with enhanced metadata:', enhancedEpisode);
+                        onEpisodeSelect(enhancedEpisode);
                       }}
                     >
                       <PlayCircle className="h-4 w-4" />
@@ -725,6 +812,29 @@ export default function ShowDetails({
             <Button
               size="sm"
               onClick={() => {
+                // First, preserve any metadata we have from the current episode
+                if (currentEpisode?.metadata?.season && currentEpisode?.metadata?.episode && currentEpisode?.description) {
+                  const showId = displayShow.metadata?.imdbId || displayShow.sourceId;
+                  const cacheKey = getEpisodeKey(
+                    showId, 
+                    currentEpisode.metadata.season, 
+                    currentEpisode.metadata.episode
+                  );
+                  
+                  // Cache the current episode's description before switching
+                  if (currentEpisode.description) {
+                    episodeDescriptionCacheRef.current[cacheKey] = currentEpisode.description;
+                    console.log(`Cached current episode description before next: ${cacheKey}`);
+                  }
+                  
+                  // Extract and cache the episode title if needed
+                  const episodeTitle = extractEpisodeTitle(currentEpisode.title);
+                  if (episodeTitle) {
+                    episodeTitleCacheRef.current[cacheKey] = episodeTitle;
+                    console.log(`Cached current episode title before next: ${cacheKey}`);
+                  }
+                }
+                
                 // Find the complete episode in the original episode list to preserve all metadata
                 const fullEpisode = episodes.find(e => 
                   e.id === nextEpisode.id || 
@@ -732,7 +842,29 @@ export default function ShowDetails({
                   e.metadata?.season === nextEpisode.metadata?.season && 
                   e.metadata?.episode === nextEpisode.metadata?.episode)
                 ) || nextEpisode;
-                onEpisodeSelect(fullEpisode);
+                
+                // Create an enhanced version with all available metadata
+                const enhancedEpisode = { ...fullEpisode };
+                
+                // Apply any cached metadata for the target episode
+                if (nextEpisode.metadata?.season && nextEpisode.metadata?.episode) {
+                  const showId = displayShow.metadata?.imdbId || displayShow.sourceId;
+                  const targetCacheKey = getEpisodeKey(
+                    showId, 
+                    nextEpisode.metadata.season, 
+                    nextEpisode.metadata.episode
+                  );
+                  
+                  // Check if we have a cached description for the target episode
+                  const cachedDescription = episodeDescriptionCacheRef.current[targetCacheKey];
+                  if (cachedDescription) {
+                    console.log(`Applying cached description to next episode: ${targetCacheKey}`);
+                    enhancedEpisode.description = cachedDescription;
+                  }
+                }
+                
+                console.log('Selecting next episode with enhanced metadata:', enhancedEpisode);
+                onEpisodeSelect(enhancedEpisode);
               }}
               className="gap-2"
             >
