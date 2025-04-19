@@ -36,8 +36,9 @@ export default function ShowDetails({
   const [customSeason, setCustomSeason] = useState<string>('1');
   const [customEpisode, setCustomEpisode] = useState<string>('1');
   
-  // Create a persistent cache for episode titles
+  // Create a persistent cache for episode titles and descriptions
   const episodeTitleCacheRef = useRef<EpisodeTitleCache>({});
+  const episodeDescriptionCacheRef = useRef<EpisodeTitleCache>({});
   
   // Helper function to get a key for the cache
   const getEpisodeKey = (showId: string, season: number, episode: number) => {
@@ -71,8 +72,7 @@ export default function ShowDetails({
     }
   };
 
-  // Cache to store episode descriptions
-  const episodeDescriptionCacheRef = useRef<Record<string, string>>({});
+  // (We're using the episodeDescriptionCacheRef defined above)
 
   // Fetch and store episode titles and descriptions from the API data
   const fetchEpisodeData = useCallback((episodes: Video[]) => {
