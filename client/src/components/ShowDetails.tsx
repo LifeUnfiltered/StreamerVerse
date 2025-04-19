@@ -644,17 +644,16 @@ export default function ShowDetails({
                           episode.title
                         )}
                       </span>
-                      {/* Show rating badge if available */}
-                      {episode.metadata?.voteAverage && (
-                        <Badge variant="secondary" className="ml-auto">
-                          {episode.metadata.voteAverage.toFixed(1)}★
-                        </Badge>
-                      )}
-                      {/* Show release date if available */}
-                      {episode.metadata?.releaseDate && (
-                        <span className="text-xs text-muted-foreground ml-2">
-                          {new Date(episode.metadata.releaseDate).toLocaleDateString()}
-                        </span>
+                      {/* Show rating and date in a consistent manner only when data is good quality */}
+                      {episode.metadata?.voteAverage && episode.metadata?.releaseDate && (
+                        <>
+                          <Badge variant="secondary" className="ml-auto">
+                            {episode.metadata.voteAverage.toFixed(1)}★
+                          </Badge>
+                          <span className="text-xs text-muted-foreground ml-2">
+                            {new Date(episode.metadata.releaseDate).toLocaleDateString()}
+                          </span>
+                        </>
                       )}
                     </Button>
                   ))
@@ -736,7 +735,7 @@ export default function ShowDetails({
                 <span className="text-muted-foreground">
                   Next: S{nextEpisode.metadata?.season}E{nextEpisode.metadata?.episode}
                 </span>
-                {nextEpisode.metadata?.voteAverage && (
+                {nextEpisode.metadata?.voteAverage && nextEpisode.metadata?.releaseDate && (
                   <Badge variant="secondary" className="ml-2">
                     {nextEpisode.metadata.voteAverage.toFixed(1)}★
                   </Badge>
@@ -759,7 +758,7 @@ export default function ShowDetails({
                   )
                 );
               })()}
-              {nextEpisode.metadata?.releaseDate && (
+              {nextEpisode.metadata?.voteAverage && nextEpisode.metadata?.releaseDate && (
                 <div className="text-xs text-muted-foreground">
                   {new Date(nextEpisode.metadata.releaseDate).toLocaleDateString()}
                 </div>
