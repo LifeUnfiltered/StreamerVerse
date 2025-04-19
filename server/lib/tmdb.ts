@@ -41,6 +41,7 @@ function movieToVideo(movie: any): Video {
       releaseDate: movie.release_date || null,
       voteAverage: movie.vote_average || null,
       runtime: movie.runtime || null,
+      contentRating: movie.releases?.countries?.find((c: any) => c.iso_3166_1 === 'US')?.certification || null,
       embedUrl: movie.imdb_id ? `https://vidsrc.xyz/embed/movie?imdb=${movie.imdb_id}` : null,
       // Cast and crew information
       cast: movie.credits?.cast?.slice(0, 10) || [],      // Get top 10 cast members
@@ -70,6 +71,7 @@ function showToVideo(show: any): Video {
       lastAirDate: show.last_air_date || null,
       voteAverage: show.vote_average || null,
       episodeRunTime: show.episode_run_time?.[0] || null,
+      contentRating: show.content_ratings?.results?.find((c: any) => c.iso_3166_1 === 'US')?.rating || null,
       embedUrl: show.external_ids?.imdb_id ? 
         `https://vidsrc.xyz/embed/tv?imdb=${show.external_ids.imdb_id}&season=1&episode=1` : null,
       totalSeasons: show.number_of_seasons,
@@ -107,6 +109,9 @@ function episodeToVideo(episode: any, show: any): Video {
       tmdbId: show.id,
       airDate: episode.air_date || null,
       voteAverage: episode.vote_average || null,
+      runtime: episode.runtime || show.episode_run_time?.[0] || null,
+      contentRating: show.content_ratings?.results?.find((c: any) => c.iso_3166_1 === 'US')?.rating || null,
+      releaseDate: episode.air_date || null,
       embedUrl: imdbId ? 
         `https://vidsrc.xyz/embed/tv?imdb=${imdbId}&season=${seasonNum}&episode=${episodeNum}` : null,
       season: seasonNum,
@@ -136,7 +141,7 @@ export async function fetchLatestMovies(page: number = 1): Promise<Video[]> {
       try {
         const movieDetails = await tmdb.movieInfo({
           id: movie.id,
-          append_to_response: 'external_ids,credits,production_companies,networks'
+          append_to_response: 'external_ids,credits,production_companies,networks,releases'
         });
 
         if (movieDetails.imdb_id) {
@@ -166,7 +171,7 @@ export async function searchContent(query: string): Promise<Video[]> {
           // Fetch complete movie details including IMDB ID
           const movieDetails = await tmdb.movieInfo({
             id: result.id,
-            append_to_response: 'external_ids,credits,production_companies,networks'
+            append_to_response: 'external_ids,credits,production_companies,networks,releases'
           });
 
           if (movieDetails.imdb_id) {
@@ -176,7 +181,7 @@ export async function searchContent(query: string): Promise<Video[]> {
           // Fetch complete TV show details including external IDs
           const showDetails = await tmdb.tvInfo({
             id: result.id,
-            append_to_response: 'external_ids,credits,production_companies,networks'
+            append_to_response: 'external_ids,credits,production_companies,networks,content_ratings'
           });
 
           if (showDetails.name && showDetails.external_ids?.imdb_id) {
