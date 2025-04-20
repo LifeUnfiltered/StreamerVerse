@@ -473,6 +473,74 @@ export async function registerRoutes(app: Express) {
       res.status(500).json({ message: 'Failed to remove from watchlist' });
     }
   });
+  
+  // Watch History routes
+  app.get('/api/watch-history', requireAuth, async (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+      const videos = await storage.getWatchHistory(req.session.userId!, limit);
+      res.json(videos);
+    } catch (error) {
+      console.error('Error fetching watch history:', error);
+      res.status(500).json({ message: 'Failed to fetch watch history' });
+    }
+  });
+  
+  app.get('/api/continue-watching', requireAuth, async (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : undefined;
+      const videos = await storage.getContinueWatching(req.session.userId!, limit);
+      res.json(videos);
+    } catch (error) {
+      console.error('Error fetching continue watching list:', error);
+      res.status(500).json({ message: 'Failed to fetch continue watching list' });
+    }
+  });
+  
+  app.post('/api/watch-history/:videoId', requireAuth, async (req, res) => {
+    try {
+      const { videoId } = req.params;
+      const { position, duration, videoData } = req.body;
+      
+      if (!videoData || typeof position !== 'number' || typeof duration !== 'number') {
+        return res.status(400).json({ message: 'Invalid request data' });
+      }
+      
+      const item = await storage.addToWatchHistory(
+        req.session.userId!, 
+        videoId, 
+        videoData, 
+        position, 
+        duration
+      );
+      res.json(item);
+    } catch (error) {
+      console.error('Error adding to watch history:', error);
+      res.status(500).json({ message: 'Failed to add to watch history' });
+    }
+  });
+  
+  app.patch('/api/watch-history/:videoId', requireAuth, async (req, res) => {
+    try {
+      const { videoId } = req.params;
+      const { position, isCompleted } = req.body;
+      
+      if (typeof position !== 'number') {
+        return res.status(400).json({ message: 'Invalid position value' });
+      }
+      
+      await storage.updateWatchProgress(
+        req.session.userId!, 
+        videoId, 
+        position, 
+        Boolean(isCompleted)
+      );
+      res.json({ message: 'Watch progress updated' });
+    } catch (error) {
+      console.error('Error updating watch progress:', error);
+      res.status(500).json({ message: 'Failed to update watch progress' });
+    }
+  });
 
   return httpServer;
 }

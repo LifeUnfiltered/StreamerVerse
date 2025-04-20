@@ -10,6 +10,8 @@ import LoadingSpinner from "./LoadingSpinner";
 import CastAndCrew from "./CastAndCrew";
 import { AnimatePresence } from "framer-motion";
 import { toast } from "@/hooks/use-toast";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 interface VideoPlayerProps {
   video: Video;
@@ -18,8 +20,13 @@ interface VideoPlayerProps {
 export default function VideoPlayer({ video }: VideoPlayerProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isPipMode, setIsPipMode] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const lastUpdateTimeRef = useRef<number>(0);
+  const queryClient = useQueryClient();
 
   // Handle iframe load
   useEffect(() => {
@@ -38,6 +45,104 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
       };
     }
   }, [video.source, video.sourceId]);
+
+  // Estimation for video duration based on metadata 
+  useEffect(() => {
+    if (video.metadata?.runtime) {
+      // If we have runtime in minutes, convert to seconds
+      setDuration(video.metadata.runtime * 60);
+    } else {
+      // Default duration if not specified (for tracking purposes)
+      setDuration(video.source === 'youtube' ? 600 : 2400); // 10 mins for YT, 40 mins for shows
+    }
+  }, [video.metadata, video.source]);
+
+  // Track watch progress
+  const { mutate: updateWatchProgress } = useMutation({
+    mutationFn: async (data: { 
+      videoId: string, 
+      position: number, 
+      isCompleted: boolean,
+      duration: number,
+      videoData: Video 
+    }) => {
+      try {
+        // Check if this is the first time tracking this video
+        const isNewWatch = lastUpdateTimeRef.current === 0;
+        
+        if (isNewWatch) {
+          // First time tracking, add to watch history
+          await apiRequest('POST', `/api/watch-history/${data.videoId}`, {
+            position: data.position,
+            duration: data.duration,
+            videoData: data.videoData
+          });
+        } else {
+          // Update existing watch progress
+          await apiRequest('PATCH', `/api/watch-history/${data.videoId}`, {
+            position: data.position,
+            isCompleted: data.isCompleted
+          });
+        }
+        
+        // Update last update time
+        lastUpdateTimeRef.current = Date.now();
+        
+        return true;
+      } catch (error) {
+        console.error('Failed to update watch progress:', error);
+        return false;
+      }
+    },
+    onSuccess: () => {
+      // Invalidate relevant queries
+      queryClient.invalidateQueries({ queryKey: ['/api/watch-history'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/continue-watching'] });
+    }
+  });
+
+  // Track watch progress periodically (every 10 seconds)
+  useEffect(() => {
+    // Only track if we have a valid video and it's not loading
+    if (!isLoading && video && video.sourceId) {
+      // Setup periodic progress tracking
+      const trackingInterval = setInterval(() => {
+        // Get estimated current time (this is a simplification since we can't directly 
+        // access the iframe player's actual time)
+        const estimatedTime = currentTime + 10; // Add 10 seconds since last update
+        setCurrentTime(estimatedTime);
+        
+        // Calculate if video is completed (90% watched)
+        const isCompleted = estimatedTime >= duration * 0.9;
+        
+        // Update watch progress
+        updateWatchProgress({
+          videoId: video.sourceId,
+          position: estimatedTime,
+          isCompleted,
+          duration,
+          videoData: video
+        });
+        
+      }, 10000); // Update every 10 seconds
+      
+      return () => {
+        clearInterval(trackingInterval);
+        
+        // When component unmounts, do a final update
+        if (currentTime > 0) {
+          const isCompleted = currentTime >= duration * 0.9;
+          updateWatchProgress({
+            videoId: video.sourceId,
+            position: currentTime,
+            isCompleted,
+            duration,
+            videoData: video
+          });
+        }
+      };
+    }
+  }, [video, isLoading, updateWatchProgress, currentTime, duration]);
 
   // Generate the embed URL based on the source and video type
   let embedUrl = '';
@@ -129,7 +234,7 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
                 description: "Entered Picture-in-Picture mode",
               });
             })
-            .catch(err => {
+            .catch((err: Error) => {
               console.error("PiP error:", err);
               toast({
                 variant: "destructive",

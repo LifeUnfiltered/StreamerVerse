@@ -1,4 +1,4 @@
-import { pgTable, text, serial, json, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, json, timestamp, integer, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -37,6 +37,17 @@ export const watchlist = pgTable("watchlist", {
   addedAt: timestamp("added_at").defaultNow(),
 });
 
+// New table for tracking watched videos
+export const watchHistory = pgTable("watch_history", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id),
+  videoId: text("video_id").notNull(),
+  watchedAt: timestamp("watched_at").defaultNow(),
+  lastPosition: integer("last_position").default(0), // Track playback position in seconds
+  isCompleted: boolean("is_completed").default(false),
+  duration: integer("duration").default(0), // Total duration of video in seconds
+});
+
 // Schemas
 export const videoSchema = createInsertSchema(videos).pick({
   sourceId: true,
@@ -58,6 +69,14 @@ export const watchlistSchema = createInsertSchema(watchlist).pick({
   videoId: true,
 });
 
+export const watchHistorySchema = createInsertSchema(watchHistory).pick({
+  userId: true,
+  videoId: true,
+  lastPosition: true,
+  isCompleted: true,
+  duration: true,
+});
+
 export const searchSchema = z.object({
   query: z.string().min(1),
   source: z.string().default('youtube')
@@ -72,6 +91,9 @@ export type InsertUser = z.infer<typeof userSchema>;
 
 export type WatchlistItem = typeof watchlist.$inferSelect;
 export type InsertWatchlistItem = z.infer<typeof watchlistSchema>;
+
+export type WatchHistoryItem = typeof watchHistory.$inferSelect;
+export type InsertWatchHistoryItem = z.infer<typeof watchHistorySchema>;
 
 export type SearchParams = z.infer<typeof searchSchema>;
 
