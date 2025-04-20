@@ -3,10 +3,13 @@ import type { Video } from "@shared/schema";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
+import { PictureInPicture2, Maximize, Pause, Play, Volume2, VolumeX } from "lucide-react";
 import FloatingActionButton from "./FloatingActionButton";
 import LoadingSpinner from "./LoadingSpinner";
 import CastAndCrew from "./CastAndCrew";
 import { AnimatePresence } from "framer-motion";
+import { toast } from "@/hooks/use-toast";
 
 interface VideoPlayerProps {
   video: Video;
@@ -14,7 +17,9 @@ interface VideoPlayerProps {
 
 export default function VideoPlayer({ video }: VideoPlayerProps) {
   const [isLoading, setIsLoading] = useState(true);
+  const [isPipMode, setIsPipMode] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Handle iframe load
   useEffect(() => {
@@ -93,6 +98,84 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
   console.log('Video metadata:', video.metadata);
   console.log('Generated embed URL:', embedUrl);
 
+  // Function to enter Picture-in-Picture mode
+  const enterPictureInPicture = () => {
+    if (document.pictureInPictureElement) {
+      // Already in PiP mode, exit it
+      document.exitPictureInPicture()
+        .then(() => {
+          setIsPipMode(false);
+          toast({
+            description: "Exited Picture-in-Picture mode",
+          });
+        })
+        .catch(error => {
+          console.error("Error exiting Picture-in-Picture mode:", error);
+          toast({
+            variant: "destructive",
+            description: "Failed to exit Picture-in-Picture mode",
+          });
+        });
+    } else if (iframeRef.current) {
+      try {
+        // Attempt to request PiP mode with the iframe
+        // This works differently based on browser - some support iframe PiP, others don't
+        if ('requestPictureInPicture' in iframeRef.current) {
+          // @ts-ignore - TypeScript doesn't know about this method on iframe
+          iframeRef.current.requestPictureInPicture()
+            .then(() => {
+              setIsPipMode(true);
+              toast({
+                description: "Entered Picture-in-Picture mode",
+              });
+            })
+            .catch(err => {
+              console.error("PiP error:", err);
+              toast({
+                variant: "destructive",
+                description: "This browser doesn't support Picture-in-Picture for embedded videos",
+              });
+            });
+        } else {
+          // Fallback for browsers that don't support PiP on iframes
+          toast({
+            variant: "destructive",
+            description: "This browser doesn't support Picture-in-Picture for embedded videos",
+          });
+        }
+      } catch (error) {
+        console.error("Error entering Picture-in-Picture mode:", error);
+        toast({
+          variant: "destructive",
+          description: "Failed to enter Picture-in-Picture mode",
+        });
+      }
+    }
+  };
+
+  // Handle fullscreen
+  const toggleFullscreen = () => {
+    try {
+      if (!document.fullscreenElement) {
+        // Enter fullscreen
+        if (containerRef.current?.requestFullscreen) {
+          containerRef.current.requestFullscreen();
+        }
+      } else {
+        // Exit fullscreen
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        }
+      }
+    } catch (error) {
+      console.error("Error toggling fullscreen:", error);
+      toast({
+        variant: "destructive",
+        description: "Fullscreen mode is not available",
+      });
+    }
+  };
+
   if (!embedUrl) {
     return (
       <Card>
@@ -115,7 +198,7 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
           <CardTitle className="line-clamp-1">{video.title}</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
+          <div className="space-y-4" ref={containerRef}>
             <AspectRatio ratio={16 / 9} className="relative bg-black rounded-md overflow-hidden video-player">
               <iframe
                 ref={iframeRef}
@@ -133,6 +216,28 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
                 {isLoading && <LoadingSpinner />}
               </AnimatePresence>
             </AspectRatio>
+            
+            {/* Video controls */}
+            <div className="flex items-center justify-between">
+              <div className="flex space-x-2">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={enterPictureInPicture}
+                  title="Picture-in-Picture"
+                >
+                  <PictureInPicture2 className="h-4 w-4" />
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={toggleFullscreen}
+                  title="Fullscreen"
+                >
+                  <Maximize className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
             <div className="space-y-3">
               {/* Release date information */}
               <div className="flex flex-wrap gap-2">
