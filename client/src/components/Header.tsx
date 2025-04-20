@@ -108,6 +108,12 @@ export default function Header({ onAuthClick, onWatchlistClick, onTrendingClick,
                       </span>
                     )}
                   </DropdownMenuItem>
+                  {onHistoryClick && (
+                    <DropdownMenuItem onClick={onHistoryClick} className="cursor-pointer">
+                      <History className="mr-2 h-4 w-4" />
+                      <span>Watch History</span>
+                    </DropdownMenuItem>
+                  )}
                   {onTrendingClick && (
                     <DropdownMenuItem onClick={onTrendingClick} className="cursor-pointer md:hidden">
                       <TrendingUp className="mr-2 h-4 w-4" />

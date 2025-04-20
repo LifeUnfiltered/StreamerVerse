@@ -802,6 +802,7 @@ export default function VidSrc() {
         onAuthClick={() => setIsAuthDialogOpen(true)}
         onWatchlistClick={handleWatchlistClick}
         onTrendingClick={handleTrendingClick}
+        onHistoryClick={handleHistoryClick}
       />
       <main className="container mx-auto p-4 md:p-6">
         <div className="space-y-4">
@@ -811,6 +812,7 @@ export default function VidSrc() {
               <h2 className="text-xl font-semibold">
                 {navigation.view === 'search' && 'Search Results'}
                 {navigation.view === 'watchlist' && 'Your Watchlist'}
+                {navigation.view === 'history' && 'Your Watch History'}
                 {navigation.view === 'video' && selectedVideo?.title}
               </h2>
             </div>
@@ -868,6 +870,16 @@ export default function VidSrc() {
                     onAuthRequired={() => setIsAuthDialogOpen(true)}
                   />
                 )}
+              </>
+            ) : navigation.view === 'history' && isLoggedIn ? (
+              <>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-xl font-semibold">Your Watch History</h2>
+                </div>
+                <WatchHistory
+                  onSelect={handleVideoSelect}
+                  onAuthRequired={() => setIsAuthDialogOpen(true)}
+                />
               </>
             ) : searchQuery ? (
               <div>
