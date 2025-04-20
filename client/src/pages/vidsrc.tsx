@@ -12,6 +12,8 @@ import SearchBar from "@/components/SearchBar";
 import ShowDetails from "@/components/ShowDetails";
 import SourceSelector from "@/components/SourceSelector";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import ContinueWatching from "@/components/ContinueWatching";
+import WatchHistory from "@/components/WatchHistory";
 import { 
   AlertCircle, 
   Sword, 
