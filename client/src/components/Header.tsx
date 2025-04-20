@@ -2,7 +2,7 @@ import { SiYoutube } from "react-icons/si";
 import { Button } from "@/components/ui/button";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { LogIn, LogOut, User as UserIcon, Bookmark, TrendingUp } from "lucide-react";
+import { LogIn, LogOut, User as UserIcon, Bookmark, TrendingUp, History } from "lucide-react";
 import type { Video } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import ThemeSwitcher, { ColorThemeButton } from "./ThemeSwitcher";
@@ -19,9 +19,10 @@ interface HeaderProps {
   onAuthClick: () => void;
   onWatchlistClick: () => void;
   onTrendingClick?: () => void;
+  onHistoryClick?: () => void;
 }
 
-export default function Header({ onAuthClick, onWatchlistClick, onTrendingClick }: HeaderProps) {
+export default function Header({ onAuthClick, onWatchlistClick, onTrendingClick, onHistoryClick }: HeaderProps) {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 

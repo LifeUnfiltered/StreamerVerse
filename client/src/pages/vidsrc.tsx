@@ -40,8 +40,8 @@ import {
 import BackButton from "@/components/BackButton";
 
 interface NavigationState {
-  view: 'browse' | 'search' | 'watchlist' | 'video' | 'trending';
-  previousView: 'browse' | 'search' | 'watchlist' | 'video' | 'trending' | null;
+  view: 'browse' | 'search' | 'watchlist' | 'video' | 'trending' | 'history';
+  previousView: 'browse' | 'search' | 'watchlist' | 'video' | 'trending' | 'history' | null;
 }
 
 interface GenreItem {
@@ -213,6 +213,16 @@ export default function VidSrc() {
     setNavigation({ 
       view: 'trending',
       previousView: navigation.view === 'trending' ? navigation.previousView : navigation.view
+    });
+    setSearchQuery('');
+    setSelectedVideo(null);
+  };
+  
+  // Handle navigation to watch history
+  const handleHistoryClick = () => {
+    setNavigation({ 
+      view: 'history',
+      previousView: navigation.view === 'history' ? navigation.previousView : navigation.view
     });
     setSearchQuery('');
     setSelectedVideo(null);
@@ -895,6 +905,12 @@ export default function VidSrc() {
 
 
                 <TabsContent value="movies" className="w-full">
+                  {/* Continue Watching section will appear at the top if the user has items in progress */}
+                  <ContinueWatching 
+                    onSelect={handleVideoSelect}
+                    onAuthRequired={() => setIsAuthDialogOpen(true)}
+                  />
+                  
                   <div className="mb-6">
                     <h2 className="text-lg font-semibold mb-4">Movie Genres</h2>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
@@ -955,6 +971,12 @@ export default function VidSrc() {
                 </TabsContent>
 
                 <TabsContent value="shows" className="w-full">
+                  {/* Continue Watching section will appear at the top if the user has items in progress */}
+                  <ContinueWatching 
+                    onSelect={handleVideoSelect}
+                    onAuthRequired={() => setIsAuthDialogOpen(true)}
+                  />
+                  
                   <div className="mb-6">
                     <h2 className="text-lg font-semibold mb-4">TV Genres</h2>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
