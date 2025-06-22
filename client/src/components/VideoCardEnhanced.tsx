@@ -16,7 +16,7 @@ interface VideoCardProps {
   variant?: 'default' | 'compact';
 }
 
-export default function VideoCard({ 
+export default function VideoCardEnhanced({ 
   video, 
   onClick, 
   isSelected,
