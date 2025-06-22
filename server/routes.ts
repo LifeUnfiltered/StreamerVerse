@@ -114,12 +114,16 @@ export async function registerRoutes(app: Express) {
         }
         
         req.session.userId = testUser.id;
-        req.session.save((err) => {
-          if (err) console.error('Session save error:', err);
-          console.log('Session saved for user:', testUser.id);
-        });
         
-        return res.json({ id: testUser.id, username: testUser.username });
+        // Ensure session is saved before responding
+        req.session.save((err) => {
+          if (err) {
+            console.error('Session save error:', err);
+            return res.status(500).json({ message: 'Session save failed' });
+          }
+          console.log('Session saved for user:', testUser.id);
+          res.json({ id: testUser.id, username: testUser.username });
+        });
       }
 
       // Then check registered users

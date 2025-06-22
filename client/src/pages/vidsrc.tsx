@@ -1079,7 +1079,6 @@ export default function VidSrc() {
                     onVideoSelect={handleVideoSelect}
                     selectedVideo={selectedVideo}
                     onAuthRequired={() => setIsAuthDialogOpen(true)}
-                    variant="compact"
                   />
                 </div>
 
@@ -1093,7 +1092,6 @@ export default function VidSrc() {
                     onVideoSelect={handleVideoSelect}
                     selectedVideo={selectedVideo}
                     onAuthRequired={() => setIsAuthDialogOpen(true)}
-                    variant="compact"
                   />
                 </div>
                 
