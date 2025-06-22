@@ -193,6 +193,32 @@
           }
           return originalReplace.apply(window.location, arguments);
         };
+
+        // Additional click event blocking for ads
+        document.addEventListener('click', function(event) {
+          const target = event.target;
+          if (target && target.tagName && 
+              (target.tagName.toLowerCase() === 'a' || target.onclick)) {
+            const href = target.href || target.onclick?.toString() || '';
+            if (href.includes('ads') || href.includes('popup') || 
+                href.includes('click') || href.includes('banner')) {
+              console.log('Blocked ad click:', href);
+              event.preventDefault();
+              event.stopPropagation();
+              return false;
+            }
+          }
+        }, true);
+
+        // Block context menu on video players to prevent ad menus
+        document.addEventListener('contextmenu', function(event) {
+          if (event.target.tagName && 
+              (event.target.tagName.toLowerCase() === 'iframe' ||
+               event.target.classList.contains('video-player'))) {
+            event.preventDefault();
+            return false;
+          }
+        });
       });
     </script>
   </head>

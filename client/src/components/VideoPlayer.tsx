@@ -382,11 +382,24 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
                 onLoad={() => video.source === 'youtube' && setIsLoading(false)}
               />
               <AnimatePresence>
-                {isLoading && <LoadingSpinner />}
+                {isLoading && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/90 text-white">
+                    <div className="text-center space-y-4">
+                      <LoadingSpinner />
+                      {video.source === 'vidsrc' && currentDomainIndex > 0 && (
+                        <p className="text-sm text-gray-300">
+                          Trying source {currentDomainIndex + 1} of {vidSrcDomains.length}...
+                        </p>
+                      )}
+                      <p className="text-sm text-gray-400">Loading video player...</p>
+                    </div>
+                  </div>
+                )}
                 {loadError && (
                   <div className="absolute inset-0 flex items-center justify-center bg-black/80 text-white">
                     <div className="text-center space-y-4">
-                      <p>Video source unavailable</p>
+                      <p>All video sources tried</p>
+                      <p className="text-sm text-gray-400">Attempted {vidSrcDomains.length} different sources</p>
                       <Button 
                         variant="outline" 
                         onClick={() => {
