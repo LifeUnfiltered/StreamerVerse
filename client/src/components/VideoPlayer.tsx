@@ -46,16 +46,17 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
       };
 
       const handleIframeError = () => {
-        console.log('VidSrc iframe failed to load, trying next domain...');
+        console.log(`VidSrc iframe failed to load (domain ${currentDomainIndex + 1}/${vidSrcDomains.length}), trying next domain...`);
         if (currentDomainIndex < vidSrcDomains.length - 1) {
           setCurrentDomainIndex(prev => prev + 1);
           setIsLoading(true);
+          setLoadError(false);
         } else {
           setIsLoading(false);
           setLoadError(true);
           toast({
             variant: "destructive",
-            description: "Video source unavailable. Please try again later.",
+            description: "All video sources tried. Click 'Try Again' to retry.",
           });
         }
       };
@@ -76,8 +77,16 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
           } catch (e) {
             // Cross-origin restrictions prevent content access, which is normal
           }
-        }, 5000);
+        }, 8000);
       };
+
+      // Set timeout for iframe loading
+      const loadTimeout = setTimeout(() => {
+        if (isLoading) {
+          console.log('Iframe load timeout, trying next domain...');
+          handleIframeError();
+        }
+      }, 15000); // 15 second timeout
       
       iframe.addEventListener('load', checkIframeContent);
       
@@ -85,6 +94,7 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
         iframe.removeEventListener('load', handleIframeLoad);
         iframe.removeEventListener('error', handleIframeError);
         iframe.removeEventListener('load', checkIframeContent);
+        clearTimeout(loadTimeout);
       };
     }
   }, [video.source, video.sourceId, currentDomainIndex]);
@@ -191,7 +201,7 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
   let embedUrl = '';
   
   // Define array of VidSrc domains to try (from most reliable to fallbacks)
-  const vidSrcDomains = ['vidsrc.to', 'vidsrc.me', 'vidsrc.cc', 'vidsrc.net', 'vidsrc.xyz'];
+  const vidSrcDomains = ['vidsrc.to', 'vidsrc.xyz', 'vidsrc.me', 'vidsrc.cc', 'vidsrc.net'];
   const preferredDomain = vidSrcDomains[currentDomainIndex] || vidSrcDomains[0]; // Use current domain index
   
   if (video.source === 'youtube') {
@@ -361,12 +371,12 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
             <AspectRatio ratio={16 / 9} className="relative bg-black rounded-md overflow-hidden video-player">
               <iframe
                 ref={iframeRef}
-                key={video.sourceId}
+                key={`${video.sourceId}-${currentDomainIndex}`}
                 src={embedUrl}
                 title={video.title}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                 allowFullScreen
-                sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
+                sandbox="allow-same-origin allow-scripts allow-forms allow-presentation"
                 className="absolute inset-0 w-full h-full video-player"
                 id="video-player-iframe"
                 onLoad={() => video.source === 'youtube' && setIsLoading(false)}

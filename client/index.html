@@ -8,11 +8,52 @@
     <!-- Advanced Ad-Blocking and Anti-Redirect Script -->
     <script>
       window.addEventListener('DOMContentLoaded', function() {
-        // Block popup windows
+        // Enhanced popup blocking
         const originalWindowOpen = window.open;
-        window.open = function() {
-          console.log('Popup blocked:', arguments[0]);
-          return null;
+        window.open = function(url, name, specs) {
+          console.log('Popup blocked:', url);
+          // Return a mock window object to prevent errors
+          return {
+            focus: () => {},
+            blur: () => {},
+            close: () => {},
+            closed: false,
+            location: { href: '' },
+            document: { write: () => {}, close: () => {} }
+          };
+        };
+
+        // Block alert, confirm, and prompt dialogs that could be ads
+        const originalAlert = window.alert;
+        const originalConfirm = window.confirm;
+        const originalPrompt = window.prompt;
+        
+        window.alert = function(message) {
+          if (message && typeof message === 'string' && 
+              (message.toLowerCase().includes('ad') || 
+               message.toLowerCase().includes('click') ||
+               message.toLowerCase().includes('download'))) {
+            console.log('Ad alert blocked:', message);
+            return;
+          }
+          return originalAlert.apply(this, arguments);
+        };
+        
+        window.confirm = function(message) {
+          if (message && typeof message === 'string' && 
+              (message.toLowerCase().includes('ad') || 
+               message.toLowerCase().includes('click'))) {
+            console.log('Ad confirm blocked:', message);
+            return false;
+          }
+          return originalConfirm.apply(this, arguments);
+        };
+
+        // Block focus stealing attempts
+        const originalFocus = window.focus;
+        window.focus = function() {
+          console.log('Focus stealing attempt blocked');
+          return;
         };
 
         // Create sandbox environment for iframe content

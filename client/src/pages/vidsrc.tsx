@@ -267,6 +267,20 @@ export default function VidSrc() {
           <div className="mt-6 grid gap-6 grid-cols-1">
             {selectedVideo ? (
               <div className="space-y-6">
+                <div className="flex items-center gap-4">
+                  <BackButton 
+                    onClick={() => {
+                      setSelectedVideo(null);
+                      setSearchQuery("");
+                      setNavigation({ 
+                        view: 'browse', 
+                        previousView: null 
+                      });
+                    }}
+                    label="Back to Browse"
+                  />
+                  <h1 className="text-xl font-semibold text-muted-foreground">Now Playing</h1>
+                </div>
                 <VideoPlayer video={selectedVideo} />
                 {currentSource === 'vidsrc' && selectedVideo?.metadata?.type === 'tv' && selectedVideo && (
                   <ShowDetails
