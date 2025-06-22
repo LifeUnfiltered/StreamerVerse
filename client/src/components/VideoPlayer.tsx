@@ -41,17 +41,20 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
   useEffect(() => {
     if (video.source === 'vidsrc' && iframeRef.current) {
       const handleIframeLoad = () => {
+        console.log('VidSrc iframe loaded successfully');
         setIsLoading(false);
         setLoadError(false);
       };
 
       const handleIframeError = () => {
-        console.log(`VidSrc iframe failed to load (domain ${currentDomainIndex + 1}/${vidSrcDomains.length}), trying next domain...`);
+        console.log(`VidSrc iframe failed to load (domain ${currentDomainIndex + 1}/${vidSrcDomains.length})`);
         if (currentDomainIndex < vidSrcDomains.length - 1) {
+          console.log('Trying next domain...');
           setCurrentDomainIndex(prev => prev + 1);
           setIsLoading(true);
           setLoadError(false);
         } else {
+          console.log('All domains exhausted');
           setIsLoading(false);
           setLoadError(true);
           toast({
@@ -65,35 +68,17 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
       iframe.addEventListener('load', handleIframeLoad);
       iframe.addEventListener('error', handleIframeError);
       
-      // Also handle cases where iframe loads but content fails
-      const checkIframeContent = () => {
-        setTimeout(() => {
-          try {
-            // If iframe loads but shows error content, try next domain
-            if (iframe.contentDocument?.title?.toLowerCase().includes('error') ||
-                iframe.contentDocument?.body?.textContent?.toLowerCase().includes('not found')) {
-              handleIframeError();
-            }
-          } catch (e) {
-            // Cross-origin restrictions prevent content access, which is normal
-          }
-        }, 8000);
-      };
-
-      // Set timeout for iframe loading
+      // Simplified timeout for very slow loading
       const loadTimeout = setTimeout(() => {
         if (isLoading) {
-          console.log('Iframe load timeout, trying next domain...');
+          console.log('Iframe load timeout after 45 seconds, trying next domain...');
           handleIframeError();
         }
-      }, 15000); // 15 second timeout
-      
-      iframe.addEventListener('load', checkIframeContent);
+      }, 45000);
       
       return () => {
         iframe.removeEventListener('load', handleIframeLoad);
         iframe.removeEventListener('error', handleIframeError);
-        iframe.removeEventListener('load', checkIframeContent);
         clearTimeout(loadTimeout);
       };
     }
@@ -376,10 +361,16 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
                 title={video.title}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                 allowFullScreen
-                sandbox="allow-same-origin allow-scripts allow-forms allow-presentation"
+                sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
                 className="absolute inset-0 w-full h-full video-player"
                 id="video-player-iframe"
-                onLoad={() => video.source === 'youtube' && setIsLoading(false)}
+                onLoad={() => {
+                  console.log('Iframe onLoad triggered for', video.source);
+                  if (video.source === 'youtube') {
+                    setIsLoading(false);
+                  }
+                  // VidSrc loading is handled by the useEffect above
+                }}
               />
               <AnimatePresence>
                 {isLoading && (
