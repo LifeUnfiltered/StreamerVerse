@@ -3,7 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Play, Heart, Share2, Eye, Clock, Star, Bookmark } from "lucide-react";
+import { Play, Heart, Share2, Eye, Clock, Star } from "lucide-react";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import WatchlistButton from "./WatchlistButton";
