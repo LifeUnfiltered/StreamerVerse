@@ -29,13 +29,17 @@
                 // Allow internal navigation but block external redirects
                 // Check against all known VidSrc domains and player-related paths
                 if (
+                  url.includes('vidsrc.to') || 
+                  url.includes('vidsrc.me') || 
+                  url.includes('vidsrc.cc') || 
+                  url.includes('vidsrc.net') || 
                   url.includes('vidsrc.xyz') || 
                   url.includes('vidsrc.pm') || 
                   url.includes('vidsrc.in') || 
-                  url.includes('vidsrc.net') || 
                   url.includes('episode') || 
                   url.includes('player') || 
-                  url.includes('video')
+                  url.includes('video') ||
+                  url.includes('embed')
                 ) {
                   console.log('Allowing internal iframe navigation:', url);
                   return originalAssign.apply(iframe.contentWindow.location, arguments);
@@ -48,13 +52,17 @@
                 // Allow internal navigation but block external redirects
                 // Check against all known VidSrc domains and player-related paths
                 if (
+                  url.includes('vidsrc.to') || 
+                  url.includes('vidsrc.me') || 
+                  url.includes('vidsrc.cc') || 
+                  url.includes('vidsrc.net') || 
                   url.includes('vidsrc.xyz') || 
                   url.includes('vidsrc.pm') || 
                   url.includes('vidsrc.in') || 
-                  url.includes('vidsrc.net') || 
                   url.includes('episode') || 
                   url.includes('player') || 
-                  url.includes('video')
+                  url.includes('video') ||
+                  url.includes('embed')
                 ) {
                   console.log('Allowing internal iframe navigation:', url);
                   return originalReplace.apply(iframe.contentWindow.location, arguments);
