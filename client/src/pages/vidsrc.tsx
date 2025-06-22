@@ -1062,16 +1062,221 @@ export default function VidSrc() {
                 </TabsContent>
               </Tabs>
             ) : currentSource === 'youtube' ? (
-              <div className="space-y-8">
+              <div className="space-y-10">
                 {/* Continue Watching section for YouTube */}
                 <ContinueWatching 
                   onSelect={handleVideoSelect}
                   onAuthRequired={() => setIsAuthDialogOpen(true)}
                 />
 
+                {/* YouTube Categories */}
+                <div className="space-y-6">
+                  <div className="text-center space-y-2">
+                    <h2 className="text-3xl font-bold bg-gradient-to-r from-red-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">
+                      YouTube Categories
+                    </h2>
+                    <p className="text-muted-foreground">Discover content across all your favorite categories</p>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                    {[
+                      { name: 'Music', query: 'music', icon: <Music className="h-7 w-7" />, gradient: 'from-pink-500 to-red-500' },
+                      { name: 'Gaming', query: 'gaming', icon: <Zap className="h-7 w-7" />, gradient: 'from-purple-500 to-indigo-500' },
+                      { name: 'Comedy', query: 'comedy', icon: <Laugh className="h-7 w-7" />, gradient: 'from-yellow-500 to-orange-500' },
+                      { name: 'Tech', query: 'technology', icon: <Rocket className="h-7 w-7" />, gradient: 'from-blue-500 to-cyan-500' },
+                      { name: 'Education', query: 'education', icon: <FlaskConical className="h-7 w-7" />, gradient: 'from-green-500 to-emerald-500' },
+                      { name: 'Sports', query: 'sports', icon: <Users className="h-7 w-7" />, gradient: 'from-orange-500 to-red-500' },
+                      { name: 'News', query: 'news', icon: <Camera className="h-7 w-7" />, gradient: 'from-gray-500 to-slate-600' },
+                      { name: 'Travel', query: 'travel', icon: <Plane className="h-7 w-7" />, gradient: 'from-teal-500 to-blue-500' },
+                      { name: 'Food', query: 'cooking food', icon: <Heart className="h-7 w-7" />, gradient: 'from-rose-500 to-pink-500' },
+                      { name: 'DIY', query: 'diy tutorial', icon: <Castle className="h-7 w-7" />, gradient: 'from-amber-500 to-yellow-500' },
+                      { name: 'Fitness', query: 'fitness workout', icon: <Sword className="h-7 w-7" />, gradient: 'from-red-500 to-orange-500' },
+                      { name: 'Movies', query: 'movie trailers', icon: <Film className="h-7 w-7" />, gradient: 'from-indigo-500 to-purple-500' }
+                    ].map(category => (
+                      <button
+                        key={category.name}
+                        onClick={() => handleSearch(category.query)}
+                        className="group relative p-6 rounded-2xl bg-gradient-to-br from-background to-muted border border-border hover:border-primary/50 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl"
+                      >
+                        <div className="flex flex-col items-center space-y-3">
+                          <div className={`p-3 rounded-xl bg-gradient-to-r ${category.gradient} text-white shadow-lg group-hover:shadow-xl transition-shadow`}>
+                            {category.icon}
+                          </div>
+                          <span className="text-sm font-semibold text-center">{category.name}</span>
+                        </div>
+                        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-transparent via-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Trending Searches */}
+                <div className="space-y-6">
+                  <div className="text-center space-y-2">
+                    <h2 className="text-2xl font-bold">🔥 Trending Searches</h2>
+                    <p className="text-muted-foreground">What everyone's watching right now</p>
+                  </div>
+                  <div className="flex flex-wrap gap-3 justify-center">
+                    {[
+                      { term: 'trending music 2024', icon: '🎵' },
+                      { term: 'funny videos', icon: '😂' },
+                      { term: 'how to tutorials', icon: '📚' },
+                      { term: 'movie trailers', icon: '🎬' },
+                      { term: 'gaming highlights', icon: '🎮' },
+                      { term: 'tech reviews', icon: '📱' },
+                      { term: 'cooking recipes', icon: '👨‍🍳' },
+                      { term: 'workout routines', icon: '💪' },
+                      { term: 'travel vlogs', icon: '✈️' },
+                      { term: 'news updates', icon: '📰' },
+                      { term: 'science experiments', icon: '🧪' },
+                      { term: 'art tutorials', icon: '🎨' }
+                    ].map(search => (
+                      <button
+                        key={search.term}
+                        onClick={() => handleSearch(search.term)}
+                        className="px-4 py-2 rounded-full bg-gradient-to-r from-secondary to-secondary/80 hover:from-primary/20 hover:to-primary/10 text-sm font-medium transition-all duration-200 hover:scale-105 shadow-sm hover:shadow-md border border-border/50 hover:border-primary/30"
+                      >
+                        <span className="mr-2">{search.icon}</span>
+                        {search.term}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Popular Playlists */}
+                <div className="space-y-6">
+                  <div className="text-center space-y-2">
+                    <h2 className="text-2xl font-bold">📜 Popular Playlists</h2>
+                    <p className="text-muted-foreground">Curated collections you'll love</p>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {[
+                      {
+                        title: 'Top Hits 2024',
+                        description: 'Latest trending music videos',
+                        query: 'top hits 2024 music',
+                        thumbnail: '🎵',
+                        gradient: 'from-pink-500/20 to-red-500/20'
+                      },
+                      {
+                        title: 'Tech Reviews',
+                        description: 'Latest gadget reviews and unboxings',
+                        query: 'tech review 2024',
+                        thumbnail: '📱',
+                        gradient: 'from-blue-500/20 to-cyan-500/20'
+                      },
+                      {
+                        title: 'Cooking Masterclass',
+                        description: 'Professional cooking tutorials',
+                        query: 'cooking masterclass tutorial',
+                        thumbnail: '👨‍🍳',
+                        gradient: 'from-orange-500/20 to-yellow-500/20'
+                      },
+                      {
+                        title: 'Gaming Highlights',
+                        description: 'Best gaming moments and gameplay',
+                        query: 'gaming highlights 2024',
+                        thumbnail: '🎮',
+                        gradient: 'from-purple-500/20 to-indigo-500/20'
+                      },
+                      {
+                        title: 'Educational Content',
+                        description: 'Learn something new every day',
+                        query: 'educational videos science',
+                        thumbnail: '📚',
+                        gradient: 'from-green-500/20 to-emerald-500/20'
+                      },
+                      {
+                        title: 'Comedy Gold',
+                        description: 'Funniest videos on YouTube',
+                        query: 'funny comedy videos',
+                        thumbnail: '😂',
+                        gradient: 'from-yellow-500/20 to-orange-500/20'
+                      }
+                    ].map(playlist => (
+                      <div
+                        key={playlist.title}
+                        onClick={() => handleSearch(playlist.query)}
+                        className={`group relative p-6 rounded-2xl bg-gradient-to-br ${playlist.gradient} border border-border hover:border-primary/50 cursor-pointer transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105`}
+                      >
+                        <div className="flex items-start space-x-4">
+                          <div className="text-4xl flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                            {playlist.thumbnail}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-bold text-lg mb-2 group-hover:text-primary transition-colors">{playlist.title}</h3>
+                            <p className="text-sm text-muted-foreground leading-relaxed">{playlist.description}</p>
+                          </div>
+                        </div>
+                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Quick Actions */}
+                <div className="space-y-6">
+                  <div className="text-center space-y-2">
+                    <h2 className="text-2xl font-bold">⚡ Quick Actions</h2>
+                    <p className="text-muted-foreground">Jump straight into your favorite content types</p>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <button
+                      onClick={() => handleSearch('podcast')}
+                      className="group p-6 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-500 text-white hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl"
+                    >
+                      <div className="flex flex-col items-center space-y-3">
+                        <div className="p-3 bg-white/20 rounded-xl group-hover:bg-white/30 transition-colors">
+                          <Music className="h-8 w-8" />
+                        </div>
+                        <span className="text-sm font-bold">Podcasts</span>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => handleSearch('documentary')}
+                      className="group p-6 rounded-2xl bg-gradient-to-br from-blue-500 to-cyan-500 text-white hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl"
+                    >
+                      <div className="flex flex-col items-center space-y-3">
+                        <div className="p-3 bg-white/20 rounded-xl group-hover:bg-white/30 transition-colors">
+                          <Camera className="h-8 w-8" />
+                        </div>
+                        <span className="text-sm font-bold">Documentaries</span>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => handleSearch('live stream')}
+                      className="group p-6 rounded-2xl bg-gradient-to-br from-red-500 to-orange-500 text-white hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl"
+                    >
+                      <div className="flex flex-col items-center space-y-3">
+                        <div className="p-3 bg-white/20 rounded-xl group-hover:bg-white/30 transition-colors">
+                          <Zap className="h-8 w-8" />
+                        </div>
+                        <span className="text-sm font-bold">Live Streams</span>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => handleSearch('shorts')}
+                      className="group p-6 rounded-2xl bg-gradient-to-br from-green-500 to-teal-500 text-white hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-2xl"
+                    >
+                      <div className="flex flex-col items-center space-y-3">
+                        <div className="p-3 bg-white/20 rounded-xl group-hover:bg-white/30 transition-colors">
+                          <Film className="h-8 w-8" />
+                        </div>
+                        <span className="text-sm font-bold">Shorts</span>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
                 {/* YouTube Trending Content */}
-                <div className="space-y-4">
-                  <h2 className="text-2xl font-bold">Trending on YouTube</h2>
+                <div className="space-y-6">
+                  <div className="text-center space-y-2">
+                    <h2 className="text-3xl font-bold bg-gradient-to-r from-red-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">
+                      🔥 Trending on YouTube
+                    </h2>
+                    <p className="text-muted-foreground">What's hot right now</p>
+                  </div>
                   <VideoList
                     videos={youtubeTrending}
                     isLoading={youtubeTrendingLoading}
@@ -1083,8 +1288,11 @@ export default function VidSrc() {
                 </div>
 
                 {/* YouTube Recommendations */}
-                <div className="space-y-4">
-                  <h2 className="text-xl font-semibold">Recommended for You</h2>
+                <div className="space-y-6">
+                  <div className="text-center space-y-2">
+                    <h2 className="text-2xl font-bold">✨ Recommended for You</h2>
+                    <p className="text-muted-foreground">Personalized picks based on trending categories</p>
+                  </div>
                   <VideoList
                     videos={youtubeRecommendations}
                     isLoading={youtubeRecommendationsLoading}
@@ -1093,169 +1301,6 @@ export default function VidSrc() {
                     selectedVideo={selectedVideo}
                     onAuthRequired={() => setIsAuthDialogOpen(true)}
                   />
-                </div>
-                
-                {/* YouTube Categories */}
-                <div className="space-y-6">
-                  <h2 className="text-2xl font-bold">YouTube Categories</h2>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                    {[
-                      { name: 'Music', query: 'music', icon: <Music className="h-6 w-6" /> },
-                      { name: 'Gaming', query: 'gaming', icon: <Zap className="h-6 w-6" /> },
-                      { name: 'Comedy', query: 'comedy', icon: <Laugh className="h-6 w-6" /> },
-                      { name: 'Tech', query: 'technology', icon: <Rocket className="h-6 w-6" /> },
-                      { name: 'Education', query: 'education', icon: <FlaskConical className="h-6 w-6" /> },
-                      { name: 'Sports', query: 'sports', icon: <Users className="h-6 w-6" /> },
-                      { name: 'News', query: 'news', icon: <Camera className="h-6 w-6" /> },
-                      { name: 'Travel', query: 'travel', icon: <Plane className="h-6 w-6" /> },
-                      { name: 'Food', query: 'cooking food', icon: <Heart className="h-6 w-6" /> },
-                      { name: 'DIY', query: 'diy tutorial', icon: <Castle className="h-6 w-6" /> },
-                      { name: 'Fitness', query: 'fitness workout', icon: <Sword className="h-6 w-6" /> },
-                      { name: 'Movies', query: 'movie trailers', icon: <Film className="h-6 w-6" /> }
-                    ].map(category => (
-                      <button
-                        key={category.name}
-                        onClick={() => handleSearch(category.query)}
-                        className="p-4 rounded-lg bg-card hover:bg-accent hover:scale-105 transition-all duration-200 shadow-sm"
-                      >
-                        <div className="flex flex-col items-center space-y-2">
-                          {category.icon}
-                          <span className="text-sm font-medium">{category.name}</span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Popular YouTube Searches */}
-                <div className="space-y-4">
-                  <h2 className="text-xl font-semibold">Trending Searches</h2>
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      'trending music 2024',
-                      'funny videos',
-                      'how to tutorials',
-                      'movie trailers',
-                      'gaming highlights',
-                      'tech reviews',
-                      'cooking recipes',
-                      'workout routines',
-                      'travel vlogs',
-                      'news updates',
-                      'science experiments',
-                      'art tutorials'
-                    ].map(searchTerm => (
-                      <button
-                        key={searchTerm}
-                        onClick={() => handleSearch(searchTerm)}
-                        className="px-3 py-1 rounded-full bg-secondary hover:bg-secondary/80 text-sm transition-colors"
-                      >
-                        {searchTerm}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* YouTube Playlists */}
-                <div className="space-y-4">
-                  <h2 className="text-xl font-semibold">Popular Playlists</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {[
-                      {
-                        title: 'Top Hits 2024',
-                        description: 'Latest trending music videos',
-                        query: 'top hits 2024 music',
-                        thumbnail: '🎵'
-                      },
-                      {
-                        title: 'Tech Reviews',
-                        description: 'Latest gadget reviews and unboxings',
-                        query: 'tech review 2024',
-                        thumbnail: '📱'
-                      },
-                      {
-                        title: 'Cooking Masterclass',
-                        description: 'Professional cooking tutorials',
-                        query: 'cooking masterclass tutorial',
-                        thumbnail: '👨‍🍳'
-                      },
-                      {
-                        title: 'Gaming Highlights',
-                        description: 'Best gaming moments and gameplay',
-                        query: 'gaming highlights 2024',
-                        thumbnail: '🎮'
-                      },
-                      {
-                        title: 'Educational Content',
-                        description: 'Learn something new every day',
-                        query: 'educational videos science',
-                        thumbnail: '📚'
-                      },
-                      {
-                        title: 'Comedy Gold',
-                        description: 'Funniest videos on YouTube',
-                        query: 'funny comedy videos',
-                        thumbnail: '😂'
-                      }
-                    ].map(playlist => (
-                      <div
-                        key={playlist.title}
-                        onClick={() => handleSearch(playlist.query)}
-                        className="p-4 rounded-lg bg-card hover:bg-accent cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md"
-                      >
-                        <div className="flex items-start space-x-3">
-                          <div className="text-2xl">{playlist.thumbnail}</div>
-                          <div className="flex-1">
-                            <h3 className="font-semibold text-sm">{playlist.title}</h3>
-                            <p className="text-xs text-muted-foreground mt-1">{playlist.description}</p>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Quick Actions */}
-                <div className="space-y-4">
-                  <h2 className="text-xl font-semibold">Quick Actions</h2>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <button
-                      onClick={() => handleSearch('podcast')}
-                      className="p-4 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:scale-105 transition-transform"
-                    >
-                      <div className="flex flex-col items-center space-y-2">
-                        <Music className="h-6 w-6" />
-                        <span className="text-sm font-medium">Podcasts</span>
-                      </div>
-                    </button>
-                    <button
-                      onClick={() => handleSearch('documentary')}
-                      className="p-4 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:scale-105 transition-transform"
-                    >
-                      <div className="flex flex-col items-center space-y-2">
-                        <Camera className="h-6 w-6" />
-                        <span className="text-sm font-medium">Documentaries</span>
-                      </div>
-                    </button>
-                    <button
-                      onClick={() => handleSearch('live stream')}
-                      className="p-4 rounded-lg bg-gradient-to-r from-red-500 to-orange-500 text-white hover:scale-105 transition-transform"
-                    >
-                      <div className="flex flex-col items-center space-y-2">
-                        <Zap className="h-6 w-6" />
-                        <span className="text-sm font-medium">Live Streams</span>
-                      </div>
-                    </button>
-                    <button
-                      onClick={() => handleSearch('shorts')}
-                      className="p-4 rounded-lg bg-gradient-to-r from-green-500 to-teal-500 text-white hover:scale-105 transition-transform"
-                    >
-                      <div className="flex flex-col items-center space-y-2">
-                        <Film className="h-6 w-6" />
-                        <span className="text-sm font-medium">Shorts</span>
-                      </div>
-                    </button>
-                  </div>
                 </div>
               </div>
             ) : null}
