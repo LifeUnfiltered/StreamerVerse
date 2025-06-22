@@ -78,7 +78,6 @@ export default function VidSrc() {
   const [selectedGenreType, setSelectedGenreType] = useState<'movies' | 'tv'>('movies');
   const queryClient = useQueryClient();
 
-  // Watchlist query
   const { data: watchlist } = useQuery<Video[]>({
     queryKey: ['/api/watchlist'],
     queryFn: async () => {
@@ -99,7 +98,6 @@ export default function VidSrc() {
     retry: false
   });
 
-  // Latest content queries
   const { data: movies, isLoading: moviesLoading, error: moviesError } = useQuery<Video[]>({
     queryKey: ['/api/videos/vidsrc/latest/movies', page],
     queryFn: async () => {
@@ -113,49 +111,11 @@ export default function VidSrc() {
     queryKey: ['/api/videos/test-tv'],
     queryFn: async () => {
       const response = await apiRequest('GET', '/api/videos/test-tv');
-      const shows = await response.json();
-      
-      // Cache the show titles for future reference
-      shows.forEach((show: Video) => {
-        if (show.metadata?.type === 'tv') {
-          const showId = show.metadata?.imdbId || show.sourceId;
-          if (showId && show.title) {
-            showNameCache.set(showId, show.title);
-            console.log(`Cached show title from browse: ${showId} = "${show.title}"`);
-          }
-        }
-      });
-      
-      return shows;
+      return response.json();
     },
     enabled: !searchQuery && currentSource === 'vidsrc' && navigation.view === 'browse'
   });
 
-  // YouTube trending content
-  const { data: youtubeTrending, isLoading: youtubeTrendingLoading, error: youtubeTrendingError } = useQuery<Video[]>({
-    queryKey: ['/api/videos/youtube/trending'],
-    queryFn: async () => {
-      const response = await apiRequest('GET', '/api/videos/search?query=trending 2024&source=youtube');
-      return response.json();
-    },
-    enabled: currentSource === 'youtube' && navigation.view === 'browse' && !searchQuery,
-    staleTime: 5 * 60 * 1000 // Cache for 5 minutes
-  });
-
-  // YouTube category content
-  const { data: youtubeRecommendations, isLoading: youtubeRecommendationsLoading } = useQuery<Video[]>({
-    queryKey: ['/api/videos/youtube/recommendations'],
-    queryFn: async () => {
-      const categories = ['music 2024', 'tech review', 'cooking tutorial', 'gaming highlights'];
-      const randomCategory = categories[Math.floor(Math.random() * categories.length)];
-      const response = await apiRequest('GET', `/api/videos/search?query=${encodeURIComponent(randomCategory)}&source=youtube`);
-      return response.json();
-    },
-    enabled: currentSource === 'youtube' && navigation.view === 'browse' && !searchQuery,
-    staleTime: 10 * 60 * 1000 // Cache for 10 minutes
-  });
-
-  // Search query
   const { data: searchResults, isLoading: searchLoading, error: searchError } = useQuery<Video[]>({
     queryKey: [currentSource === 'youtube' ? '/api/videos/search' : '/api/videos/vidsrc/search', searchQuery, currentSource],
     queryFn: async () => {
@@ -163,18 +123,14 @@ export default function VidSrc() {
         ? `/api/videos/search?query=${encodeURIComponent(searchQuery)}&source=youtube`
         : `/api/videos/vidsrc/search?query=${encodeURIComponent(searchQuery)}`;
       const response = await apiRequest('GET', endpoint);
-      const results = await response.json();
-      
-      return results;
+      return response.json();
     },
     enabled: searchQuery.length > 0
   });
 
   const handleSearch = (query: string) => {
-    console.log('Searching for:', query);
     setSearchQuery(query);
     setSelectedVideo(null);
-    
     setNavigation({ 
       view: 'search', 
       previousView: navigation.view === 'search' ? navigation.previousView : navigation.view 
@@ -192,32 +148,6 @@ export default function VidSrc() {
     queryClient.invalidateQueries({ queryKey: ['/api/watchlist'] });
   };
 
-  const handleWatchlistClick = () => {
-    setNavigation({ 
-      view: 'watchlist',
-      previousView: navigation.view === 'watchlist' ? navigation.previousView : navigation.view
-    });
-    setSearchQuery('');
-  };
-  
-  const handleTrendingClick = () => {
-    setNavigation({ 
-      view: 'trending',
-      previousView: navigation.view === 'trending' ? navigation.previousView : navigation.view
-    });
-    setSearchQuery('');
-    setSelectedVideo(null);
-  };
-  
-  const handleHistoryClick = () => {
-    setNavigation({ 
-      view: 'history',
-      previousView: navigation.view === 'history' ? navigation.previousView : navigation.view
-    });
-    setSearchQuery('');
-    setSelectedVideo(null);
-  };
-
   const handleVideoSelect = (video: Video) => {
     setSelectedVideo(video);
     setNavigation({ 
@@ -232,9 +162,9 @@ export default function VidSrc() {
     <div className="min-h-screen bg-background">
       <Header 
         onAuthClick={() => setIsAuthDialogOpen(true)}
-        onWatchlistClick={handleWatchlistClick}
-        onTrendingClick={handleTrendingClick}
-        onHistoryClick={handleHistoryClick}
+        onWatchlistClick={() => setNavigation({ view: 'watchlist', previousView: navigation.view })}
+        onTrendingClick={() => setNavigation({ view: 'trending', previousView: navigation.view })}
+        onHistoryClick={() => setNavigation({ view: 'history', previousView: navigation.view })}
       />
       
       <main className="container mx-auto px-4 py-6">
@@ -261,52 +191,11 @@ export default function VidSrc() {
             {selectedVideo ? (
               <div className="space-y-6">
                 <VideoPlayer video={selectedVideo} />
-                {currentSource === 'vidsrc' && (
-                  <ShowDetails
-                    show={selectedVideo?.metadata?.type === 'tv' ? selectedVideo : undefined}
-                    episodes={[]}
-                    onEpisodeSelect={handleVideoSelect}
-                    currentEpisode={selectedVideo}
-                  />
-                )}
               </div>
             ) : null}
 
             <div className="w-full">
-              {navigation.view === 'watchlist' && isLoggedIn ? (
-                <>
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-semibold">Your Watchlist</h2>
-                  </div>
-                  {!watchlist?.length ? (
-                    <Alert>
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertDescription>
-                        Your watchlist is empty. Browse videos and click the bookmark icon to add them to your watchlist.
-                      </AlertDescription>
-                    </Alert>
-                  ) : (
-                    <VideoList
-                      videos={watchlist}
-                      isLoading={false}
-                      error={null}
-                      onVideoSelect={handleVideoSelect}
-                      selectedVideo={selectedVideo}
-                      onAuthRequired={() => setIsAuthDialogOpen(true)}
-                    />
-                  )}
-                </>
-              ) : navigation.view === 'history' && isLoggedIn ? (
-                <>
-                  <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-semibold">Your Watch History</h2>
-                  </div>
-                  <WatchHistory
-                    onSelect={handleVideoSelect}
-                    onAuthRequired={() => setIsAuthDialogOpen(true)}
-                  />
-                </>
-              ) : searchQuery ? (
+              {navigation.view === 'search' && searchQuery ? (
                 <div>
                   <h2 className="text-xl font-semibold mb-4">Search Results</h2>
                   <VideoList
@@ -320,13 +209,11 @@ export default function VidSrc() {
                 </div>
               ) : currentSource === 'vidsrc' ? (
                 <div className="space-y-10">
-                  {/* Continue Watching section for VidSrc */}
                   <ContinueWatching 
                     onSelect={handleVideoSelect}
                     onAuthRequired={() => setIsAuthDialogOpen(true)}
                   />
 
-                  {/* VidSrc Premium Header */}
                   <div className="space-y-6">
                     <div className="text-center space-y-2">
                       <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent">
@@ -387,13 +274,11 @@ export default function VidSrc() {
                 </div>
               ) : currentSource === 'youtube' ? (
                 <div className="space-y-10">
-                  {/* Continue Watching section for YouTube */}
                   <ContinueWatching 
                     onSelect={handleVideoSelect}
                     onAuthRequired={() => setIsAuthDialogOpen(true)}
                   />
 
-                  {/* YouTube Categories */}
                   <div className="space-y-6">
                     <div className="text-center space-y-2">
                       <h2 className="text-3xl font-bold bg-gradient-to-r from-red-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">
@@ -408,13 +293,7 @@ export default function VidSrc() {
                         { name: 'Comedy', query: 'comedy', icon: <Laugh className="h-7 w-7" />, gradient: 'from-yellow-500 to-orange-500' },
                         { name: 'Tech', query: 'technology', icon: <Rocket className="h-7 w-7" />, gradient: 'from-blue-500 to-cyan-500' },
                         { name: 'Education', query: 'education', icon: <FlaskConical className="h-7 w-7" />, gradient: 'from-green-500 to-emerald-500' },
-                        { name: 'Sports', query: 'sports', icon: <Users className="h-7 w-7" />, gradient: 'from-orange-500 to-red-500' },
-                        { name: 'News', query: 'news', icon: <Camera className="h-7 w-7" />, gradient: 'from-gray-500 to-slate-600' },
-                        { name: 'Travel', query: 'travel', icon: <Plane className="h-7 w-7" />, gradient: 'from-teal-500 to-blue-500' },
-                        { name: 'Food', query: 'cooking food', icon: <Heart className="h-7 w-7" />, gradient: 'from-rose-500 to-pink-500' },
-                        { name: 'DIY', query: 'diy tutorial', icon: <Castle className="h-7 w-7" />, gradient: 'from-amber-500 to-yellow-500' },
-                        { name: 'Fitness', query: 'fitness workout', icon: <Sword className="h-7 w-7" />, gradient: 'from-red-500 to-orange-500' },
-                        { name: 'Movies', query: 'movie trailers', icon: <Film className="h-7 w-7" />, gradient: 'from-indigo-500 to-purple-500' }
+                        { name: 'Sports', query: 'sports', icon: <Users className="h-7 w-7" />, gradient: 'from-orange-500 to-red-500' }
                       ].map(category => (
                         <button
                           key={category.name}
@@ -434,40 +313,6 @@ export default function VidSrc() {
                         </button>
                       ))}
                     </div>
-                  </div>
-
-                  {/* YouTube Trending Content */}
-                  <div className="space-y-6">
-                    <div className="text-center space-y-2">
-                      <h2 className="text-3xl font-bold bg-gradient-to-r from-red-500 via-purple-500 to-blue-500 bg-clip-text text-transparent">
-                        🔥 Trending on YouTube
-                      </h2>
-                      <p className="text-muted-foreground">What's hot right now</p>
-                    </div>
-                    <VideoList
-                      videos={youtubeTrending}
-                      isLoading={youtubeTrendingLoading}
-                      error={youtubeTrendingError}
-                      onVideoSelect={handleVideoSelect}
-                      selectedVideo={selectedVideo}
-                      onAuthRequired={() => setIsAuthDialogOpen(true)}
-                    />
-                  </div>
-
-                  {/* YouTube Recommendations */}
-                  <div className="space-y-6">
-                    <div className="text-center space-y-2">
-                      <h2 className="text-2xl font-bold">✨ Recommended for You</h2>
-                      <p className="text-muted-foreground">Personalized picks based on trending categories</p>
-                    </div>
-                    <VideoList
-                      videos={youtubeRecommendations}
-                      isLoading={youtubeRecommendationsLoading}
-                      error={null}
-                      onVideoSelect={handleVideoSelect}
-                      selectedVideo={selectedVideo}
-                      onAuthRequired={() => setIsAuthDialogOpen(true)}
-                    />
                   </div>
                 </div>
               ) : null}
