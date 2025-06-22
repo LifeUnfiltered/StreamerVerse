@@ -30,6 +30,13 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
   const lastUpdateTimeRef = useRef<number>(0);
   const queryClient = useQueryClient();
 
+  // Reset domain index when video changes
+  useEffect(() => {
+    setCurrentDomainIndex(0);
+    setLoadError(false);
+    setIsLoading(true);
+  }, [video.sourceId]);
+
   // Handle iframe load and error
   useEffect(() => {
     if (video.source === 'vidsrc' && iframeRef.current) {
@@ -185,7 +192,7 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
   
   // Define array of VidSrc domains to try (from most reliable to fallbacks)
   const vidSrcDomains = ['vidsrc.to', 'vidsrc.me', 'vidsrc.cc', 'vidsrc.net', 'vidsrc.xyz'];
-  const preferredDomain = vidSrcDomains[0]; // Default to the most reliable domain
+  const preferredDomain = vidSrcDomains[currentDomainIndex] || vidSrcDomains[0]; // Use current domain index
   
   if (video.source === 'youtube') {
     embedUrl = `https://www.youtube.com/embed/${video.sourceId}?autoplay=1&modestbranding=1&rel=0`;
@@ -366,6 +373,24 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
               />
               <AnimatePresence>
                 {isLoading && <LoadingSpinner />}
+                {loadError && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/80 text-white">
+                    <div className="text-center space-y-4">
+                      <p>Video source unavailable</p>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => {
+                          setCurrentDomainIndex(0);
+                          setLoadError(false);
+                          setIsLoading(true);
+                        }}
+                        className="text-white border-white hover:bg-white hover:text-black"
+                      >
+                        Try Again
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </AnimatePresence>
             </AspectRatio>
             
