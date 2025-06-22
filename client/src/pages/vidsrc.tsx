@@ -243,27 +243,34 @@ export default function VidSrc() {
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center flex-1">
               {navigation.view !== 'browse' && (
                 <BackButton 
-                  onClick={() => setNavigation({ 
-                    view: navigation.previousView || 'browse', 
-                    previousView: null 
-                  })}
+                  onClick={() => {
+                    setSelectedVideo(null);
+                    setNavigation({ 
+                      view: navigation.previousView || 'browse', 
+                      previousView: null 
+                    });
+                  }}
                 />
               )}
-              <SearchBar onSearch={handleSearch} />
             </div>
             <SourceSelector 
               onSourceSelect={handleSourceSelect}
               currentSource={currentSource}
             />
           </div>
+          
+          {/* Search bar positioned below source selector */}
+          <div className="w-full">
+            <SearchBar onSearch={handleSearch} />
+          </div>
 
           <div className="mt-6 grid gap-6 grid-cols-1">
             {selectedVideo ? (
               <div className="space-y-6">
                 <VideoPlayer video={selectedVideo} />
-                {currentSource === 'vidsrc' && (
+                {currentSource === 'vidsrc' && selectedVideo?.metadata?.type === 'tv' && selectedVideo && (
                   <ShowDetails
-                    show={selectedVideo?.metadata?.type === 'tv' ? selectedVideo : undefined}
+                    show={selectedVideo}
                     episodes={[]}
                     onEpisodeSelect={handleVideoSelect}
                     currentEpisode={selectedVideo}

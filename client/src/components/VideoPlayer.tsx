@@ -23,28 +23,64 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
+  const [currentDomainIndex, setCurrentDomainIndex] = useState(0);
+  const [loadError, setLoadError] = useState(false);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const lastUpdateTimeRef = useRef<number>(0);
   const queryClient = useQueryClient();
 
-  // Handle iframe load
+  // Handle iframe load and error
   useEffect(() => {
     if (video.source === 'vidsrc' && iframeRef.current) {
       const handleIframeLoad = () => {
         setIsLoading(false);
-        // Ad blocking is now handled globally in index.html
+        setLoadError(false);
       };
 
-      // Attach load event
+      const handleIframeError = () => {
+        console.log('VidSrc iframe failed to load, trying next domain...');
+        if (currentDomainIndex < vidSrcDomains.length - 1) {
+          setCurrentDomainIndex(prev => prev + 1);
+          setIsLoading(true);
+        } else {
+          setIsLoading(false);
+          setLoadError(true);
+          toast({
+            variant: "destructive",
+            description: "Video source unavailable. Please try again later.",
+          });
+        }
+      };
+
       const iframe = iframeRef.current;
       iframe.addEventListener('load', handleIframeLoad);
+      iframe.addEventListener('error', handleIframeError);
+      
+      // Also handle cases where iframe loads but content fails
+      const checkIframeContent = () => {
+        setTimeout(() => {
+          try {
+            // If iframe loads but shows error content, try next domain
+            if (iframe.contentDocument?.title?.toLowerCase().includes('error') ||
+                iframe.contentDocument?.body?.textContent?.toLowerCase().includes('not found')) {
+              handleIframeError();
+            }
+          } catch (e) {
+            // Cross-origin restrictions prevent content access, which is normal
+          }
+        }, 5000);
+      };
+      
+      iframe.addEventListener('load', checkIframeContent);
       
       return () => {
         iframe.removeEventListener('load', handleIframeLoad);
+        iframe.removeEventListener('error', handleIframeError);
+        iframe.removeEventListener('load', checkIframeContent);
       };
     }
-  }, [video.source, video.sourceId]);
+  }, [video.source, video.sourceId, currentDomainIndex]);
 
   // Estimation for video duration based on metadata 
   useEffect(() => {
@@ -147,9 +183,9 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
   // Generate the embed URL based on the source and video type
   let embedUrl = '';
   
-  // Define array of VidSrc domains to try (from newest to oldest)
-  const vidSrcDomains = ['vidsrc.xyz', 'vidsrc.pm', 'vidsrc.in', 'vidsrc.net'];
-  const preferredDomain = vidSrcDomains[0]; // Default to the newest domain
+  // Define array of VidSrc domains to try (from most reliable to fallbacks)
+  const vidSrcDomains = ['vidsrc.to', 'vidsrc.me', 'vidsrc.cc', 'vidsrc.net', 'vidsrc.xyz'];
+  const preferredDomain = vidSrcDomains[0]; // Default to the most reliable domain
   
   if (video.source === 'youtube') {
     embedUrl = `https://www.youtube.com/embed/${video.sourceId}?autoplay=1&modestbranding=1&rel=0`;
@@ -160,13 +196,24 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
     // If we have a valid IMDB ID
     if (imdbId) {
       if (video.metadata?.type === 'movie') {
-        // Use the new API format for movies
-        embedUrl = `https://${preferredDomain}/embed/movie?imdb=${imdbId}`;
+        // Use the reliable format for movies
+        embedUrl = `https://${preferredDomain}/embed/movie/${imdbId}`;
       } else if (video.metadata?.type === 'tv') {
         // For TV shows, check if it has season and episode info
         const season = video.metadata.season || 1;
         const episode = video.metadata.episode || 1;
-        embedUrl = `https://${preferredDomain}/embed/tv?imdb=${imdbId}&season=${season}&episode=${episode}`;
+        embedUrl = `https://${preferredDomain}/embed/tv/${imdbId}/${season}/${episode}`;
+      }
+    }
+    
+    // If no IMDB ID but we have a direct sourceId that looks like IMDB
+    if (!embedUrl && video.sourceId && video.sourceId.startsWith('tt')) {
+      if (video.metadata?.type === 'movie') {
+        embedUrl = `https://${preferredDomain}/embed/movie/${video.sourceId}`;
+      } else if (video.metadata?.type === 'tv') {
+        const season = video.metadata?.season || 1;
+        const episode = video.metadata?.episode || 1;
+        embedUrl = `https://${preferredDomain}/embed/tv/${video.sourceId}/${season}/${episode}`;
       }
     }
     
