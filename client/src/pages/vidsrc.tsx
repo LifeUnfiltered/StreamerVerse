@@ -921,42 +921,249 @@ export default function VidSrc() {
                 />
               </>
             ) : currentSource === 'vidsrc' ? (
-              <Tabs defaultValue="movies" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 mb-6">
-                  <TabsTrigger value="movies">Movies</TabsTrigger>
-                  <TabsTrigger value="shows">TV Shows</TabsTrigger>
-                </TabsList>
+              <div className="space-y-10">
+                {/* Continue Watching section for VidSrc */}
+                <ContinueWatching 
+                  onSelect={handleVideoSelect}
+                  onAuthRequired={() => setIsAuthDialogOpen(true)}
+                />
 
-
-
-                <TabsContent value="movies" className="w-full">
-                  {/* Continue Watching section will appear at the top if the user has items in progress */}
-                  <ContinueWatching 
-                    onSelect={handleVideoSelect}
-                    onAuthRequired={() => setIsAuthDialogOpen(true)}
-                  />
-                  
-                  <div className="mb-6">
-                    <h2 className="text-lg font-semibold mb-4">Movie Genres</h2>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                      {movieGenres?.map(genre => (
-                        <button
-                          key={genre.id}
-                          onClick={() => handleGenreSelect(genre.id, 'movies')}
-                          className={`p-4 rounded-lg shadow-sm transition-all duration-200 text-left ${
-                            selectedGenreId === genre.id && selectedGenreType === 'movies' 
-                              ? 'bg-primary text-primary-foreground' 
-                              : 'bg-card hover:bg-accent hover:scale-105'
-                          }`}
-                        >
-                          <div className="flex flex-col items-center">
-                            {getGenreIcon(genre.id, 'movies')}
-                            {genre.name}
-                          </div>
-                        </button>
-                      ))}
-                    </div>
+                {/* VidSrc Premium Header */}
+                <div className="space-y-6">
+                  <div className="text-center space-y-2">
+                    <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent">
+                      🎬 Premium Movies & TV Shows
+                    </h2>
+                    <p className="text-muted-foreground">Stream high-quality content from our extensive collection</p>
                   </div>
+                </div>
+
+                <Tabs defaultValue="movies" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2 mb-8 h-12 bg-gradient-to-r from-background to-muted/20 border-2 border-primary/20">
+                    <TabsTrigger value="movies" className="text-lg font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-purple-500 data-[state=active]:text-white">
+                      🎬 Movies
+                    </TabsTrigger>
+                    <TabsTrigger value="shows" className="text-lg font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white">
+                      📺 TV Shows
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="movies" className="w-full space-y-8">
+                    <div className="space-y-6">
+                      <div className="text-center space-y-2">
+                        <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
+                          Movie Genres
+                        </h3>
+                        <p className="text-muted-foreground">Choose your favorite movie genre</p>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                        {movieGenres?.map(genre => {
+                          const genreColors = {
+                            28: 'from-red-500 to-orange-500', // Action
+                            12: 'from-yellow-500 to-orange-500', // Adventure
+                            16: 'from-pink-500 to-purple-500', // Animation
+                            35: 'from-yellow-400 to-amber-500', // Comedy
+                            80: 'from-gray-600 to-gray-800', // Crime
+                            99: 'from-green-500 to-teal-500', // Documentary
+                            18: 'from-blue-500 to-indigo-600', // Drama
+                            10751: 'from-green-400 to-emerald-500', // Family
+                            14: 'from-purple-500 to-pink-500', // Fantasy
+                            36: 'from-amber-600 to-yellow-600', // History
+                            27: 'from-red-600 to-black', // Horror
+                            10402: 'from-pink-400 to-rose-500', // Music
+                            9648: 'from-indigo-600 to-purple-700', // Mystery
+                            10749: 'from-rose-400 to-pink-500', // Romance
+                            878: 'from-cyan-500 to-blue-600', // Science Fiction
+                            10770: 'from-blue-400 to-indigo-500', // TV Movie
+                            53: 'from-red-700 to-orange-600', // Thriller
+                            10752: 'from-gray-500 to-slate-600', // War
+                            37: 'from-amber-700 to-yellow-700' // Western
+                          };
+                          const gradientClass = genreColors[genre.id as keyof typeof genreColors] || 'from-gray-500 to-slate-600';
+                          
+                          return (
+                            <button
+                              key={genre.id}
+                              onClick={() => handleGenreSelect(genre.id, 'movies')}
+                              className={`group relative p-6 rounded-2xl bg-gradient-to-br ${
+                                selectedGenreId === genre.id && selectedGenreType === 'movies' 
+                                  ? `${gradientClass} text-white shadow-2xl scale-105` 
+                                  : 'from-background to-muted border border-border hover:border-primary/50'
+                              } hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl`}
+                            >
+                              <div className="flex flex-col items-center space-y-3">
+                                <div className={`p-3 rounded-full ${
+                                  selectedGenreId === genre.id && selectedGenreType === 'movies'
+                                    ? 'bg-white/20 backdrop-blur-sm'
+                                    : `bg-gradient-to-br ${gradientClass}`
+                                }`}>
+                                  <div className={selectedGenreId === genre.id && selectedGenreType === 'movies' ? 'text-white' : 'text-white'}>
+                                    {getGenreIcon(genre.id, 'movies')}
+                                  </div>
+                                </div>
+                                <span className={`font-medium text-center ${
+                                  selectedGenreId === genre.id && selectedGenreType === 'movies'
+                                    ? 'text-white'
+                                    : 'text-foreground group-hover:text-primary'
+                                }`}>
+                                  {genre.name}
+                                </span>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  
+                    {selectedGenreId && selectedGenreType === 'movies' ? (
+                      <>
+                        <div className="flex items-center justify-between mb-4">
+                          <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
+                            {movieGenres?.find(g => g.id === selectedGenreId)?.name} Movies
+                          </h2>
+                          <button 
+                            onClick={() => setSelectedGenreId(null)}
+                            className="px-4 py-2 bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-lg hover:scale-105 transition-all duration-200 shadow-lg"
+                          >
+                            Clear selection
+                          </button>
+                        </div>
+                        <VideoList
+                          videos={genreMovies}
+                          isLoading={genreMoviesLoading}
+                          error={genreMoviesError}
+                          onVideoSelect={handleVideoSelect}
+                          selectedVideo={selectedVideo}
+                          onAuthRequired={() => setIsAuthDialogOpen(true)}
+                        />
+                      </>
+                    ) : (
+                      <div className="space-y-6">
+                        <div className="text-center space-y-2">
+                          <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
+                            🍿 Latest Movies
+                          </h3>
+                          <p className="text-muted-foreground">Discover the newest movie releases</p>
+                        </div>
+                        <VideoList
+                          videos={movies}
+                          isLoading={moviesLoading}
+                          error={moviesError}
+                          onVideoSelect={handleVideoSelect}
+                          selectedVideo={selectedVideo}
+                          onAuthRequired={() => setIsAuthDialogOpen(true)}
+                        />
+                      </div>
+                    )}
+                  </TabsContent>
+
+                  <TabsContent value="shows" className="w-full space-y-8">
+                    <div className="space-y-6">
+                      <div className="text-center space-y-2">
+                        <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-500 to-indigo-500 bg-clip-text text-transparent">
+                          TV Show Genres
+                        </h3>
+                        <p className="text-muted-foreground">Explore your favorite TV show genres</p>
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                        {tvGenres?.map(genre => {
+                          const tvGenreColors = {
+                            10759: 'from-red-500 to-orange-500', // Action & Adventure
+                            16: 'from-pink-500 to-purple-500', // Animation
+                            35: 'from-yellow-400 to-amber-500', // Comedy
+                            80: 'from-gray-600 to-gray-800', // Crime
+                            99: 'from-green-500 to-teal-500', // Documentary
+                            18: 'from-blue-500 to-indigo-600', // Drama
+                            10751: 'from-green-400 to-emerald-500', // Family
+                            10762: 'from-orange-400 to-yellow-500', // Kids
+                            9648: 'from-indigo-600 to-purple-700', // Mystery
+                            10763: 'from-blue-400 to-cyan-500', // News
+                            10764: 'from-rose-400 to-pink-500', // Reality
+                            10765: 'from-cyan-500 to-blue-600', // Sci-Fi & Fantasy
+                            10766: 'from-purple-400 to-pink-400', // Soap
+                            10767: 'from-amber-500 to-orange-500', // Talk
+                            10768: 'from-red-600 to-orange-600', // War & Politics
+                            37: 'from-amber-700 to-yellow-700' // Western
+                          };
+                          const gradientClass = tvGenreColors[genre.id as keyof typeof tvGenreColors] || 'from-gray-500 to-slate-600';
+                          
+                          return (
+                            <button
+                              key={genre.id}
+                              onClick={() => handleGenreSelect(genre.id, 'tv')}
+                              className={`group relative p-6 rounded-2xl bg-gradient-to-br ${
+                                selectedGenreId === genre.id && selectedGenreType === 'tv' 
+                                  ? `${gradientClass} text-white shadow-2xl scale-105` 
+                                  : 'from-background to-muted border border-border hover:border-primary/50'
+                              } hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl`}
+                            >
+                              <div className="flex flex-col items-center space-y-3">
+                                <div className={`p-3 rounded-full ${
+                                  selectedGenreId === genre.id && selectedGenreType === 'tv'
+                                    ? 'bg-white/20 backdrop-blur-sm'
+                                    : `bg-gradient-to-br ${gradientClass}`
+                                }`}>
+                                  <div className={selectedGenreId === genre.id && selectedGenreType === 'tv' ? 'text-white' : 'text-white'}>
+                                    {getGenreIcon(genre.id, 'tv')}
+                                  </div>
+                                </div>
+                                <span className={`font-medium text-center ${
+                                  selectedGenreId === genre.id && selectedGenreType === 'tv'
+                                    ? 'text-white'
+                                    : 'text-foreground group-hover:text-primary'
+                                }`}>
+                                  {genre.name}
+                                </span>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  
+                    {selectedGenreId && selectedGenreType === 'tv' ? (
+                      <>
+                        <div className="flex items-center justify-between mb-4">
+                          <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-500 to-indigo-500 bg-clip-text text-transparent">
+                            {tvGenres?.find(g => g.id === selectedGenreId)?.name} TV Shows
+                          </h2>
+                          <button 
+                            onClick={() => setSelectedGenreId(null)}
+                            className="px-4 py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-lg hover:scale-105 transition-all duration-200 shadow-lg"
+                          >
+                            Clear selection
+                          </button>
+                        </div>
+                        <VideoList
+                          videos={genreTVShows}
+                          isLoading={genreTVShowsLoading}
+                          error={genreTVShowsError}
+                          onVideoSelect={handleVideoSelect}
+                          selectedVideo={selectedVideo}
+                          onAuthRequired={() => setIsAuthDialogOpen(true)}
+                        />
+                      </>
+                    ) : (
+                      <div className="space-y-6">
+                        <div className="text-center space-y-2">
+                          <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-500 to-indigo-500 bg-clip-text text-transparent">
+                            📺 Popular TV Shows
+                          </h3>
+                          <p className="text-muted-foreground">Discover trending TV series and shows</p>
+                        </div>
+                        <VideoList
+                          videos={shows}
+                          isLoading={showsLoading}
+                          error={showsError}
+                          onVideoSelect={handleVideoSelect}
+                          selectedVideo={selectedVideo}
+                          onAuthRequired={() => setIsAuthDialogOpen(true)}
+                        />
+                      </div>
+                    )}
+                  </TabsContent>
+                </Tabs>
+              </div>
                   
                   {selectedGenreId && selectedGenreType === 'movies' ? (
                     <>
@@ -981,8 +1188,13 @@ export default function VidSrc() {
                       />
                     </>
                   ) : (
-                    <>
-                      <h2 className="text-lg font-semibold mb-4">Latest Movies</h2>
+                    <div className="space-y-6">
+                      <div className="text-center space-y-2">
+                        <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
+                          🍿 Latest Movies
+                        </h3>
+                        <p className="text-muted-foreground">Discover the newest movie releases</p>
+                      </div>
                       <VideoList
                         videos={movies}
                         isLoading={moviesLoading}
@@ -991,36 +1203,71 @@ export default function VidSrc() {
                         selectedVideo={selectedVideo}
                         onAuthRequired={() => setIsAuthDialogOpen(true)}
                       />
-                    </>
+                    </div>
                   )}
                 </TabsContent>
 
-                <TabsContent value="shows" className="w-full">
-                  {/* Continue Watching section will appear at the top if the user has items in progress */}
-                  <ContinueWatching 
-                    onSelect={handleVideoSelect}
-                    onAuthRequired={() => setIsAuthDialogOpen(true)}
-                  />
-                  
-                  <div className="mb-6">
-                    <h2 className="text-lg font-semibold mb-4">TV Genres</h2>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                      {tvGenres?.map(genre => (
-                        <button
-                          key={genre.id}
-                          onClick={() => handleGenreSelect(genre.id, 'tv')}
-                          className={`p-4 rounded-lg shadow-sm transition-all duration-200 text-left ${
-                            selectedGenreId === genre.id && selectedGenreType === 'tv' 
-                              ? 'bg-primary text-primary-foreground' 
-                              : 'bg-card hover:bg-accent hover:scale-105'
-                          }`}
-                        >
-                          <div className="flex flex-col items-center">
-                            {getGenreIcon(genre.id, 'tv')}
-                            {genre.name}
-                          </div>
-                        </button>
-                      ))}
+                <TabsContent value="shows" className="w-full space-y-8">
+                  <div className="space-y-6">
+                    <div className="text-center space-y-2">
+                      <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-500 to-indigo-500 bg-clip-text text-transparent">
+                        TV Show Genres
+                      </h3>
+                      <p className="text-muted-foreground">Explore your favorite TV show genres</p>
+                    </div>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                      {tvGenres?.map(genre => {
+                        const tvGenreColors = {
+                          10759: 'from-red-500 to-orange-500', // Action & Adventure
+                          16: 'from-pink-500 to-purple-500', // Animation
+                          35: 'from-yellow-400 to-amber-500', // Comedy
+                          80: 'from-gray-600 to-gray-800', // Crime
+                          99: 'from-green-500 to-teal-500', // Documentary
+                          18: 'from-blue-500 to-indigo-600', // Drama
+                          10751: 'from-green-400 to-emerald-500', // Family
+                          10762: 'from-orange-400 to-yellow-500', // Kids
+                          9648: 'from-indigo-600 to-purple-700', // Mystery
+                          10763: 'from-blue-400 to-cyan-500', // News
+                          10764: 'from-rose-400 to-pink-500', // Reality
+                          10765: 'from-cyan-500 to-blue-600', // Sci-Fi & Fantasy
+                          10766: 'from-purple-400 to-pink-400', // Soap
+                          10767: 'from-amber-500 to-orange-500', // Talk
+                          10768: 'from-red-600 to-orange-600', // War & Politics
+                          37: 'from-amber-700 to-yellow-700' // Western
+                        };
+                        const gradientClass = tvGenreColors[genre.id as keyof typeof tvGenreColors] || 'from-gray-500 to-slate-600';
+                        
+                        return (
+                          <button
+                            key={genre.id}
+                            onClick={() => handleGenreSelect(genre.id, 'tv')}
+                            className={`group relative p-6 rounded-2xl bg-gradient-to-br ${
+                              selectedGenreId === genre.id && selectedGenreType === 'tv' 
+                                ? `${gradientClass} text-white shadow-2xl scale-105` 
+                                : 'from-background to-muted border border-border hover:border-primary/50'
+                            } hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl`}
+                          >
+                            <div className="flex flex-col items-center space-y-3">
+                              <div className={`p-3 rounded-full ${
+                                selectedGenreId === genre.id && selectedGenreType === 'tv'
+                                  ? 'bg-white/20 backdrop-blur-sm'
+                                  : `bg-gradient-to-br ${gradientClass}`
+                              }`}>
+                                <div className={selectedGenreId === genre.id && selectedGenreType === 'tv' ? 'text-white' : 'text-white'}>
+                                  {getGenreIcon(genre.id, 'tv')}
+                                </div>
+                              </div>
+                              <span className={`font-medium text-center ${
+                                selectedGenreId === genre.id && selectedGenreType === 'tv'
+                                  ? 'text-white'
+                                  : 'text-foreground group-hover:text-primary'
+                              }`}>
+                                {genre.name}
+                              </span>
+                            </div>
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                   
@@ -1047,8 +1294,13 @@ export default function VidSrc() {
                       />
                     </>
                   ) : (
-                    <>
-                      <h2 className="text-lg font-semibold mb-4">Popular TV Shows</h2>
+                    <div className="space-y-6">
+                      <div className="text-center space-y-2">
+                        <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-500 to-indigo-500 bg-clip-text text-transparent">
+                          📺 Popular TV Shows
+                        </h3>
+                        <p className="text-muted-foreground">Discover trending TV series and shows</p>
+                      </div>
                       <VideoList
                         videos={shows}
                         isLoading={showsLoading}
@@ -1057,10 +1309,11 @@ export default function VidSrc() {
                         selectedVideo={selectedVideo}
                         onAuthRequired={() => setIsAuthDialogOpen(true)}
                       />
-                    </>
+                    </div>
                   )}
                 </TabsContent>
               </Tabs>
+              </div>
             ) : currentSource === 'youtube' ? (
               <div className="space-y-10">
                 {/* Continue Watching section for YouTube */}
