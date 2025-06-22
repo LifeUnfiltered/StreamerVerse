@@ -48,12 +48,13 @@ export async function registerRoutes(app: Express) {
         checkPeriod: 86400000, // prune expired entries every 24h
       }),
       secret: sessionSecret,
-      resave: true,
-      saveUninitialized: true,
+      resave: false,
+      saveUninitialized: false,
       cookie: { 
         secure: false, // Set to false for development
         maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-        httpOnly: true
+        httpOnly: true,
+        sameSite: 'lax'
       },
       name: 'streamer_verse_session'
     })

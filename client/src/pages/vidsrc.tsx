@@ -140,6 +140,30 @@ export default function VidSrc() {
     enabled: !searchQuery && !!selectedVideo && currentSource === 'vidsrc'
   });
 
+  // YouTube trending content
+  const { data: youtubeTrending, isLoading: youtubeTrendingLoading, error: youtubeTrendingError } = useQuery<Video[]>({
+    queryKey: ['/api/videos/youtube/trending'],
+    queryFn: async () => {
+      const response = await apiRequest('GET', '/api/videos/search?query=trending 2024&source=youtube');
+      return response.json();
+    },
+    enabled: currentSource === 'youtube' && navigation.view === 'browse' && !searchQuery,
+    staleTime: 5 * 60 * 1000 // Cache for 5 minutes
+  });
+
+  // YouTube category content
+  const { data: youtubeRecommendations, isLoading: youtubeRecommendationsLoading } = useQuery<Video[]>({
+    queryKey: ['/api/videos/youtube/recommendations'],
+    queryFn: async () => {
+      const categories = ['music 2024', 'tech review', 'cooking tutorial', 'gaming highlights'];
+      const randomCategory = categories[Math.floor(Math.random() * categories.length)];
+      const response = await apiRequest('GET', `/api/videos/search?query=${encodeURIComponent(randomCategory)}&source=youtube`);
+      return response.json();
+    },
+    enabled: currentSource === 'youtube' && navigation.view === 'browse' && !searchQuery,
+    staleTime: 10 * 60 * 1000 // Cache for 10 minutes
+  });
+
   // Search query
   const { data: searchResults, isLoading: searchLoading, error: searchError } = useQuery<Video[]>({
     queryKey: [currentSource === 'youtube' ? '/api/videos/search' : '/api/videos/vidsrc/search', searchQuery, currentSource],
@@ -1037,6 +1061,205 @@ export default function VidSrc() {
                   )}
                 </TabsContent>
               </Tabs>
+            ) : currentSource === 'youtube' ? (
+              <div className="space-y-8">
+                {/* Continue Watching section for YouTube */}
+                <ContinueWatching 
+                  onSelect={handleVideoSelect}
+                  onAuthRequired={() => setIsAuthDialogOpen(true)}
+                />
+
+                {/* YouTube Trending Content */}
+                <div className="space-y-4">
+                  <h2 className="text-2xl font-bold">Trending on YouTube</h2>
+                  <VideoList
+                    videos={youtubeTrending}
+                    isLoading={youtubeTrendingLoading}
+                    error={youtubeTrendingError}
+                    onVideoSelect={handleVideoSelect}
+                    selectedVideo={selectedVideo}
+                    onAuthRequired={() => setIsAuthDialogOpen(true)}
+                    variant="compact"
+                  />
+                </div>
+
+                {/* YouTube Recommendations */}
+                <div className="space-y-4">
+                  <h2 className="text-xl font-semibold">Recommended for You</h2>
+                  <VideoList
+                    videos={youtubeRecommendations}
+                    isLoading={youtubeRecommendationsLoading}
+                    error={null}
+                    onVideoSelect={handleVideoSelect}
+                    selectedVideo={selectedVideo}
+                    onAuthRequired={() => setIsAuthDialogOpen(true)}
+                    variant="compact"
+                  />
+                </div>
+                
+                {/* YouTube Categories */}
+                <div className="space-y-6">
+                  <h2 className="text-2xl font-bold">YouTube Categories</h2>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    {[
+                      { name: 'Music', query: 'music', icon: <Music className="h-6 w-6" /> },
+                      { name: 'Gaming', query: 'gaming', icon: <Zap className="h-6 w-6" /> },
+                      { name: 'Comedy', query: 'comedy', icon: <Laugh className="h-6 w-6" /> },
+                      { name: 'Tech', query: 'technology', icon: <Rocket className="h-6 w-6" /> },
+                      { name: 'Education', query: 'education', icon: <FlaskConical className="h-6 w-6" /> },
+                      { name: 'Sports', query: 'sports', icon: <Users className="h-6 w-6" /> },
+                      { name: 'News', query: 'news', icon: <Camera className="h-6 w-6" /> },
+                      { name: 'Travel', query: 'travel', icon: <Plane className="h-6 w-6" /> },
+                      { name: 'Food', query: 'cooking food', icon: <Heart className="h-6 w-6" /> },
+                      { name: 'DIY', query: 'diy tutorial', icon: <Castle className="h-6 w-6" /> },
+                      { name: 'Fitness', query: 'fitness workout', icon: <Sword className="h-6 w-6" /> },
+                      { name: 'Movies', query: 'movie trailers', icon: <Film className="h-6 w-6" /> }
+                    ].map(category => (
+                      <button
+                        key={category.name}
+                        onClick={() => handleSearch(category.query)}
+                        className="p-4 rounded-lg bg-card hover:bg-accent hover:scale-105 transition-all duration-200 shadow-sm"
+                      >
+                        <div className="flex flex-col items-center space-y-2">
+                          {category.icon}
+                          <span className="text-sm font-medium">{category.name}</span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Popular YouTube Searches */}
+                <div className="space-y-4">
+                  <h2 className="text-xl font-semibold">Trending Searches</h2>
+                  <div className="flex flex-wrap gap-2">
+                    {[
+                      'trending music 2024',
+                      'funny videos',
+                      'how to tutorials',
+                      'movie trailers',
+                      'gaming highlights',
+                      'tech reviews',
+                      'cooking recipes',
+                      'workout routines',
+                      'travel vlogs',
+                      'news updates',
+                      'science experiments',
+                      'art tutorials'
+                    ].map(searchTerm => (
+                      <button
+                        key={searchTerm}
+                        onClick={() => handleSearch(searchTerm)}
+                        className="px-3 py-1 rounded-full bg-secondary hover:bg-secondary/80 text-sm transition-colors"
+                      >
+                        {searchTerm}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* YouTube Playlists */}
+                <div className="space-y-4">
+                  <h2 className="text-xl font-semibold">Popular Playlists</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {[
+                      {
+                        title: 'Top Hits 2024',
+                        description: 'Latest trending music videos',
+                        query: 'top hits 2024 music',
+                        thumbnail: '🎵'
+                      },
+                      {
+                        title: 'Tech Reviews',
+                        description: 'Latest gadget reviews and unboxings',
+                        query: 'tech review 2024',
+                        thumbnail: '📱'
+                      },
+                      {
+                        title: 'Cooking Masterclass',
+                        description: 'Professional cooking tutorials',
+                        query: 'cooking masterclass tutorial',
+                        thumbnail: '👨‍🍳'
+                      },
+                      {
+                        title: 'Gaming Highlights',
+                        description: 'Best gaming moments and gameplay',
+                        query: 'gaming highlights 2024',
+                        thumbnail: '🎮'
+                      },
+                      {
+                        title: 'Educational Content',
+                        description: 'Learn something new every day',
+                        query: 'educational videos science',
+                        thumbnail: '📚'
+                      },
+                      {
+                        title: 'Comedy Gold',
+                        description: 'Funniest videos on YouTube',
+                        query: 'funny comedy videos',
+                        thumbnail: '😂'
+                      }
+                    ].map(playlist => (
+                      <div
+                        key={playlist.title}
+                        onClick={() => handleSearch(playlist.query)}
+                        className="p-4 rounded-lg bg-card hover:bg-accent cursor-pointer transition-all duration-200 shadow-sm hover:shadow-md"
+                      >
+                        <div className="flex items-start space-x-3">
+                          <div className="text-2xl">{playlist.thumbnail}</div>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-sm">{playlist.title}</h3>
+                            <p className="text-xs text-muted-foreground mt-1">{playlist.description}</p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Quick Actions */}
+                <div className="space-y-4">
+                  <h2 className="text-xl font-semibold">Quick Actions</h2>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <button
+                      onClick={() => handleSearch('podcast')}
+                      className="p-4 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white hover:scale-105 transition-transform"
+                    >
+                      <div className="flex flex-col items-center space-y-2">
+                        <Music className="h-6 w-6" />
+                        <span className="text-sm font-medium">Podcasts</span>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => handleSearch('documentary')}
+                      className="p-4 rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white hover:scale-105 transition-transform"
+                    >
+                      <div className="flex flex-col items-center space-y-2">
+                        <Camera className="h-6 w-6" />
+                        <span className="text-sm font-medium">Documentaries</span>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => handleSearch('live stream')}
+                      className="p-4 rounded-lg bg-gradient-to-r from-red-500 to-orange-500 text-white hover:scale-105 transition-transform"
+                    >
+                      <div className="flex flex-col items-center space-y-2">
+                        <Zap className="h-6 w-6" />
+                        <span className="text-sm font-medium">Live Streams</span>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => handleSearch('shorts')}
+                      className="p-4 rounded-lg bg-gradient-to-r from-green-500 to-teal-500 text-white hover:scale-105 transition-transform"
+                    >
+                      <div className="flex flex-col items-center space-y-2">
+                        <Film className="h-6 w-6" />
+                        <span className="text-sm font-medium">Shorts</span>
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              </div>
             ) : null}
           </div>
         </div>
