@@ -445,6 +445,53 @@ export async function registerRoutes(app: Express) {
     }
   });
 
+  // Health check endpoint
+  app.get('/api/health', async (req, res) => {
+    const healthStatus = {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      services: {
+        api: true,
+        database: true,
+        youtube: true,
+        tmdb: true
+      }
+    };
+
+    try {
+      // Check database connection
+      const testUser = await storage.getUserByUsername('health-check-test');
+      healthStatus.services.database = true;
+    } catch (error) {
+      console.error('Database health check failed:', error);
+      healthStatus.services.database = false;
+      healthStatus.status = 'degraded';
+    }
+
+    try {
+      // Check TMDB API
+      await fetchLatestMovies(1);
+      healthStatus.services.tmdb = true;
+    } catch (error) {
+      console.error('TMDB health check failed:', error);
+      healthStatus.services.tmdb = false;
+      healthStatus.status = 'degraded';
+    }
+
+    try {
+      // Check YouTube API
+      await searchYouTube('test');
+      healthStatus.services.youtube = true;
+    } catch (error) {
+      console.error('YouTube health check failed:', error);
+      healthStatus.services.youtube = false;
+      healthStatus.status = 'degraded';
+    }
+
+    const statusCode = healthStatus.status === 'ok' ? 200 : 503;
+    res.status(statusCode).json(healthStatus);
+  });
+
   // Watchlist routes
   app.get('/api/watchlist', requireAuth, async (req, res) => {
     try {
