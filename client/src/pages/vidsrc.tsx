@@ -39,6 +39,21 @@ import {
 } from "lucide-react";
 import BackButton from "@/components/BackButton";
 
+// Cache objects for episode metadata
+const showNameCache = new Map<string, string>();
+const episodeTitleCache = new Map<string, string>();
+const episodeDescriptionCache = new Map<string, string>();
+
+// Helper functions for episode metadata
+const getEpisodeKey = (showId: string, season: number, episode: number): string => {
+  return `${showId}-s${season}e${episode}`;
+};
+
+const formatEpisodeTitle = (showTitle: string, season: number, episode: number, episodeTitle?: string): string => {
+  const baseTitle = `${showTitle} S${season}E${episode}`;
+  return episodeTitle ? `${baseTitle} - ${episodeTitle}` : baseTitle;
+};
+
 interface NavigationState {
   view: 'browse' | 'search' | 'watchlist' | 'video' | 'trending' | 'history';
   previousView: 'browse' | 'search' | 'watchlist' | 'video' | 'trending' | 'history' | null;
@@ -59,6 +74,8 @@ export default function VidSrc() {
     view: 'browse',
     previousView: null 
   });
+  const [selectedGenreId, setSelectedGenreId] = useState<number | null>(null);
+  const [selectedGenreType, setSelectedGenreType] = useState<'movies' | 'tv'>('movies');
   const queryClient = useQueryClient();
 
   // Watchlist query
@@ -511,30 +528,6 @@ export default function VidSrc() {
   console.log('Current show:', currentShow);
   console.log('Selected video:', selectedVideo);
   
-  // Helper function to format episode titles consistently
-  const formatEpisodeTitle = (showTitle: string, season: number, episode: number, episodeTitle: string = '') => {
-    const seasonEpisodeText = `S${season}E${episode}`;
-    if (episodeTitle) {
-      return `${showTitle} ${seasonEpisodeText} - ${episodeTitle}`;
-    } else {
-      return `${showTitle} ${seasonEpisodeText}`;
-    }
-  };
-
-  // Maintain a cache of episode titles
-  const episodeTitleCache = useMemo(() => new Map<string, string>(), []);
-  
-  // Maintain a cache of episode descriptions
-  const episodeDescriptionCache = useMemo(() => new Map<string, string>(), []);
-
-  // Function to get a key for the episode cache
-  const getEpisodeKey = (showId: string, season: number, episode: number) => {
-    return `${showId}-s${season}e${episode}`;
-  };
-  
-  // Store show names in a cache for reference
-  const showNameCache = useMemo(() => new Map<string, string>(), []);
-  
   // Helper function to get genre icons
   const getGenreIcon = (genreId: number, type: 'movies' | 'tv') => {
     // Movie genre IDs
@@ -584,10 +577,6 @@ export default function VidSrc() {
       }
     }
   };
-  
-  // State for selected genre
-  const [selectedGenreId, setSelectedGenreId] = useState<number | null>(null);
-  const [selectedGenreType, setSelectedGenreType] = useState<'movies' | 'tv'>('movies');
   
   // Fetch movie genres
   const { data: movieGenres } = useQuery<GenreItem[]>({
