@@ -11,17 +11,16 @@
       (function() {
         'use strict';
         
-        // Comprehensive popup blocking
+        // Aggressive popup and ad blocking
         const originalOpen = window.open;
         window.open = function(url, name, specs, replace) {
           console.log('Popup blocked:', url);
-          // Return a mock window object to prevent errors
           return {
             focus: () => {},
             blur: () => {},
             close: () => {},
-            closed: false,
-            location: { href: url || '' },
+            closed: true,
+            location: { href: 'about:blank' },
             document: { 
               write: () => {}, 
               close: () => {},
@@ -32,6 +31,16 @@
             addEventListener: () => {},
             removeEventListener: () => {}
           };
+        };
+        
+        // Block pushState navigation that opens ads
+        const originalPushState = history.pushState;
+        history.pushState = function(state, title, url) {
+          if (url && (url.includes('ads') || url.includes('popup') || url.includes('promo'))) {
+            console.log('Ad navigation blocked:', url);
+            return;
+          }
+          return originalPushState.call(this, state, title, url);
         };
 
         // Block all dialog types
@@ -197,6 +206,32 @@
         };
 
         console.log('Enhanced ad blocking initialized');
+        // Aggressive event blocking for ads
+        document.addEventListener('click', function(e) {
+          const target = e.target;
+          if (target && (
+            target.classList.toString().includes('ad') ||
+            target.id.includes('ad') ||
+            target.getAttribute('data-ad') ||
+            target.closest('[class*="ad"]') ||
+            target.closest('[id*="ad"]')
+          )) {
+            console.log('Ad click blocked');
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            return false;
+          }
+        }, true);
+        
+        // Block context menu on ads
+        document.addEventListener('contextmenu', function(e) {
+          const target = e.target;
+          if (target && target.classList.toString().includes('ad')) {
+            e.preventDefault();
+            return false;
+          }
+        }, true);
       })();
     </script>
     

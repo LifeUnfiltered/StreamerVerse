@@ -54,18 +54,55 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
         setLoadError(false);
         clearAllTimeouts();
         
-        // Monitor for VidSrc internal script failures (like sbx.html 404)
+        // Monitor for VidSrc internal script failures and implement ad blocking
         setTimeout(() => {
-          console.log('Monitoring VidSrc for internal errors...');
+          console.log('Setting up VidSrc monitoring and ad blocking...');
           
-          // Aggressive health check - if VidSrc doesn't work quickly, cycle domains
+          // Enhanced ad blocking for VidSrc iframes
+          const iframe = document.getElementById('video-player-iframe') as HTMLIFrameElement;
+          if (iframe) {
+            // Block ad-related events on the iframe
+            iframe.addEventListener('load', () => {
+              try {
+                // Try to access iframe content for ad blocking (will fail due to CORS but worth trying)
+                const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+                if (iframeDoc) {
+                  // Add ad blocking CSS to iframe
+                  const style = iframeDoc.createElement('style');
+                  style.textContent = `
+                    [class*="ad"], [id*="ad"], [class*="ads"], [id*="ads"],
+                    [class*="banner"], [id*="banner"], [class*="popup"], [id*="popup"],
+                    .advertisement, .ads-container, .ad-container, .banner-ad,
+                    .popup-ad, .overlay-ad, .video-ads, .preroll-ads { 
+                      display: none !important; 
+                      visibility: hidden !important;
+                      opacity: 0 !important;
+                    }
+                  `;
+                  iframeDoc.head?.appendChild(style);
+                }
+              } catch (e) {
+                // Cross-origin blocked, expected
+                console.log('Cross-origin iframe access blocked (normal)');
+              }
+            });
+            
+            // Block clicks that might trigger ads
+            iframe.style.pointerEvents = 'auto';
+            iframe.addEventListener('click', (e) => {
+              // Allow normal video controls but prevent ad clicks
+              e.stopPropagation();
+            }, true);
+          }
+          
+          // Health check for domain cycling
           const healthCheckTimeout = setTimeout(() => {
             const iframe = document.getElementById('video-player-iframe') as HTMLIFrameElement;
             if (iframe && iframe.src.includes('vidsrc')) {
-              console.log('VidSrc health check: No working video after 4 seconds, cycling domain...');
+              console.log('VidSrc health check: No working video after 5 seconds, cycling domain...');
               handleIframeError();
             }
-          }, 4000); // 4 second aggressive health check
+          }, 5000); // 5 second health check
           
           // Also check if the iframe content has loaded properly by checking for video elements
           const contentCheck = setInterval(() => {
