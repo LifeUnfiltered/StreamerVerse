@@ -5,28 +5,38 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>StreamFlex</title>
     
-    <!-- Comprehensive Ad-Blocking Script -->
+    <!-- Enhanced Ad-Blocking and Anti-Popup Script -->
     <script>
       (function() {
         'use strict';
         
-        // Block all popups
-        window.open = function(url, name, specs) {
+        // Comprehensive popup blocking
+        const originalOpen = window.open;
+        window.open = function(url, name, specs, replace) {
           console.log('Popup blocked:', url);
+          // Return a mock window object to prevent errors
           return {
             focus: () => {},
             blur: () => {},
             close: () => {},
             closed: false,
-            location: { href: '' },
-            document: { write: () => {}, close: () => {} }
+            location: { href: url || '' },
+            document: { 
+              write: () => {}, 
+              close: () => {},
+              open: () => {},
+              writeln: () => {}
+            },
+            postMessage: () => {},
+            addEventListener: () => {},
+            removeEventListener: () => {}
           };
         };
 
-        // Block dialogs
+        // Block all dialog types
         window.alert = function(message) {
           console.log('Alert blocked:', message);
-          return;
+          return undefined;
         };
         
         window.confirm = function(message) {
@@ -34,58 +44,229 @@
           return false;
         };
         
-        window.prompt = function(message) {
+        window.prompt = function(message, defaultText) {
           console.log('Prompt blocked:', message);
           return null;
         };
 
-        // Block navigation redirects
+        // Enhanced navigation blocking
         const originalAssign = window.location.assign;
         const originalReplace = window.location.replace;
+        const originalReload = window.location.reload;
+        
+        Object.defineProperty(window.location, 'href', {
+          set: function(url) {
+            console.log('Location.href redirect blocked to:', url);
+            return false;
+          },
+          get: function() {
+            return window.location.toString();
+          }
+        });
         
         window.location.assign = function(url) {
-          console.log('Navigation blocked to:', url);
+          console.log('Location.assign blocked to:', url);
           return false;
         };
         
         window.location.replace = function(url) {
-          console.log('Navigation blocked to:', url);
+          console.log('Location.replace blocked to:', url);
           return false;
         };
 
-        // Ad element blocking
+        // Block common ad-related globals
+        window.gtag = function() { console.log('Google Analytics blocked'); };
+        window.dataLayer = window.dataLayer || [];
+        window._gaq = window._gaq || [];
+        
+        // Block focus stealing
+        const originalFocus = window.focus;
+        window.focus = function() {
+          console.log('Window focus steal blocked');
+          return false;
+        };
+
+        // Enhanced ad element blocking
         function blockAds() {
           const adSelectors = [
-            '[class*="ad"]', '[id*="ad"]', '[class*="popup"]', '[id*="popup"]',
+            // Generic ad patterns
+            '[class*="ad-"]', '[class*="_ad"]', '[class*="ads-"]', '[class*="_ads"]',
+            '[id*="ad-"]', '[id*="_ad"]', '[id*="ads-"]', '[id*="_ads"]',
+            '[class*="popup"]', '[id*="popup"]', '[class*="modal"]', '[id*="modal"]',
             '[class*="banner"]', '[id*="banner"]', '[class*="sponsor"]', '[id*="sponsor"]',
+            
+            // Specific ad networks
             'iframe[src*="ads"]', 'iframe[src*="doubleclick"]', 'iframe[src*="googlesyndication"]',
-            '.advertisement', '.ad-container', '.popup-overlay', '.modal-backdrop'
+            'iframe[src*="googletagservices"]', 'iframe[src*="amazon-adsystem"]',
+            'iframe[src*="adsystem"]', 'iframe[src*="advertising"]',
+            
+            // Common ad containers
+            '.advertisement', '.ad-container', '.popup-overlay', '.modal-backdrop',
+            '.ad-banner', '.banner-ad', '.popup-ad', '.interstitial',
+            
+            // VidSrc specific ad patterns
+            '[class*="overlay"]', '[id*="overlay"]', '[class*="preroll"]', '[id*="preroll"]',
+            '[class*="interstitial"]', '[id*="interstitial"]', '.vjs-overlay',
+            
+            // Additional blocking patterns
+            '[onclick*="window.open"]', '[onclick*="popup"]', 
+            'div[style*="position: fixed"]', 'div[style*="z-index: 999"]'
           ];
           
+          let blockedCount = 0;
           adSelectors.forEach(selector => {
             try {
               const elements = document.querySelectorAll(selector);
               elements.forEach(el => {
-                el.style.display = 'none !important';
-                el.remove();
+                // Skip our own video player iframe
+                if (el.id === 'video-player-iframe' || el.classList.contains('video-player')) {
+                  return;
+                }
+                
+                const display = window.getComputedStyle(el).display;
+                if (display !== 'none') {
+                  el.style.setProperty('display', 'none', 'important');
+                  el.style.setProperty('visibility', 'hidden', 'important');
+                  el.style.setProperty('opacity', '0', 'important');
+                  el.remove();
+                  blockedCount++;
+                }
               });
-            } catch (e) {}
+            } catch (e) {
+              // Ignore selector errors
+            }
           });
+          
+          if (blockedCount > 0) {
+            console.log(`Blocked ${blockedCount} ad elements`);
+          }
         }
 
-        // Run ad blocking
+        // Block event propagation for ad clicks
+        document.addEventListener('click', function(e) {
+          const target = e.target;
+          if (target && (
+            target.tagName === 'A' && target.href && (
+              target.href.includes('ads') || 
+              target.href.includes('popup') ||
+              target.href.includes('redirect')
+            )
+          )) {
+            console.log('Ad click blocked:', target.href);
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+          }
+        }, true);
+
+        // Run ad blocking immediately and continuously
         blockAds();
-        setInterval(blockAds, 1000);
         
+        // More frequent checking during initial load
+        const initialInterval = setInterval(blockAds, 250);
+        setTimeout(() => {
+          clearInterval(initialInterval);
+          setInterval(blockAds, 1000); // Less frequent after initial load
+        }, 10000);
+        
+        // DOM observer for dynamic content
         if (window.MutationObserver) {
-          const observer = new MutationObserver(blockAds);
-          observer.observe(document.body || document.documentElement, {
-            childList: true,
-            subtree: true
+          const observer = new MutationObserver(function(mutations) {
+            let shouldBlock = false;
+            mutations.forEach(function(mutation) {
+              if (mutation.addedNodes.length > 0) {
+                shouldBlock = true;
+              }
+            });
+            if (shouldBlock) {
+              setTimeout(blockAds, 100); // Small delay to let content settle
+            }
           });
+          
+          const observerConfig = {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['style', 'class', 'id', 'src']
+          };
+          
+          // Start observing when DOM is ready
+          if (document.body) {
+            observer.observe(document.body, observerConfig);
+          } else {
+            document.addEventListener('DOMContentLoaded', function() {
+              observer.observe(document.body, observerConfig);
+            });
+          }
         }
+
+        // Block common iframe injection techniques
+        const originalCreateElement = document.createElement;
+        document.createElement = function(tagName) {
+          const element = originalCreateElement.call(this, tagName);
+          if (tagName.toLowerCase() === 'iframe') {
+            // Monitor iframe src changes
+            Object.defineProperty(element, 'src', {
+              set: function(url) {
+                if (url && (url.includes('ads') || url.includes('popup') || url.includes('redirect'))) {
+                  console.log('Blocked iframe creation with ad URL:', url);
+                  return;
+                }
+                this.setAttribute('src', url);
+              },
+              get: function() {
+                return this.getAttribute('src');
+              }
+            });
+          }
+          return element;
+        };
+
+        console.log('Enhanced ad blocking initialized');
       })();
     </script>
+    
+    <!-- CSS-based Ad Blocking -->
+    <style>
+      /* Hide common ad patterns */
+      [class*="ad-"], [class*="_ad"], [class*="ads-"], [class*="_ads"],
+      [id*="ad-"], [id*="_ad"], [id*="ads-"], [id*="_ads"],
+      [class*="popup"], [id*="popup"], [class*="banner"], [id*="banner"],
+      [class*="sponsor"], [id*="sponsor"], [class*="overlay"]:not(.video-player),
+      [id*="overlay"]:not(.video-player), [class*="interstitial"], [id*="interstitial"],
+      .advertisement, .ad-container, .popup-overlay, .modal-backdrop,
+      .ad-banner, .banner-ad, .popup-ad, .vjs-overlay,
+      iframe[src*="ads"], iframe[src*="doubleclick"], iframe[src*="googlesyndication"],
+      iframe[src*="googletagservices"], iframe[src*="amazon-adsystem"] {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+        width: 0 !important;
+        height: 0 !important;
+        position: absolute !important;
+        left: -9999px !important;
+        top: -9999px !important;
+      }
+      
+      /* Protect our video player */
+      .video-player, #video-player-iframe {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        position: relative !important;
+      }
+      
+      /* Block fixed position popups that aren't our UI */
+      div[style*="position: fixed"]:not([class*="toast"]):not([class*="dialog"]):not([class*="alert"]) {
+        display: none !important;
+      }
+      
+      /* Additional VidSrc specific blocking */
+      [class*="preroll"], [id*="preroll"], [class*="midroll"], [id*="midroll"],
+      [class*="postroll"], [id*="postroll"] {
+        display: none !important;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
