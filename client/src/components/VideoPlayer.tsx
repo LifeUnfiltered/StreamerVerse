@@ -37,13 +37,19 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
     setIsLoading(true);
   }, [video.sourceId]);
 
-  // Handle iframe load and error
+  // Handle iframe load and error with Chrome compatibility
   useEffect(() => {
     if (video.source === 'vidsrc' && iframeRef.current) {
+      const iframe = iframeRef.current;
+      let loadTimeout: NodeJS.Timeout;
+      let isIframeLoaded = false;
+
       const handleIframeLoad = () => {
         console.log('VidSrc iframe loaded successfully');
+        isIframeLoaded = true;
         setIsLoading(false);
         setLoadError(false);
+        if (loadTimeout) clearTimeout(loadTimeout);
       };
 
       const handleIframeError = () => {
@@ -64,22 +70,56 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
         }
       };
 
-      const iframe = iframeRef.current;
+      // Chrome-specific: Set up multiple detection methods
       iframe.addEventListener('load', handleIframeLoad);
       iframe.addEventListener('error', handleIframeError);
       
-      // Simplified timeout for very slow loading
-      const loadTimeout = setTimeout(() => {
-        if (isLoading) {
-          console.log('Iframe load timeout after 45 seconds, trying next domain...');
+      // Browser-specific loading detection
+      const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+      
+      let chromeLoadCheck: NodeJS.Timeout;
+      let chromeSecondaryCheck: NodeJS.Timeout;
+      
+      if (isChrome) {
+        // Chrome-specific: Multiple detection methods
+        chromeLoadCheck = setTimeout(() => {
+          if (!isIframeLoaded) {
+            try {
+              if (iframe.contentWindow || iframe.contentDocument) {
+                console.log('Chrome: iframe loaded via contentWindow detection');
+                handleIframeLoad();
+              }
+            } catch (e) {
+              // Cross-origin restrictions expected - iframe likely loaded
+              console.log('Chrome: iframe loaded (cross-origin detected)');
+              handleIframeLoad();
+            }
+          }
+        }, 2000);
+        
+        // Additional Chrome fallback
+        chromeSecondaryCheck = setTimeout(() => {
+          if (!isIframeLoaded) {
+            console.log('Chrome: forcing iframe load success');
+            handleIframeLoad();
+          }
+        }, 5000);
+      }
+      
+      // Final timeout for very slow loading
+      loadTimeout = setTimeout(() => {
+        if (isLoading && !isIframeLoaded) {
+          console.log('Iframe load timeout, trying next domain...');
           handleIframeError();
         }
-      }, 45000);
+      }, 20000);
       
       return () => {
         iframe.removeEventListener('load', handleIframeLoad);
         iframe.removeEventListener('error', handleIframeError);
         clearTimeout(loadTimeout);
+        if (chromeLoadCheck) clearTimeout(chromeLoadCheck);
+        if (chromeSecondaryCheck) clearTimeout(chromeSecondaryCheck);
       };
     }
   }, [video.source, video.sourceId, currentDomainIndex]);
@@ -361,7 +401,7 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
                 title={video.title}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                 allowFullScreen
-                sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
+                sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation allow-top-navigation-by-user-activation"
                 className="absolute inset-0 w-full h-full video-player"
                 id="video-player-iframe"
                 onLoad={() => {

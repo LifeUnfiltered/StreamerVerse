@@ -5,49 +5,114 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>StreamFlex</title>
     
-    <!-- Advanced Ad-Blocking and Anti-Redirect Script -->
+    <!-- Comprehensive Ad-Blocking and Anti-Redirect Script -->
     <script>
-      window.addEventListener('DOMContentLoaded', function() {
-        // Enhanced popup blocking
+      // Immediate ad blocking setup
+      (function() {
+        'use strict';
+        
+        // Comprehensive popup blocking
         const originalWindowOpen = window.open;
         window.open = function(url, name, specs) {
           console.log('Popup blocked:', url);
-          // Return a mock window object to prevent errors
           return {
             focus: () => {},
             blur: () => {},
             close: () => {},
             closed: false,
             location: { href: '' },
-            document: { write: () => {}, close: () => {} }
+            document: { write: () => {}, close: () => {} },
+            addEventListener: () => {},
+            removeEventListener: () => {}
           };
         };
 
-        // Block alert, confirm, and prompt dialogs that could be ads
+        // Block all dialogs that could be ads
         const originalAlert = window.alert;
         const originalConfirm = window.confirm;
         const originalPrompt = window.prompt;
         
         window.alert = function(message) {
-          if (message && typeof message === 'string' && 
-              (message.toLowerCase().includes('ad') || 
-               message.toLowerCase().includes('click') ||
-               message.toLowerCase().includes('download'))) {
-            console.log('Ad alert blocked:', message);
-            return;
-          }
-          return originalAlert.apply(this, arguments);
+          console.log('Alert blocked:', message);
+          return;
         };
         
         window.confirm = function(message) {
-          if (message && typeof message === 'string' && 
-              (message.toLowerCase().includes('ad') || 
-               message.toLowerCase().includes('click'))) {
-            console.log('Ad confirm blocked:', message);
+          console.log('Confirm blocked:', message);
+          return false;
+        };
+        
+        window.prompt = function(message) {
+          console.log('Prompt blocked:', message);
+          return null;
+        };
+
+        // Block focus/blur events that could trigger popups
+        let focusBlocked = false;
+        window.addEventListener('focus', function(e) {
+          if (focusBlocked) {
+            e.preventDefault();
+            e.stopPropagation();
             return false;
           }
-          return originalConfirm.apply(this, arguments);
+        }, true);
+
+        // Prevent navigation away from the page
+        const originalAssign = window.location.assign;
+        const originalReplace = window.location.replace;
+        
+        window.location.assign = function(url) {
+          console.log('Navigation blocked to:', url);
+          return false;
         };
+        
+        window.location.replace = function(url) {
+          console.log('Navigation blocked to:', url);
+          return false;
+        };
+
+        // Block common ad-related event listeners
+        const originalAddEventListener = EventTarget.prototype.addEventListener;
+        EventTarget.prototype.addEventListener = function(type, listener, options) {
+          if (type === 'beforeunload' || type === 'unload' || type === 'pagehide') {
+            console.log('Blocked ad event listener:', type);
+            return;
+          }
+          return originalAddEventListener.call(this, type, listener, options);
+        };
+
+        // Enhanced ad element blocking
+        function blockAds() {
+          const adSelectors = [
+            '[class*="ad"]', '[id*="ad"]', '[class*="popup"]', '[id*="popup"]',
+            '[class*="banner"]', '[id*="banner"]', '[class*="sponsor"]', '[id*="sponsor"]',
+            'iframe[src*="ads"]', 'iframe[src*="doubleclick"]', 'iframe[src*="googlesyndication"]',
+            '.advertisement', '.ad-container', '.popup-overlay', '.modal-backdrop'
+          ];
+          
+          adSelectors.forEach(selector => {
+            try {
+              const elements = document.querySelectorAll(selector);
+              elements.forEach(el => {
+                el.style.display = 'none !important';
+                el.remove();
+              });
+            } catch (e) {}
+          });
+        }
+
+        // Run ad blocking immediately and on DOM changes
+        blockAds();
+        setInterval(blockAds, 1000);
+        
+        if (window.MutationObserver) {
+          const observer = new MutationObserver(blockAds);
+          observer.observe(document.body || document.documentElement, {
+            childList: true,
+            subtree: true
+          });
+        }
+      })();
 
         // Block focus stealing attempts
         const originalFocus = window.focus;
