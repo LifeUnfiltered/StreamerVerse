@@ -54,24 +54,20 @@
         const originalReplace = window.location.replace;
         const originalReload = window.location.reload;
         
-        Object.defineProperty(window.location, 'href', {
-          set: function(url) {
-            console.log('Location.href redirect blocked to:', url);
-            return false;
-          },
-          get: function() {
-            return window.location.toString();
-          }
-        });
-        
         window.location.assign = function(url) {
-          console.log('Location.assign blocked to:', url);
-          return false;
+          if (url && (url.includes('ads') || url.includes('popup') || url.includes('redirect'))) {
+            console.log('Location.assign blocked to:', url);
+            return false;
+          }
+          return originalAssign.call(this, url);
         };
         
         window.location.replace = function(url) {
-          console.log('Location.replace blocked to:', url);
-          return false;
+          if (url && (url.includes('ads') || url.includes('popup') || url.includes('redirect'))) {
+            console.log('Location.replace blocked to:', url);
+            return false;
+          }
+          return originalReplace.call(this, url);
         };
 
         // Block common ad-related globals
@@ -86,60 +82,43 @@
           return false;
         };
 
-        // Enhanced ad element blocking
+        // Simplified ad element blocking focused on VidSrc
         function blockAds() {
           const adSelectors = [
-            // Generic ad patterns
-            '[class*="ad-"]', '[class*="_ad"]', '[class*="ads-"]', '[class*="_ads"]',
-            '[id*="ad-"]', '[id*="_ad"]', '[id*="ads-"]', '[id*="_ads"]',
-            '[class*="popup"]', '[id*="popup"]', '[class*="modal"]', '[id*="modal"]',
-            '[class*="banner"]', '[id*="banner"]', '[class*="sponsor"]', '[id*="sponsor"]',
-            
-            // Specific ad networks
-            'iframe[src*="ads"]', 'iframe[src*="doubleclick"]', 'iframe[src*="googlesyndication"]',
-            'iframe[src*="googletagservices"]', 'iframe[src*="amazon-adsystem"]',
-            'iframe[src*="adsystem"]', 'iframe[src*="advertising"]',
-            
-            // Common ad containers
+            // Focus on popup/overlay patterns that affect VidSrc
+            '[class*="popup"]:not(.video-player)', '[id*="popup"]:not(.video-player)',
+            '[class*="overlay"]:not(.video-player)', '[id*="overlay"]:not(.video-player)',
+            '[class*="interstitial"]', '[id*="interstitial"]',
             '.advertisement', '.ad-container', '.popup-overlay', '.modal-backdrop',
-            '.ad-banner', '.banner-ad', '.popup-ad', '.interstitial',
             
-            // VidSrc specific ad patterns
-            '[class*="overlay"]', '[id*="overlay"]', '[class*="preroll"]', '[id*="preroll"]',
-            '[class*="interstitial"]', '[id*="interstitial"]', '.vjs-overlay',
+            // Specific ad networks (but not our video iframe)
+            'iframe[src*="ads"]:not(#video-player-iframe)', 
+            'iframe[src*="doubleclick"]:not(#video-player-iframe)',
+            'iframe[src*="googlesyndication"]:not(#video-player-iframe)',
             
-            // Additional blocking patterns
-            '[onclick*="window.open"]', '[onclick*="popup"]', 
-            'div[style*="position: fixed"]', 'div[style*="z-index: 999"]'
+            // Elements with click handlers that open popups
+            '[onclick*="window.open"]', '[onclick*="popup"]'
           ];
           
-          let blockedCount = 0;
           adSelectors.forEach(selector => {
             try {
               const elements = document.querySelectorAll(selector);
               elements.forEach(el => {
-                // Skip our own video player iframe
+                // Double check we're not targeting our video player
                 if (el.id === 'video-player-iframe' || el.classList.contains('video-player')) {
                   return;
                 }
                 
-                const display = window.getComputedStyle(el).display;
-                if (display !== 'none') {
-                  el.style.setProperty('display', 'none', 'important');
-                  el.style.setProperty('visibility', 'hidden', 'important');
-                  el.style.setProperty('opacity', '0', 'important');
+                // Remove the element
+                if (el.parentNode) {
+                  el.style.display = 'none';
                   el.remove();
-                  blockedCount++;
                 }
               });
             } catch (e) {
               // Ignore selector errors
             }
           });
-          
-          if (blockedCount > 0) {
-            console.log(`Blocked ${blockedCount} ad elements`);
-          }
         }
 
         // Block event propagation for ad clicks
@@ -159,15 +138,9 @@
           }
         }, true);
 
-        // Run ad blocking immediately and continuously
+        // Run ad blocking with reasonable frequency
         blockAds();
-        
-        // More frequent checking during initial load
-        const initialInterval = setInterval(blockAds, 250);
-        setTimeout(() => {
-          clearInterval(initialInterval);
-          setInterval(blockAds, 1000); // Less frequent after initial load
-        }, 10000);
+        setInterval(blockAds, 2000); // Check every 2 seconds
         
         // DOM observer for dynamic content
         if (window.MutationObserver) {
@@ -226,47 +199,7 @@
       })();
     </script>
     
-    <!-- CSS-based Ad Blocking -->
-    <style>
-      /* Hide common ad patterns */
-      [class*="ad-"], [class*="_ad"], [class*="ads-"], [class*="_ads"],
-      [id*="ad-"], [id*="_ad"], [id*="ads-"], [id*="_ads"],
-      [class*="popup"], [id*="popup"], [class*="banner"], [id*="banner"],
-      [class*="sponsor"], [id*="sponsor"], [class*="overlay"]:not(.video-player),
-      [id*="overlay"]:not(.video-player), [class*="interstitial"], [id*="interstitial"],
-      .advertisement, .ad-container, .popup-overlay, .modal-backdrop,
-      .ad-banner, .banner-ad, .popup-ad, .vjs-overlay,
-      iframe[src*="ads"], iframe[src*="doubleclick"], iframe[src*="googlesyndication"],
-      iframe[src*="googletagservices"], iframe[src*="amazon-adsystem"] {
-        display: none !important;
-        visibility: hidden !important;
-        opacity: 0 !important;
-        width: 0 !important;
-        height: 0 !important;
-        position: absolute !important;
-        left: -9999px !important;
-        top: -9999px !important;
-      }
-      
-      /* Protect our video player */
-      .video-player, #video-player-iframe {
-        display: block !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        position: relative !important;
-      }
-      
-      /* Block fixed position popups that aren't our UI */
-      div[style*="position: fixed"]:not([class*="toast"]):not([class*="dialog"]):not([class*="alert"]) {
-        display: none !important;
-      }
-      
-      /* Additional VidSrc specific blocking */
-      [class*="preroll"], [id*="preroll"], [class*="midroll"], [id*="midroll"],
-      [class*="postroll"], [id*="postroll"] {
-        display: none !important;
-      }
-    </style>
+
   </head>
   <body>
     <div id="root"></div>

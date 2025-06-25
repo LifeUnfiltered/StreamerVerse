@@ -90,78 +90,38 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
       iframe.addEventListener('load', handleIframeLoad);
       iframe.addEventListener('error', handleIframeError);
       
-      // Chrome-specific enhanced detection
+      // Chrome-specific detection - more aggressive approach
       if (isChrome) {
-        // Method 1: Check iframe ready state periodically
+        console.log('Chrome detected: Setting up enhanced iframe detection');
+        
+        // Method 1: Fast polling for Chrome
         readyStateCheck = setInterval(() => {
           if (isIframeLoaded) return;
           
+          // Check if iframe has any content/structure
           try {
-            // Try to access iframe document (will throw if not ready)
-            const doc = iframe.contentDocument || iframe.contentWindow?.document;
-            if (doc && doc.readyState) {
-              if (doc.readyState === 'complete' || doc.readyState === 'interactive') {
-                console.log('Chrome: iframe ready via readyState check');
-                handleIframeLoad();
-                return;
-              }
-            }
-          } catch (e) {
-            // Cross-origin error means iframe is loaded but from different domain
-            console.log('Chrome: iframe loaded (cross-origin access blocked)');
-            handleIframeLoad();
-            return;
-          }
-          
-          // Additional Chrome check: see if iframe has loaded by checking naturalWidth/height
-          try {
-            if (iframe.offsetWidth > 0 && iframe.offsetHeight > 0) {
-              console.log('Chrome: iframe loaded via size check');
-              handleIframeLoad();
-              return;
-            }
-          } catch (e) {
-            // Ignore errors
-          }
-        }, 500);
-
-        // Method 2: Content availability and network check
-        contentCheck = setTimeout(() => {
-          if (isIframeLoaded) return;
-          
-          try {
-            // If we can access contentWindow, iframe structure is ready
             if (iframe.contentWindow) {
-              console.log('Chrome: iframe loaded via contentWindow check');
+              console.log('Chrome: iframe contentWindow available');
+              clearInterval(readyStateCheck);
               handleIframeLoad();
               return;
             }
           } catch (e) {
-            // Even errors suggest iframe is loaded
-            console.log('Chrome: iframe loaded (contentWindow error indicates loading)');
+            // Cross-origin error is actually good - means iframe loaded
+            console.log('Chrome: iframe loaded (cross-origin protection active)');
+            clearInterval(readyStateCheck);
             handleIframeLoad();
             return;
           }
-          
-          // Check if the iframe src is actually loading by making a network request
-          fetch(iframe.src, { method: 'HEAD', mode: 'no-cors' })
-            .then(() => {
-              console.log('Chrome: iframe URL responds, assuming loaded');
-              handleIframeLoad();
-            })
-            .catch(() => {
-              console.log('Chrome: iframe URL fetch failed, but iframe may still be loading');
-              // Don't fail here, let other timeouts handle it
-            });
-        }, 2000);
+        }, 300); // Check every 300ms
         
-        // Method 3: Force success for Chrome after reasonable time
-        setTimeout(() => {
+        // Method 2: Force success for Chrome after short wait
+        contentCheck = setTimeout(() => {
           if (!isIframeLoaded) {
-            console.log('Chrome: forcing load success after 4 seconds');
+            console.log('Chrome: Force loading success after 2s');
             handleIframeLoad();
           }
-        }, 4000);
+        }, 2000);
       }
       
       // Firefox works better with standard load events, but add backup
@@ -172,7 +132,7 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
             console.log('Firefox: iframe assumed loaded (backup)');
             handleIframeLoad();
           }
-        }, 8000);
+        }, 6000);
       }
       
       // Universal fallback timeout for very slow connections
@@ -181,7 +141,7 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
           console.log('Universal timeout: trying next domain...');
           handleIframeError();
         }
-      }, 25000);
+      }, 15000);
       
       return () => {
         iframe.removeEventListener('load', handleIframeLoad);
@@ -468,7 +428,7 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
                 title={video.title}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                 allowFullScreen
-                sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation allow-top-navigation-by-user-activation allow-modals allow-orientation-lock allow-pointer-lock allow-downloads"
+                sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation allow-top-navigation-by-user-activation"
                 className="absolute inset-0 w-full h-full video-player"
                 id="video-player-iframe"
                 onLoad={() => {

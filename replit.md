@@ -9,10 +9,10 @@ A React-based streaming web application that provides access to movies and TV sh
 - **Communication Style**: Direct, action-focused communication without repetitive phrases
 
 ## Recent Changes
-- **June 25, 2025**: Fixed VidSrc iframe sandbox permissions that were accidentally broken
-- **June 25, 2025**: Implemented Chrome-specific iframe loading detection with fallback mechanisms
-- **June 25, 2025**: Added comprehensive domain cycling system with 5 VidSrc backup sources
-- **June 25, 2025**: Simplified iframe loading logic to prevent conflicts between event handlers
+- **June 25, 2025**: Reverted problematic CSS ad blocking that interfered with video display
+- **June 25, 2025**: Simplified Chrome iframe loading detection to prevent timeouts
+- **June 25, 2025**: Fixed navigation blocking script to allow legitimate navigation
+- **June 25, 2025**: Reduced iframe loading timeouts for faster domain cycling
 
 ## Current Issues
 - **Chrome Compatibility**: VidSrc videos work in Firefox but not Chrome due to stricter iframe policies
