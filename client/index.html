@@ -5,14 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
     <title>StreamFlex</title>
     
-    <!-- Comprehensive Ad-Blocking and Anti-Redirect Script -->
+    <!-- Comprehensive Ad-Blocking Script -->
     <script>
-      // Immediate ad blocking setup
       (function() {
         'use strict';
         
-        // Comprehensive popup blocking
-        const originalWindowOpen = window.open;
+        // Block all popups
         window.open = function(url, name, specs) {
           console.log('Popup blocked:', url);
           return {
@@ -21,17 +19,11 @@
             close: () => {},
             closed: false,
             location: { href: '' },
-            document: { write: () => {}, close: () => {} },
-            addEventListener: () => {},
-            removeEventListener: () => {}
+            document: { write: () => {}, close: () => {} }
           };
         };
 
-        // Block all dialogs that could be ads
-        const originalAlert = window.alert;
-        const originalConfirm = window.confirm;
-        const originalPrompt = window.prompt;
-        
+        // Block dialogs
         window.alert = function(message) {
           console.log('Alert blocked:', message);
           return;
@@ -47,17 +39,7 @@
           return null;
         };
 
-        // Block focus/blur events that could trigger popups
-        let focusBlocked = false;
-        window.addEventListener('focus', function(e) {
-          if (focusBlocked) {
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
-          }
-        }, true);
-
-        // Prevent navigation away from the page
+        // Block navigation redirects
         const originalAssign = window.location.assign;
         const originalReplace = window.location.replace;
         
@@ -71,17 +53,7 @@
           return false;
         };
 
-        // Block common ad-related event listeners
-        const originalAddEventListener = EventTarget.prototype.addEventListener;
-        EventTarget.prototype.addEventListener = function(type, listener, options) {
-          if (type === 'beforeunload' || type === 'unload' || type === 'pagehide') {
-            console.log('Blocked ad event listener:', type);
-            return;
-          }
-          return originalAddEventListener.call(this, type, listener, options);
-        };
-
-        // Enhanced ad element blocking
+        // Ad element blocking
         function blockAds() {
           const adSelectors = [
             '[class*="ad"]', '[id*="ad"]', '[class*="popup"]', '[id*="popup"]',
@@ -101,7 +73,7 @@
           });
         }
 
-        // Run ad blocking immediately and on DOM changes
+        // Run ad blocking
         blockAds();
         setInterval(blockAds, 1000);
         
@@ -113,178 +85,6 @@
           });
         }
       })();
-
-        // Block focus stealing attempts
-        const originalFocus = window.focus;
-        window.focus = function() {
-          console.log('Focus stealing attempt blocked');
-          return;
-        };
-
-        // Create sandbox environment for iframe content
-        const handleIframeLoad = function(iframe) {
-          try {
-            if (!iframe.contentWindow) return;
-            
-            // Block redirects in iframes
-            if (iframe.contentWindow.location) {
-              const originalAssign = iframe.contentWindow.location.assign;
-              const originalReplace = iframe.contentWindow.location.replace;
-              
-              iframe.contentWindow.location.assign = function(url) {
-                // Allow internal navigation but block external redirects
-                // Check against all known VidSrc domains and player-related paths
-                if (
-                  url.includes('vidsrc.to') || 
-                  url.includes('vidsrc.me') || 
-                  url.includes('vidsrc.cc') || 
-                  url.includes('vidsrc.net') || 
-                  url.includes('vidsrc.xyz') || 
-                  url.includes('vidsrc.pm') || 
-                  url.includes('vidsrc.in') || 
-                  url.includes('episode') || 
-                  url.includes('player') || 
-                  url.includes('video') ||
-                  url.includes('embed')
-                ) {
-                  console.log('Allowing internal iframe navigation:', url);
-                  return originalAssign.apply(iframe.contentWindow.location, arguments);
-                }
-                console.log('Blocked iframe redirect:', url);
-                return null;
-              };
-              
-              iframe.contentWindow.location.replace = function(url) {
-                // Allow internal navigation but block external redirects
-                // Check against all known VidSrc domains and player-related paths
-                if (
-                  url.includes('vidsrc.to') || 
-                  url.includes('vidsrc.me') || 
-                  url.includes('vidsrc.cc') || 
-                  url.includes('vidsrc.net') || 
-                  url.includes('vidsrc.xyz') || 
-                  url.includes('vidsrc.pm') || 
-                  url.includes('vidsrc.in') || 
-                  url.includes('episode') || 
-                  url.includes('player') || 
-                  url.includes('video') ||
-                  url.includes('embed')
-                ) {
-                  console.log('Allowing internal iframe navigation:', url);
-                  return originalReplace.apply(iframe.contentWindow.location, arguments);
-                }
-                console.log('Blocked iframe redirect:', url);
-                return null;
-              };
-            }
-            
-            // Block popup ads in iframes
-            if (iframe.contentWindow.open) {
-              iframe.contentWindow.open = function() {
-                console.log('Iframe popup blocked:', arguments[0]);
-                return null;
-              };
-            }
-          } catch (e) {
-            // Cross-origin access errors are expected, we can safely ignore them
-            console.log('Cross-origin protection active (expected):', e.message);
-          }
-        };
-
-        // Monitor for new iframes and apply protection
-        const observer = new MutationObserver(function(mutations) {
-          mutations.forEach(function(mutation) {
-            if (mutation.addedNodes) {
-              mutation.addedNodes.forEach(function(node) {
-                if (node.nodeName === 'IFRAME') {
-                  node.addEventListener('load', function() {
-                    handleIframeLoad(node);
-                  });
-                  // Also handle existing loaded iframes
-                  if (node.contentDocument) {
-                    handleIframeLoad(node);
-                  }
-                }
-                
-                // If it's a parent element, check for iframes inside
-                if (node.querySelectorAll) {
-                  const iframes = node.querySelectorAll('iframe');
-                  iframes.forEach(function(iframe) {
-                    iframe.addEventListener('load', function() {
-                      handleIframeLoad(iframe);
-                    });
-                    if (iframe.contentDocument) {
-                      handleIframeLoad(iframe);
-                    }
-                  });
-                }
-              });
-            }
-          });
-        });
-
-        // Start observing the document
-        observer.observe(document, { 
-          childList: true,
-          subtree: true
-        });
-        
-        // Handle existing iframes
-        document.querySelectorAll('iframe').forEach(function(iframe) {
-          iframe.addEventListener('load', function() {
-            handleIframeLoad(iframe);
-          });
-          if (iframe.contentDocument) {
-            handleIframeLoad(iframe);
-          }
-        });
-        
-        // Intercept navigation attempts on the main page
-        const originalAssign = window.location.assign;
-        const originalReplace = window.location.replace;
-        
-        window.location.assign = function(url) {
-          if (url.startsWith('http') && !url.includes(window.location.hostname)) {
-            console.log('Blocked main window redirect:', url);
-            return null;
-          }
-          return originalAssign.apply(window.location, arguments);
-        };
-        
-        window.location.replace = function(url) {
-          if (url.startsWith('http') && !url.includes(window.location.hostname)) {
-            console.log('Blocked main window redirect:', url);
-            return null;
-          }
-          return originalReplace.apply(window.location, arguments);
-        };
-
-        // Additional click event blocking for ads
-        document.addEventListener('click', function(event) {
-          const target = event.target;
-          if (target && target.tagName && 
-              (target.tagName.toLowerCase() === 'a' || target.onclick)) {
-            const href = target.href || target.onclick?.toString() || '';
-            if (href.includes('ads') || href.includes('popup') || 
-                href.includes('click') || href.includes('banner')) {
-              console.log('Blocked ad click:', href);
-              event.preventDefault();
-              event.stopPropagation();
-              return false;
-            }
-          }
-        }, true);
-
-        // Block context menu on video players to prevent ad menus
-        document.addEventListener('contextmenu', function(event) {
-          if (event.target.tagName && 
-              (event.target.tagName.toLowerCase() === 'iframe' ||
-               event.target.classList.contains('video-player'))) {
-            event.preventDefault();
-            return false;
-          }
-        });
-      });
     </script>
   </head>
   <body>
