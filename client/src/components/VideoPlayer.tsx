@@ -107,13 +107,13 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
         console.log(`${browserName} detected: Setting up iframe detection`);
         
         // Chromium browsers are very restrictive with VidSrc iframes
-        // Use aggressive timeout because they often don't fire load events
+        // Use very short timeout because they often block the content entirely
         contentCheck = setTimeout(() => {
           if (!isIframeLoaded) {
-            console.log(`${browserName}: Force iframe loaded after 800ms timeout`);
+            console.log(`${browserName}: Force iframe loaded after 500ms timeout`);
             handleIframeLoad();
           }
-        }, 800); // Very aggressive timeout for Chromium
+        }, 500); // Very aggressive timeout for Chromium
         
         // Try multiple detection methods for Chromium
         readyStateCheck = setInterval(() => {
@@ -122,20 +122,26 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
             return;
           }
           
-          // Method 1: Check if iframe structure exists
+          // Method 1: Check if iframe is in DOM and has basic structure
           if (iframe.offsetHeight > 0 && iframe.offsetWidth > 0) {
             console.log(`${browserName}: iframe has dimensions, assuming loaded`);
             handleIframeLoad();
             return;
           }
           
-          // Method 2: Try to access contentWindow (will throw if loaded due to CORS)
+          // Method 2: Check if iframe src is set (means browser is processing it)
+          if (iframe.src && iframe.src !== 'about:blank') {
+            console.log(`${browserName}: iframe src is set, assuming loaded`);
+            handleIframeLoad();
+            return;
+          }
+          
+          // Method 3: Try to access contentWindow (will throw if loaded due to CORS)
           try {
             const test = iframe.contentWindow;
-            if (test !== null) {
-              console.log(`${browserName}: iframe contentWindow accessible`);
-              handleIframeLoad();
-            }
+            // If we can access it without error, assume it's loaded
+            console.log(`${browserName}: iframe contentWindow accessible`);
+            handleIframeLoad();
           } catch (e) {
             // Any error accessing contentWindow usually means iframe loaded but blocked
             console.log(`${browserName}: Cross-origin security detected, iframe loaded`);
@@ -155,8 +161,8 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
         }, 6000);
       }
       
-      // Universal fallback timeout - shorter for Chromium browsers
-      const timeoutDuration = isChromiumBased ? 8000 : 15000;
+      // Universal fallback timeout - much shorter for Chromium browsers
+      const timeoutDuration = isChromiumBased ? 5000 : 15000;
       loadTimeout = setTimeout(() => {
         if (!isIframeLoaded) {
           console.log(`Universal timeout (${timeoutDuration}ms): trying next domain...`);
@@ -449,9 +455,10 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
                 title={video.title}
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
                 allowFullScreen
-                sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation allow-top-navigation-by-user-activation"
+                sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation allow-top-navigation-by-user-activation allow-downloads allow-modals allow-orientation-lock allow-pointer-lock allow-storage-access-by-user-activation"
                 className="absolute inset-0 w-full h-full video-player"
                 id="video-player-iframe"
+                referrerPolicy="no-referrer-when-downgrade"
                 onLoad={() => {
                   console.log('Iframe onLoad triggered for', video.source);
                   if (video.source === 'youtube') {
