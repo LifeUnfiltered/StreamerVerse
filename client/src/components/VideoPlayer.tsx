@@ -87,12 +87,43 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
               }
             });
             
-            // Block clicks that might trigger ads
+            // Enhanced iframe click protection
             iframe.style.pointerEvents = 'auto';
-            iframe.addEventListener('click', (e) => {
-              // Allow normal video controls but prevent ad clicks
-              e.stopPropagation();
-            }, true);
+            
+            // Add click protection overlay that captures and filters clicks
+            const clickProtector = document.createElement('div');
+            clickProtector.style.cssText = `
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              z-index: 1;
+              background: transparent;
+              pointer-events: none;
+            `;
+            iframe.parentElement?.appendChild(clickProtector);
+            
+            // Monitor for popup attempts from within iframe
+            let popupAttempts = 0;
+            const originalWindowOpen = window.open;
+            
+            iframe.addEventListener('load', () => {
+              // Reset popup attempt counter when iframe loads
+              popupAttempts = 0;
+            });
+            
+            // Detect and block popup storms (multiple rapid popup attempts)
+            const popupDetector = setInterval(() => {
+              if (popupAttempts > 2) {
+                console.log('Popup storm detected, blocking all popups for 10 seconds');
+                window.open = () => null;
+                setTimeout(() => {
+                  window.open = originalWindowOpen;
+                  popupAttempts = 0;
+                }, 10000);
+              }
+            }, 1000);
           }
           
           // Health check for domain cycling

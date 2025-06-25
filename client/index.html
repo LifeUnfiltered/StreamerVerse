@@ -206,21 +206,52 @@
         };
 
         console.log('Enhanced ad blocking initialized');
-        // Aggressive event blocking for ads
+        // Enhanced click blocking for popup ads while preserving video functionality
+        let clickTimeout;
         document.addEventListener('click', function(e) {
           const target = e.target;
+          
+          // Allow clicks on our video player iframe and its container
+          if (target && (
+            target.id === 'video-player-iframe' ||
+            target.closest('#video-player-iframe') ||
+            target.closest('.video-player-container') ||
+            target.closest('[class*="video-player"]')
+          )) {
+            return; // Allow video player clicks
+          }
+          
+          // Block suspicious ad clicks
           if (target && (
             target.classList.toString().includes('ad') ||
             target.id.includes('ad') ||
             target.getAttribute('data-ad') ||
             target.closest('[class*="ad"]') ||
-            target.closest('[id*="ad"]')
+            target.closest('[id*="ad"]') ||
+            target.getAttribute('onclick') ||
+            target.closest('[onclick]')
           )) {
             console.log('Ad click blocked');
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
             return false;
+          }
+          
+          // Detect rapid multiple clicks (often ad behavior)
+          clearTimeout(clickTimeout);
+          clickTimeout = setTimeout(() => {
+            // Reset click detection
+          }, 100);
+          
+          // Block clicks that try to open new windows
+          if (e.ctrlKey || e.metaKey || e.button === 1) {
+            const href = target.getAttribute('href') || target.closest('a')?.getAttribute('href');
+            if (href && !href.startsWith('#') && !href.includes('vidsrc') && !href.includes(window.location.hostname)) {
+              console.log('External link click blocked');
+              e.preventDefault();
+              return false;
+            }
           }
         }, true);
         
