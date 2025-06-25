@@ -83,45 +83,54 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
       };
 
       // Detect browser type for different loading strategies
-      const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+      const isChrome = /Chrome/.test(navigator.userAgent) && !/Edg/.test(navigator.userAgent);
       const isFirefox = /Firefox/.test(navigator.userAgent);
+      
+      console.log('Browser detection:', { 
+        userAgent: navigator.userAgent, 
+        vendor: navigator.vendor, 
+        isChrome, 
+        isFirefox 
+      });
       
       // Standard event listeners (work better in Firefox)
       iframe.addEventListener('load', handleIframeLoad);
       iframe.addEventListener('error', handleIframeError);
       
-      // Chrome-specific detection - more aggressive approach
+      // Chrome-specific detection - simplified approach
       if (isChrome) {
-        console.log('Chrome detected: Setting up enhanced iframe detection');
+        console.log('Chrome detected: Setting up iframe detection');
         
-        // Method 1: Fast polling for Chrome
-        readyStateCheck = setInterval(() => {
-          if (isIframeLoaded) return;
-          
-          // Check if iframe has any content/structure
-          try {
-            if (iframe.contentWindow) {
-              console.log('Chrome: iframe contentWindow available');
-              clearInterval(readyStateCheck);
-              handleIframeLoad();
-              return;
-            }
-          } catch (e) {
-            // Cross-origin error is actually good - means iframe loaded
-            console.log('Chrome: iframe loaded (cross-origin protection active)');
-            clearInterval(readyStateCheck);
-            handleIframeLoad();
-            return;
-          }
-        }, 300); // Check every 300ms
-        
-        // Method 2: Force success for Chrome after short wait
+        // Chrome often doesn't fire standard load events for cross-origin iframes
+        // Use a simple timeout approach that works reliably
         contentCheck = setTimeout(() => {
           if (!isIframeLoaded) {
-            console.log('Chrome: Force loading success after 2s');
+            console.log('Chrome: Force iframe loaded after 1s timeout');
             handleIframeLoad();
           }
-        }, 2000);
+        }, 1000); // Very aggressive timeout for Chrome
+        
+        // Also try to detect via readyState changes
+        readyStateCheck = setInterval(() => {
+          if (isIframeLoaded) {
+            clearInterval(readyStateCheck);
+            return;
+          }
+          
+          // In Chrome, even trying to access contentWindow can indicate loading
+          try {
+            // Just attempting to access triggers cross-origin security if loaded
+            const test = iframe.contentWindow;
+            if (test !== null && test !== undefined) {
+              console.log('Chrome: iframe structure accessible, assuming loaded');
+              handleIframeLoad();
+            }
+          } catch (e) {
+            // SecurityError or DOMException means iframe loaded but blocked by CORS
+            console.log('Chrome: Cross-origin security active, iframe loaded');
+            handleIframeLoad();
+          }
+        }, 400);
       }
       
       // Firefox works better with standard load events, but add backup
@@ -436,7 +445,7 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
                   if (video.source === 'youtube') {
                     setIsLoading(false);
                   }
-                  // VidSrc loading is handled by the useEffect above
+                  // For VidSrc, this event might not fire reliably in Chrome, so we rely on useEffect detection
                 }}
               />
               <AnimatePresence>
