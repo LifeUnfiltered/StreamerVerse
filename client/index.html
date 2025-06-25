@@ -33,6 +33,55 @@
           configurable: false
         });
         
+        // Intercept and block any attempt to create new windows via focus/blur events
+        let focusBlocked = false;
+        const originalFocus = window.focus;
+        const originalBlur = window.blur;
+        
+        window.focus = function() {
+          if (!focusBlocked) {
+            console.log('Window focus blocked (popup prevention)');
+            focusBlocked = true;
+            setTimeout(() => { focusBlocked = false; }, 1000);
+          }
+          return false;
+        };
+        
+        window.blur = function() {
+          console.log('Window blur blocked (popup prevention)');
+          return false;
+        };
+        
+        // Block iframe-based popup attempts
+        const originalCreateElement = document.createElement.bind(document);
+        document.createElement = function(tagName) {
+          const element = originalCreateElement(tagName);
+          
+          if (tagName.toLowerCase() === 'iframe') {
+            const originalSetSrc = Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, 'src').set;
+            Object.defineProperty(element, 'src', {
+              set: function(value) {
+                // Block suspicious iframe sources that could be popups
+                if (value && (
+                  value.includes('popup') || 
+                  value.includes('redirect') ||
+                  value.includes('ads') ||
+                  (value.includes('http') && !value.includes('vidsrc') && !value.includes(window.location.hostname))
+                )) {
+                  console.log('Suspicious iframe src blocked:', value);
+                  return;
+                }
+                originalSetSrc.call(this, value);
+              },
+              get: function() {
+                return this.getAttribute('src');
+              }
+            });
+          }
+          
+          return element;
+        };
+        
         // Block pushState navigation that opens ads
         const originalPushState = history.pushState;
         history.pushState = function(state, title, url) {

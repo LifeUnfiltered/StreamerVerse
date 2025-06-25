@@ -9,10 +9,10 @@ A React-based streaming web application that provides access to movies and TV sh
 - **Communication Style**: Direct, action-focused communication without repetitive phrases
 
 ## Recent Changes
-- **June 25, 2025**: ULTRA-AGGRESSIVE: Popup blocking with null returns and property locking
-- **June 25, 2025**: Blocked middle clicks, ctrl+clicks, and target="_blank" links
-- **June 25, 2025**: Added mousedown event blocking for non-video areas
-- **June 25, 2025**: Overrode addEventListener to block popup-triggering events
+- **June 25, 2025**: ENHANCED: Added iframe-based popup blocking and focus/blur interception
+- **June 25, 2025**: FIXED: Video card hover effect now covers entire card including image
+- **June 25, 2025**: Enhanced video card overlay with full coverage and smooth transitions
+- **June 25, 2025**: Added suspicious iframe src blocking for external redirects
 
 ## Current Issues
 - **Chrome Compatibility**: VidSrc videos need additional browser-specific fixes
