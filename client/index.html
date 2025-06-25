@@ -11,27 +11,27 @@
       (function() {
         'use strict';
         
-        // Aggressive popup and ad blocking
+        // Ultra-aggressive popup blocking with multiple layers
         const originalOpen = window.open;
+        let popupBlockCount = 0;
+        
         window.open = function(url, name, specs, replace) {
-          console.log('Popup blocked:', url);
-          return {
-            focus: () => {},
-            blur: () => {},
-            close: () => {},
-            closed: true,
-            location: { href: 'about:blank' },
-            document: { 
-              write: () => {}, 
-              close: () => {},
-              open: () => {},
-              writeln: () => {}
-            },
-            postMessage: () => {},
-            addEventListener: () => {},
-            removeEventListener: () => {}
-          };
+          popupBlockCount++;
+          console.log(`Popup #${popupBlockCount} blocked:`, url);
+          
+          // Return immediately null for most aggressive blocking
+          return null;
         };
+        
+        // Block all forms of window.open access
+        Object.defineProperty(window, 'open', {
+          value: function() {
+            console.log('Window.open access blocked via defineProperty');
+            return null;
+          },
+          writable: false,
+          configurable: false
+        });
         
         // Block pushState navigation that opens ads
         const originalPushState = history.pushState;
@@ -244,25 +244,66 @@
             // Reset click detection
           }, 100);
           
-          // Block clicks that try to open new windows
-          if (e.ctrlKey || e.metaKey || e.button === 1) {
-            const href = target.getAttribute('href') || target.closest('a')?.getAttribute('href');
-            if (href && !href.startsWith('#') && !href.includes('vidsrc') && !href.includes(window.location.hostname)) {
-              console.log('External link click blocked');
+          // Block ALL middle clicks and ctrl+clicks (common popup triggers)
+          if (e.ctrlKey || e.metaKey || e.button === 1 || e.button === 2) {
+            console.log('Middle/Ctrl click blocked (potential popup trigger)');
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            return false;
+          }
+          
+          // Block clicks on elements with suspicious attributes
+          if (target && (
+            target.getAttribute('target') === '_blank' ||
+            target.closest('[target="_blank"]') ||
+            target.getAttribute('href')?.includes('javascript:') ||
+            target.closest('[href*="javascript:"]')
+          )) {
+            console.log('Suspicious link click blocked');
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            return false;
+          }
+        }, true);
+        
+        // Block context menu on ads and iframes
+        document.addEventListener('contextmenu', function(e) {
+          const target = e.target;
+          if (target && (
+            target.classList.toString().includes('ad') ||
+            target.tagName === 'IFRAME'
+          )) {
+            console.log('Context menu blocked on ad/iframe');
+            e.preventDefault();
+            return false;
+          }
+        }, true);
+        
+        // Block mousedown events that could trigger popups
+        document.addEventListener('mousedown', function(e) {
+          // Block any mousedown that isn't on our video player
+          if (e.target && !e.target.closest('#video-player-iframe') && !e.target.closest('.video-player-container')) {
+            if (e.button !== 0) { // Not left click
+              console.log('Non-left click blocked');
               e.preventDefault();
+              e.stopPropagation();
               return false;
             }
           }
         }, true);
         
-        // Block context menu on ads
-        document.addEventListener('contextmenu', function(e) {
-          const target = e.target;
-          if (target && target.classList.toString().includes('ad')) {
-            e.preventDefault();
-            return false;
+        // Override addEventListener to block popup-related events
+        const originalAddEventListener = EventTarget.prototype.addEventListener;
+        EventTarget.prototype.addEventListener = function(type, listener, options) {
+          // Block suspicious event types that could trigger popups
+          if (['beforeunload', 'unload', 'pagehide'].includes(type)) {
+            console.log('Popup-related event listener blocked:', type);
+            return;
           }
-        }, true);
+          return originalAddEventListener.call(this, type, listener, options);
+        };
       })();
     </script>
     
