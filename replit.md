@@ -9,10 +9,10 @@ A React-based streaming web application that provides access to movies and TV sh
 - **Communication Style**: Direct, action-focused communication without repetitive phrases
 
 ## Recent Changes
-- **June 25, 2025**: FIXED: Added automatic domain cycling when VidSrc internal scripts fail (sbx.html 404)
-- **June 25, 2025**: Enhanced error monitoring to detect VidSrc JavaScript failures
-- **June 25, 2025**: Reduced universal timeout to 3s for Chromium browsers
-- **June 25, 2025**: Removed CSP directive that was blocking VidSrc iframes
+- **June 25, 2025**: AGGRESSIVE FIX: Reduced VidSrc health check to 4 seconds
+- **June 25, 2025**: Reordered domain priority (vidsrc.xyz first, vidsrc.to third)
+- **June 25, 2025**: Reduced universal timeout to 6s for faster domain cycling
+- **June 25, 2025**: Increased Chromium iframe timeout to 800ms for stability
 
 ## Current Issues
 - **Ad Blocking**: Popups and ads still appearing despite current blocking scripts
