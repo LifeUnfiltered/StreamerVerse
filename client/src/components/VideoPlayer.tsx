@@ -84,53 +84,64 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
 
       // Detect browser type for different loading strategies
       const isChrome = /Chrome/.test(navigator.userAgent) && !/Edg/.test(navigator.userAgent);
+      const isEdge = /Edg/.test(navigator.userAgent);
       const isFirefox = /Firefox/.test(navigator.userAgent);
+      const isChromiumBased = isChrome || isEdge;
       
       console.log('Browser detection:', { 
         userAgent: navigator.userAgent, 
         vendor: navigator.vendor, 
         isChrome, 
-        isFirefox 
+        isEdge,
+        isFirefox,
+        isChromiumBased
       });
       
       // Standard event listeners (work better in Firefox)
       iframe.addEventListener('load', handleIframeLoad);
       iframe.addEventListener('error', handleIframeError);
       
-      // Chrome-specific detection - simplified approach
-      if (isChrome) {
-        console.log('Chrome detected: Setting up iframe detection');
+      // Chromium-based browsers (Chrome, Edge) detection
+      if (isChromiumBased) {
+        const browserName = isChrome ? 'Chrome' : isEdge ? 'Edge' : 'Chromium';
+        console.log(`${browserName} detected: Setting up iframe detection`);
         
-        // Chrome often doesn't fire standard load events for cross-origin iframes
-        // Use a simple timeout approach that works reliably
+        // Chromium browsers are very restrictive with VidSrc iframes
+        // Use aggressive timeout because they often don't fire load events
         contentCheck = setTimeout(() => {
           if (!isIframeLoaded) {
-            console.log('Chrome: Force iframe loaded after 1s timeout');
+            console.log(`${browserName}: Force iframe loaded after 800ms timeout`);
             handleIframeLoad();
           }
-        }, 1000); // Very aggressive timeout for Chrome
+        }, 800); // Very aggressive timeout for Chromium
         
-        // Also try to detect via readyState changes
+        // Try multiple detection methods for Chromium
         readyStateCheck = setInterval(() => {
           if (isIframeLoaded) {
             clearInterval(readyStateCheck);
             return;
           }
           
-          // In Chrome, even trying to access contentWindow can indicate loading
+          // Method 1: Check if iframe structure exists
+          if (iframe.offsetHeight > 0 && iframe.offsetWidth > 0) {
+            console.log(`${browserName}: iframe has dimensions, assuming loaded`);
+            handleIframeLoad();
+            return;
+          }
+          
+          // Method 2: Try to access contentWindow (will throw if loaded due to CORS)
           try {
-            // Just attempting to access triggers cross-origin security if loaded
             const test = iframe.contentWindow;
-            if (test !== null && test !== undefined) {
-              console.log('Chrome: iframe structure accessible, assuming loaded');
+            if (test !== null) {
+              console.log(`${browserName}: iframe contentWindow accessible`);
               handleIframeLoad();
             }
           } catch (e) {
-            // SecurityError or DOMException means iframe loaded but blocked by CORS
-            console.log('Chrome: Cross-origin security active, iframe loaded');
+            // Any error accessing contentWindow usually means iframe loaded but blocked
+            console.log(`${browserName}: Cross-origin security detected, iframe loaded`);
             handleIframeLoad();
           }
-        }, 400);
+        }, 300); // Check every 300ms
       }
       
       // Firefox works better with standard load events, but add backup
@@ -144,13 +155,14 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
         }, 6000);
       }
       
-      // Universal fallback timeout for very slow connections
+      // Universal fallback timeout - shorter for Chromium browsers
+      const timeoutDuration = isChromiumBased ? 8000 : 15000;
       loadTimeout = setTimeout(() => {
         if (!isIframeLoaded) {
-          console.log('Universal timeout: trying next domain...');
+          console.log(`Universal timeout (${timeoutDuration}ms): trying next domain...`);
           handleIframeError();
         }
-      }, 15000);
+      }, timeoutDuration);
       
       return () => {
         iframe.removeEventListener('load', handleIframeLoad);
