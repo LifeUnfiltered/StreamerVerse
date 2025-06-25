@@ -53,6 +53,39 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
         setIsLoading(false);
         setLoadError(false);
         clearAllTimeouts();
+        
+        // Monitor for VidSrc internal script failures (like sbx.html 404)
+        setTimeout(() => {
+          const checkForVidSrcErrors = () => {
+            const iframe = document.getElementById('video-player-iframe') as HTMLIFrameElement;
+            if (iframe && iframe.src) {
+              console.log('Monitoring VidSrc for internal errors...');
+              
+              // Set up error monitoring for VidSrc script failures
+              const originalError = window.onerror;
+              window.onerror = function(msg, url, line, col, error) {
+                if (url && url.includes('vidsrc') && (url.includes('sbx.html') || msg.includes('404'))) {
+                  console.log('VidSrc internal script failure detected, trying next domain...');
+                  handleIframeError();
+                }
+                if (originalError) originalError(msg, url, line, col, error);
+              };
+              
+              // Also monitor network errors in console
+              const originalConsoleError = console.error;
+              console.error = function(...args) {
+                const errorStr = args.join(' ');
+                if (errorStr.includes('vidsrc') && (errorStr.includes('404') || errorStr.includes('sbx.html'))) {
+                  console.log('VidSrc network error detected, cycling domain...');
+                  setTimeout(() => handleIframeError(), 1000);
+                }
+                originalConsoleError.apply(console, args);
+              };
+            }
+          };
+          
+          checkForVidSrcErrors();
+        }, 2000); // Check after 2 seconds to allow VidSrc to initialize
       };
 
       const handleIframeError = () => {
@@ -115,6 +148,8 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
           }
         }, 300); // Very aggressive timeout for Chromium
         
+        // VidSrc health monitoring is now handled in handleIframeLoad
+        
         // Try multiple detection methods for Chromium
         readyStateCheck = setInterval(() => {
           if (isIframeLoaded) {
@@ -161,8 +196,8 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
         }, 6000);
       }
       
-      // Universal fallback timeout - much shorter for Chromium browsers
-      const timeoutDuration = isChromiumBased ? 5000 : 15000;
+      // Universal fallback timeout - shorter for Chromium browsers  
+      const timeoutDuration = isChromiumBased ? 3000 : 10000;
       loadTimeout = setTimeout(() => {
         if (!isIframeLoaded) {
           console.log(`Universal timeout (${timeoutDuration}ms): trying next domain...`);
