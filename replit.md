@@ -9,15 +9,14 @@ A React-based streaming web application that provides access to movies and TV sh
 - **Communication Style**: Direct, action-focused communication without repetitive phrases
 
 ## Recent Changes
-- **June 25, 2025**: Implemented Chromium-based browser detection (Chrome + Edge)
-- **June 25, 2025**: Added 800ms aggressive timeout for Chromium iframe loading
-- **June 25, 2025**: Enhanced iframe dimension checking for Chromium browsers
-- **June 25, 2025**: Reduced universal timeout to 8s for Chromium vs 15s for Firefox
+- **June 25, 2025**: FIXED: Removed CSP directive that was blocking VidSrc iframes
+- **June 25, 2025**: Enhanced Edge browser detection (separate from Chrome)
+- **June 25, 2025**: Reduced Chromium timeout to 300ms for faster loading
+- **June 25, 2025**: Added comprehensive iframe detection methods for Chromium browsers
 
 ## Current Issues
-- **Chrome Compatibility**: VidSrc videos work in Firefox but not Chrome due to stricter iframe policies
 - **Ad Blocking**: Popups and ads still appearing despite current blocking scripts
-- **Loading Detection**: Chrome requires different iframe load detection than Firefox
+- **Authentication**: User auth features currently disabled
 
 ## Project Architecture
 - **Frontend**: React with TypeScript, Vite build system

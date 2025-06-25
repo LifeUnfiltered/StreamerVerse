@@ -110,10 +110,10 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
         // Use very short timeout because they often block the content entirely
         contentCheck = setTimeout(() => {
           if (!isIframeLoaded) {
-            console.log(`${browserName}: Force iframe loaded after 500ms timeout`);
+            console.log(`${browserName}: Force iframe loaded after 300ms timeout`);
             handleIframeLoad();
           }
-        }, 500); // Very aggressive timeout for Chromium
+        }, 300); // Very aggressive timeout for Chromium
         
         // Try multiple detection methods for Chromium
         readyStateCheck = setInterval(() => {
