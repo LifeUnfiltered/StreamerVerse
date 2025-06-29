@@ -15,7 +15,8 @@ A React-based streaming web application that provides access to movies and TV sh
 - **June 29, 2025**: Enhanced video card UI with source-specific metadata display
 
 ## Current Issues
-- **Chrome Compatibility**: VidSrc videos need additional browser-specific fixes
+- **JavaScript Syntax**: Fixed popup blocking script syntax errors
+- **Chrome Compatibility**: VidSrc videos need additional browser-specific fixes  
 - **Authentication**: User auth features currently disabled
 
 ## Project Architecture

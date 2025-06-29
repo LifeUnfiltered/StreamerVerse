@@ -412,56 +412,52 @@
         // NUCLEAR OPTION: DOM monitoring and removal
         if (!window.adBlockObserver) {
           window.adBlockObserver = new MutationObserver((mutations) => {
-          mutations.forEach((mutation) => {
-            mutation.addedNodes.forEach((node) => {
-              if (node.nodeType === 1) { // Element node
-                const element = node;
-                
-                // DESTROY any non-video iframes immediately
-                if (element.tagName === 'IFRAME') {
-                  const src = element.getAttribute('src') || '';
-                  if (!src.includes('vidsrc') && !src.includes('youtube') && !element.closest('.video-player-container')) {
-                    console.log('🔥 DESTROYING suspicious iframe:', src);
-                    element.remove();
-                    return;
-                  }
-                }
-                
-                // DESTROY popup-related elements
-                const suspiciousSelectors = [
-                  'a[target="_blank"]',
-                  'a[href*="javascript:"]',
-                  '[onclick*="window.open"]',
-                  '[onclick*="popup"]',
-                  '.popup', '.ad', '.advertisement', 
-                  '[class*="ad-"]', '[id*="ad-"]',
-                  '[class*="popup"]', '[id*="popup"]'
-                ];
-                
-                suspiciousSelectors.forEach(selector => {
-                  try {
-                    const suspiciousElements = element.querySelectorAll ? element.querySelectorAll(selector) : [];
-                    suspiciousElements.forEach(el => {
-                      console.log('🔥 DESTROYING suspicious element:', selector);
-                      el.remove();
-                    });
-                    
-                    // Check if the element itself matches
-                    if (element.matches && element.matches(selector)) {
-                      console.log('🔥 DESTROYING suspicious element (self):', selector);
+              mutation.addedNodes.forEach((node) => {
+                if (node.nodeType === 1) { // Element node
+                  const element = node;
+                  
+                  // DESTROY any non-video iframes immediately
+                  if (element.tagName === 'IFRAME') {
+                    const src = element.getAttribute('src') || '';
+                    if (!src.includes('vidsrc') && !src.includes('youtube') && !element.closest('.video-player-container')) {
+                      console.log('🔥 DESTROYING suspicious iframe:', src);
                       element.remove();
+                      return;
                     }
-                  } catch (e) {
-                    // Ignore selector errors
                   }
-                });
-              }
+                  
+                  // DESTROY popup-related elements
+                  const suspiciousSelectors = [
+                    'a[target="_blank"]',
+                    'a[href*="javascript:"]',
+                    '[onclick*="window.open"]',
+                    '[onclick*="popup"]',
+                    '.popup', '.ad', '.advertisement', 
+                    '[class*="ad-"]', '[id*="ad-"]',
+                    '[class*="popup"]', '[id*="popup"]'
+                  ];
+                  
+                  suspiciousSelectors.forEach(selector => {
+                    try {
+                      const suspiciousElements = element.querySelectorAll ? element.querySelectorAll(selector) : [];
+                      suspiciousElements.forEach(el => {
+                        console.log('🔥 DESTROYING suspicious element:', selector);
+                        el.remove();
+                      });
+                      
+                      // Check if the element itself matches
+                      if (element.matches && element.matches(selector)) {
+                        console.log('🔥 DESTROYING suspicious element (self):', selector);
+                        element.remove();
+                      }
+                    } catch (e) {
+                      // Ignore selector errors
+                    }
+                  });
+                }
+              });
             });
-          });
-        });
-        
-          });
-        
+          
           // Start aggressive monitoring
           window.adBlockObserver.observe(document.documentElement, {
             childList: true,
