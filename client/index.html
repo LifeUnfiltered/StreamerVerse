@@ -69,16 +69,20 @@
         };
         
         // Block location changes that could trigger popups
-        const originalAssign = window.location.assign;
-        const originalReplace = window.location.replace;
-        
-        window.location.assign = function(url) {
-          console.log('🚫 Location.assign BLOCKED:', url);
-        };
-        
-        window.location.replace = function(url) {
-          console.log('🚫 Location.replace BLOCKED:', url);
-        };
+        if (!window.originalLocationMethods) {
+          window.originalLocationMethods = {
+            assign: window.location.assign,
+            replace: window.location.replace
+          };
+          
+          window.location.assign = function(url) {
+            console.log('🚫 Location.assign BLOCKED:', url);
+          };
+          
+          window.location.replace = function(url) {
+            console.log('🚫 Location.replace BLOCKED:', url);
+          };
+        }
         
         // Block iframe-based popup attempts
         if (!window.originalCreateElement) {
@@ -113,8 +117,13 @@
         }
         
         // Block pushState navigation that opens ads
-        const originalPushState = history.pushState;
-        history.pushState = function(state, title, url) {
+        if (!window.originalHistoryMethods) {
+          window.originalHistoryMethods = {
+            pushState: history.pushState,
+            replaceState: history.replaceState
+          };
+          
+          history.pushState = function(state, title, url) {
           if (url && (url.includes('ads') || url.includes('popup') || url.includes('promo'))) {
             console.log('Ad navigation blocked:', url);
             return;
@@ -401,7 +410,8 @@
         }, true);
         
         // NUCLEAR OPTION: DOM monitoring and removal
-        const observer = new MutationObserver((mutations) => {
+        if (!window.adBlockObserver) {
+          window.adBlockObserver = new MutationObserver((mutations) => {
           mutations.forEach((mutation) => {
             mutation.addedNodes.forEach((node) => {
               if (node.nodeType === 1) { // Element node
@@ -450,13 +460,16 @@
           });
         });
         
-        // Start aggressive monitoring
-        observer.observe(document.documentElement, {
-          childList: true,
-          subtree: true,
-          attributes: true,
-          attributeFilter: ['href', 'onclick', 'target', 'src']
-        });
+          });
+        
+          // Start aggressive monitoring
+          window.adBlockObserver.observe(document.documentElement, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ['href', 'onclick', 'target', 'src']
+          });
+        }
       })();
     </script>
     
