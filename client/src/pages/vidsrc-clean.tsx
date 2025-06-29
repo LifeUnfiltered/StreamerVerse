@@ -119,8 +119,20 @@ export default function VidSrc() {
     staleTime: 5 * 60 * 1000,
   });
 
+  // IMMEDIATE DEBUG - Log every time selectedVideo changes
+  console.log('🚨 SELECTED VIDEO CHANGED:', {
+    hasSelectedVideo: !!selectedVideo,
+    videoTitle: selectedVideo?.title,
+    videoType: selectedVideo?.metadata?.type,
+    currentSource,
+    imdbId: selectedVideo?.metadata?.imdbId,
+    episodesLength: episodes.length,
+    episodesLoading
+  });
+
   // Debug logging in useEffect to avoid JSX issues
   useEffect(() => {
+    console.log('🎬 USE_EFFECT RUNNING:', { selectedVideo: !!selectedVideo, currentSource });
     if (selectedVideo) {
       const shouldFetchEpisodes = !!(selectedVideo?.metadata?.type === 'tv' && currentSource === 'vidsrc' && selectedVideo?.metadata?.imdbId);
       console.log('🎬 EPISODES DEBUG:', {

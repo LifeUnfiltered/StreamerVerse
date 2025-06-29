@@ -1,0 +1,252 @@
+Referrer Policy: Ignoring the less restricted referrer policy “unsafe-url” for the cross-site request: https://pxdrop.lijit.com/1/d/t.dhj?cls=sync&dmn=vidsrc.xyz&GDPR_v2=&us_privacy=&pubid=dt_scout&gpp=&gpp_sid= t.dhj
+Referrer Policy: Ignoring the less restricted referrer policy “unsafe-url” for the cross-site request: https://pd.sharethis.com/pd/dtscout dtscout
+Referrer Policy: Ignoring the less restricted referrer policy “unsafe-url” for the cross-site request: https://p.mrktmtrcs.net/mm.js mm.js
+Referrer Policy: Ignoring the less restricted referrer policy “unsafe-url” for the cross-site request: https://t.dtscout.com/pv/?_a=v&_h=vidsrc.xyz&_ss=2z8jxsb7nb&_pv=30&_ls=8514&_cc=ca&_pl=d&_b=firefox%40135&_cbid=9rka&_cb=_dtspv.c pv
+Referrer Policy: Ignoring the less restricted referrer policy “unsafe-url” for the cross-site request: https://t.sharethis.com/1/k/t.dhj?cid=c010&cls=C&rnd=0.9567243061020634&stid=ZGEACGfMMygAAAAIGsXNAw%3D%3D t.dhj
+This page is in Quirks Mode. Page layout may be impacted. For Standards Mode use “<!DOCTYPE html>”.
+t_.htm
+This page is in Quirks Mode. Page layout may be impacted. For Standards Mode use “<!DOCTYPE html>”.
+t_.htm:2:1756
+This page is in Quirks Mode. Page layout may be impacted. For Standards Mode use “<!DOCTYPE html>”.
+t_.htm
+This page is in Quirks Mode. Page layout may be impacted. For Standards Mode use “<!DOCTYPE html>”.
+t_.htm:2:1756
+Iframe onLoad triggered for vidsrc VideoPlayer.tsx:604:27
+VidSrc iframe loaded successfully VideoPlayer.tsx:51:17
+Video metadata: 
+Object { imdbId: "tt3559124", type: "tv", tmdbId: 47480, firstAirDate: "2014-04-09", lastAirDate: "2021-02-15", voteAverage: 7.325, episodeRunTime: 7, contentRating: null, embedUrl: "https://vidsrc.xyz/embed/tv?imdb=tt3559124&season=1&episode=1", totalSeasons: 5, … }
+VideoPlayer.tsx:455:11
+Generated embed URL: https://vidsrc.xyz/embed/tv/tt3559124/1/1 VideoPlayer.tsx:456:11
+VidSrc health check: No working video after 5 seconds, cycling domain... VideoPlayer.tsx:133:23
+Setting up VidSrc monitoring and ad blocking... VideoPlayer.tsx:59:19
+Source map error: Error: request failed with status 404
+Stack in the worker:networkRequest@resource://devtools/client/shared/source-map-loader/utils/network-request.js:43:9
+
+Resource URL: https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.16.0/js/md5.min.js
+Source Map URL: md5.min.js.map
+
+VidSrc health check: No working video after 5 seconds, cycling domain... VideoPlayer.tsx:133:23
+This page is in Quirks Mode. Page layout may be impacted. For Standards Mode use “<!DOCTYPE html>”.
+t_.js:2:3541
+Video metadata: 
+Object { imdbId: "tt3559124", type: "tv", tmdbId: 47480, firstAirDate: "2014-04-09", lastAirDate: "2021-02-15", voteAverage: 7.325, episodeRunTime: 7, contentRating: null, embedUrl: "https://vidsrc.xyz/embed/tv?imdb=tt3559124&season=1&episode=1", totalSeasons: 5, … }
+VideoPlayer.tsx:455:11
+Generated embed URL: https://vidsrc.xyz/embed/tv/tt3559124/1/1 VideoPlayer.tsx:456:11
+XHRPOST
+https://e40d9a9c-1259-4e32-ad81-5c082c1b9f61-00-df6zq69men6s.riker.replit.dev/api/watch-history/tt3559124
+[HTTP/1.1 401 Unauthorized 81ms]
+
+Failed to update watch progress: Error: 401: {"message":"Unauthorized"}
+    throwIfResNotOk queryClient.ts:6
+    apiRequest queryClient.ts:22
+    mutationFn VideoPlayer.tsx:316
+    fn mutation.ts:170
+    run retryer.ts:153
+    start retryer.ts:218
+    execute mutation.ts:208
+    mutate mutationObserver.ts:125
+    mutate useMutation.ts:52
+    trackingInterval VideoPlayer.tsx:360
+VideoPlayer.tsx:334:17
+Video metadata: 
+Object { imdbId: "tt3559124", type: "tv", tmdbId: 47480, firstAirDate: "2014-04-09", lastAirDate: "2021-02-15", voteAverage: 7.325, episodeRunTime: 7, contentRating: null, embedUrl: "https://vidsrc.xyz/embed/tv?imdb=tt3559124&season=1&episode=1", totalSeasons: 5, … }
+VideoPlayer.tsx:455:11
+Generated embed URL: https://vidsrc.xyz/embed/tv/tt3559124/1/1 VideoPlayer.tsx:456:11
+XHRGET
+https://e40d9a9c-1259-4e32-ad81-5c082c1b9f61-00-df6zq69men6s.riker.replit.dev/api/continue-watching?limit=4
+[HTTP/1.1 401 Unauthorized 65ms]
+
+GET
+https://pippio.com/api/sync?pid=710914&_=2&it=4&iv=2b744a5fda4666f0556dbeb65c5cdad1&it=4&iv=199d9e0311e5019ad8c47c2fa7a86c61d3b6b93a&it=4&iv=1135f404dfa2740e40d18a8ba43c620e5dfee8a92a5a37bc03f582a7ac9c9f35
+NS_BINDING_ABORTED
+
+Continue watching error: Error: 401: {"message":"Unauthorized"}
+    throwIfResNotOk queryClient.ts:6
+    apiRequest queryClient.ts:22
+    queryFn ContinueWatching.tsx:33
+    fetchFn query.ts:434
+    run retryer.ts:153
+    start retryer.ts:218
+    fetch query.ts:546
+    promises queryClient.ts:405
+    promises queryClient.ts:404
+    batch notifyManager.ts:52
+    refetchQueries queryClient.ts:400
+    invalidateQueries queryClient.ts:371
+    batch notifyManager.ts:52
+    invalidateQueries queryClient.ts:363
+    onSuccess VideoPlayer.tsx:341
+    execute mutation.ts:218
+    mutate mutationObserver.ts:125
+    mutate useMutation.ts:52
+    trackingInterval VideoPlayer.tsx:360
+ContinueWatching.tsx:42:17
+Video metadata: 
+Object { imdbId: "tt3559124", type: "tv", tmdbId: 47480, firstAirDate: "2014-04-09", lastAirDate: "2021-02-15", voteAverage: 7.325, episodeRunTime: 7, contentRating: null, embedUrl: "https://vidsrc.xyz/embed/tv?imdb=tt3559124&season=1&episode=1", totalSeasons: 5, … }
+VideoPlayer.tsx:455:11
+Generated embed URL: https://vidsrc.xyz/embed/tv/tt3559124/1/1 VideoPlayer.tsx:456:11
+Video metadata: 
+Object { imdbId: "tt3559124", type: "tv", tmdbId: 47480, firstAirDate: "2014-04-09", lastAirDate: "2021-02-15", voteAverage: 7.325, episodeRunTime: 7, contentRating: null, embedUrl: "https://vidsrc.xyz/embed/tv?imdb=tt3559124&season=1&episode=1", totalSeasons: 5, … }
+VideoPlayer.tsx:455:11
+Generated embed URL: https://vidsrc.xyz/embed/tv/tt3559124/1/1 VideoPlayer.tsx:456:11
+XHRPOST
+https://e40d9a9c-1259-4e32-ad81-5c082c1b9f61-00-df6zq69men6s.riker.replit.dev/api/watch-history/tt3559124
+[HTTP/1.1 401 Unauthorized 90ms]
+
+XHRPOST
+https://e40d9a9c-1259-4e32-ad81-5c082c1b9f61-00-df6zq69men6s.riker.replit.dev/api/watch-history/tt3559124
+[HTTP/1.1 401 Unauthorized 315ms]
+
+Failed to update watch progress: Error: 401: {"message":"Unauthorized"}
+    throwIfResNotOk queryClient.ts:6
+    apiRequest queryClient.ts:22
+    mutationFn VideoPlayer.tsx:316
+    fn mutation.ts:170
+    run retryer.ts:153
+    start retryer.ts:218
+    execute mutation.ts:208
+    mutate mutationObserver.ts:125
+    mutate useMutation.ts:52
+    trackingInterval VideoPlayer.tsx:360
+    setInterval handler*VideoPlayer/< VideoPlayer.tsx:350
+    React 13
+    workLoop scheduler.development.js:266
+    flushWork scheduler.development.js:239
+    performWorkUntilDeadline scheduler.development.js:533
+VideoPlayer.tsx:334:17
+XHRGET
+https://e40d9a9c-1259-4e32-ad81-5c082c1b9f61-00-df6zq69men6s.riker.replit.dev/api/continue-watching?limit=4
+[HTTP/1.1 401 Unauthorized 66ms]
+
+Failed to update watch progress: Error: 401: {"message":"Unauthorized"}
+    throwIfResNotOk queryClient.ts:6
+    apiRequest queryClient.ts:22
+    mutationFn VideoPlayer.tsx:316
+    fn mutation.ts:170
+    run retryer.ts:153
+    start retryer.ts:218
+    execute mutation.ts:208
+    mutate mutationObserver.ts:125
+    mutate useMutation.ts:52
+    VideoPlayer VideoPlayer.tsx:376
+    React 14
+    workLoop scheduler.development.js:266
+    flushWork scheduler.development.js:239
+    performWorkUntilDeadline scheduler.development.js:533
+VideoPlayer.tsx:334:17
+Video metadata: 
+Object { imdbId: "tt3559124", type: "tv", tmdbId: 47480, firstAirDate: "2014-04-09", lastAirDate: "2021-02-15", voteAverage: 7.325, episodeRunTime: 7, contentRating: null, embedUrl: "https://vidsrc.xyz/embed/tv?imdb=tt3559124&season=1&episode=1", totalSeasons: 5, … }
+VideoPlayer.tsx:455:11
+Generated embed URL: https://vidsrc.xyz/embed/tv/tt3559124/1/1 VideoPlayer.tsx:456:11
+Continue watching error: Error: 401: {"message":"Unauthorized"}
+    throwIfResNotOk queryClient.ts:6
+    apiRequest queryClient.ts:22
+    queryFn ContinueWatching.tsx:33
+    fetchFn query.ts:434
+    run retryer.ts:153
+    start retryer.ts:218
+    fetch query.ts:546
+    promises queryClient.ts:405
+    promises queryClient.ts:404
+    batch notifyManager.ts:52
+    refetchQueries queryClient.ts:400
+    invalidateQueries queryClient.ts:371
+    batch notifyManager.ts:52
+    invalidateQueries queryClient.ts:363
+    onSuccess VideoPlayer.tsx:341
+    execute mutation.ts:218
+    mutate mutationObserver.ts:125
+    mutate useMutation.ts:52
+    trackingInterval VideoPlayer.tsx:360
+    setInterval handler*VideoPlayer/< VideoPlayer.tsx:350
+    React 13
+    workLoop scheduler.development.js:266
+    flushWork scheduler.development.js:239
+    performWorkUntilDeadline scheduler.development.js:533
+ContinueWatching.tsx:42:17
+Video metadata: 
+Object { imdbId: "tt3559124", type: "tv", tmdbId: 47480, firstAirDate: "2014-04-09", lastAirDate: "2021-02-15", voteAverage: 7.325, episodeRunTime: 7, contentRating: null, embedUrl: "https://vidsrc.xyz/embed/tv?imdb=tt3559124&season=1&episode=1", totalSeasons: 5, … }
+VideoPlayer.tsx:455:11
+Generated embed URL: https://vidsrc.xyz/embed/tv/tt3559124/1/1 VideoPlayer.tsx:456:11
+XHRPOST
+https://e40d9a9c-1259-4e32-ad81-5c082c1b9f61-00-df6zq69men6s.riker.replit.dev/api/watch-history/tt3559124
+[HTTP/1.1 401 Unauthorized 76ms]
+
+Video metadata: 
+Object { imdbId: "tt3559124", type: "tv", tmdbId: 47480, firstAirDate: "2014-04-09", lastAirDate: "2021-02-15", voteAverage: 7.325, episodeRunTime: 7, contentRating: null, embedUrl: "https://vidsrc.xyz/embed/tv?imdb=tt3559124&season=1&episode=1", totalSeasons: 5, … }
+VideoPlayer.tsx:455:11
+Generated embed URL: https://vidsrc.xyz/embed/tv/tt3559124/1/1 VideoPlayer.tsx:456:11
+XHRPOST
+https://e40d9a9c-1259-4e32-ad81-5c082c1b9f61-00-df6zq69men6s.riker.replit.dev/api/watch-history/tt3559124
+[HTTP/1.1 401 Unauthorized 69ms]
+
+Failed to update watch progress: Error: 401: {"message":"Unauthorized"}
+    throwIfResNotOk queryClient.ts:6
+    apiRequest queryClient.ts:22
+    mutationFn VideoPlayer.tsx:316
+    fn mutation.ts:170
+    run retryer.ts:153
+    start retryer.ts:218
+    execute mutation.ts:208
+    mutate mutationObserver.ts:125
+    mutate useMutation.ts:52
+    trackingInterval VideoPlayer.tsx:360
+    setInterval handler*VideoPlayer/< VideoPlayer.tsx:350
+    React 13
+    workLoop scheduler.development.js:266
+    flushWork scheduler.development.js:239
+    performWorkUntilDeadline scheduler.development.js:533
+VideoPlayer.tsx:334:17
+Failed to update watch progress: Error: 401: {"message":"Unauthorized"}
+    throwIfResNotOk queryClient.ts:6
+    apiRequest queryClient.ts:22
+    mutationFn VideoPlayer.tsx:316
+    fn mutation.ts:170
+    run retryer.ts:153
+    start retryer.ts:218
+    execute mutation.ts:208
+    mutate mutationObserver.ts:125
+    mutate useMutation.ts:52
+    VideoPlayer VideoPlayer.tsx:376
+    React 14
+    workLoop scheduler.development.js:266
+    flushWork scheduler.development.js:239
+    performWorkUntilDeadline scheduler.development.js:533
+VideoPlayer.tsx:334:17
+Video metadata: 
+Object { imdbId: "tt3559124", type: "tv", tmdbId: 47480, firstAirDate: "2014-04-09", lastAirDate: "2021-02-15", voteAverage: 7.325, episodeRunTime: 7, contentRating: null, embedUrl: "https://vidsrc.xyz/embed/tv?imdb=tt3559124&season=1&episode=1", totalSeasons: 5, … }
+VideoPlayer.tsx:455:11
+Generated embed URL: https://vidsrc.xyz/embed/tv/tt3559124/1/1 VideoPlayer.tsx:456:11
+XHRGET
+https://e40d9a9c-1259-4e32-ad81-5c082c1b9f61-00-df6zq69men6s.riker.replit.dev/api/continue-watching?limit=4
+[HTTP/1.1 401 Unauthorized 87ms]
+
+Continue watching error: Error: 401: {"message":"Unauthorized"}
+    throwIfResNotOk queryClient.ts:6
+    apiRequest queryClient.ts:22
+    queryFn ContinueWatching.tsx:33
+    fetchFn query.ts:434
+    run retryer.ts:153
+    start retryer.ts:218
+    fetch query.ts:546
+    promises queryClient.ts:405
+    promises queryClient.ts:404
+    batch notifyManager.ts:52
+    refetchQueries queryClient.ts:400
+    invalidateQueries queryClient.ts:371
+    batch notifyManager.ts:52
+    invalidateQueries queryClient.ts:363
+    onSuccess VideoPlayer.tsx:341
+    execute mutation.ts:218
+    mutate mutationObserver.ts:125
+    mutate useMutation.ts:52
+    trackingInterval VideoPlayer.tsx:360
+    setInterval handler*VideoPlayer/< VideoPlayer.tsx:350
+    React 13
+    workLoop scheduler.development.js:266
+    flushWork scheduler.development.js:239
+    performWorkUntilDeadline scheduler.development.js:533
+ContinueWatching.tsx:42:17
+
+​
+
