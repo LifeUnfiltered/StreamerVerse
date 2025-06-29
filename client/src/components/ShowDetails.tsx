@@ -181,7 +181,12 @@ export default function ShowDetails({
     hasShow: !!show, 
     hasCurrentEpisode: !!currentEpisode,
     episodesCount: episodes.length,
-    showTitle: show?.title || currentEpisode?.title
+    showTitle: show?.title || currentEpisode?.title,
+    firstFewEpisodes: episodes.slice(0, 3).map(ep => ({ 
+      title: ep.title, 
+      season: ep.metadata?.season, 
+      episode: ep.metadata?.episode 
+    }))
   });
   
   if (!displayShow) {
@@ -271,21 +276,29 @@ export default function ShowDetails({
           <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <label htmlFor="season-select" className="text-sm font-medium">Season:</label>
-              <Select value={selectedSeason.toString()} onValueChange={(value) => setSelectedSeason(parseInt(value))}>
+              <Select 
+                value={selectedSeason.toString()} 
+                onValueChange={(value) => {
+                  console.log('🎭 Season dropdown changed:', value);
+                  const newSeason = parseInt(value);
+                  setSelectedSeason(newSeason);
+                  console.log('🎭 Selected season updated to:', newSeason);
+                }}
+              >
                 <SelectTrigger className="w-24">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {availableSeasons.map(season => (
-                    <SelectItem key={season} value={season.toString()}>
-                      {season}
+                    <SelectItem key={`season-${season}`} value={season.toString()}>
+                      Season {season}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
             <div className="text-sm text-muted-foreground">
-              {seasonEpisodes.length} episodes
+              {seasonEpisodes.length} episodes available
             </div>
           </div>
           
@@ -300,7 +313,7 @@ export default function ShowDetails({
                 
                 return (
                   <Card 
-                    key={`episode-${episode.metadata?.season}-${episode.metadata?.episode}-${episode.sourceId}`} 
+                    key={episode.sourceId || `ep-${episode.metadata?.season || 1}-${episode.metadata?.episode || 1}`} 
                     className={`cursor-pointer transition-colors hover:bg-muted/50 ${isCurrentEpisode ? 'bg-primary/10 border-primary' : ''}`}
                     onClick={() => onEpisodeSelect(episode)}
                   >
@@ -394,7 +407,7 @@ export default function ShowDetails({
                   <h4 className="font-medium mb-2">Cast</h4>
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     {displayShow.metadata.cast.slice(0, 6).map((actor: any, index: number) => (
-                      <div key={`cast-${actor.id || index}`} className="flex justify-between">
+                      <div key={`cast-${index}-${actor.name}`} className="flex justify-between">
                         <span className="font-medium">{actor.name}</span>
                         <span className="text-muted-foreground">{actor.character}</span>
                       </div>
@@ -408,7 +421,7 @@ export default function ShowDetails({
                   <h4 className="font-medium mb-2">Crew</h4>
                   <div className="grid grid-cols-2 gap-2 text-sm">
                     {displayShow.metadata.crew.slice(0, 4).map((crewMember: any, index: number) => (
-                      <div key={`crew-${crewMember.id || index}`} className="flex justify-between">
+                      <div key={`crew-${index}-${crewMember.name}`} className="flex justify-between">
                         <span className="font-medium">{crewMember.name}</span>
                         <span className="text-muted-foreground">{crewMember.job}</span>
                       </div>
