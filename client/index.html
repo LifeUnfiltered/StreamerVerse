@@ -51,34 +51,36 @@
         };
         
         // Block iframe-based popup attempts
-        const originalCreateElement = document.createElement.bind(document);
-        document.createElement = function(tagName) {
-          const element = originalCreateElement(tagName);
-          
-          if (tagName.toLowerCase() === 'iframe') {
-            const originalSetSrc = Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, 'src').set;
-            Object.defineProperty(element, 'src', {
-              set: function(value) {
-                // Block suspicious iframe sources that could be popups
-                if (value && (
-                  value.includes('popup') || 
-                  value.includes('redirect') ||
-                  value.includes('ads') ||
-                  (value.includes('http') && !value.includes('vidsrc') && !value.includes(window.location.hostname))
-                )) {
-                  console.log('Suspicious iframe src blocked:', value);
-                  return;
+        if (!window.originalCreateElement) {
+          window.originalCreateElement = document.createElement.bind(document);
+          document.createElement = function(tagName) {
+            const element = window.originalCreateElement(tagName);
+            
+            if (tagName.toLowerCase() === 'iframe') {
+              const originalSetSrc = Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, 'src').set;
+              Object.defineProperty(element, 'src', {
+                set: function(value) {
+                  // Block suspicious iframe sources that could be popups
+                  if (value && (
+                    value.includes('popup') || 
+                    value.includes('redirect') ||
+                    value.includes('ads') ||
+                    (value.includes('http') && !value.includes('vidsrc') && !value.includes(window.location.hostname))
+                  )) {
+                    console.log('Suspicious iframe src blocked:', value);
+                    return;
+                  }
+                  originalSetSrc.call(this, value);
+                },
+                get: function() {
+                  return this.getAttribute('src');
                 }
-                originalSetSrc.call(this, value);
-              },
-              get: function() {
-                return this.getAttribute('src');
-              }
-            });
-          }
-          
-          return element;
-        };
+              });
+            }
+            
+            return element;
+          };
+        }
         
         // Block pushState navigation that opens ads
         const originalPushState = history.pushState;
