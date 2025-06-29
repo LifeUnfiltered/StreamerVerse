@@ -344,12 +344,20 @@ export default function VidSrc() {
                 <VideoPlayer video={selectedVideo} />
 {/* Debug condition check */}
                 {currentSource === 'vidsrc' && selectedVideo?.metadata?.type === 'tv' && (
-                  <ShowDetails
-                    show={selectedVideo}
-                    episodes={manualEpisodes}
-                    onEpisodeSelect={handleVideoSelect}
-                    currentEpisode={selectedVideo}
-                  />
+                  <>
+                    {console.log('🎯 SHOW DETAILS RENDER DEBUG:', {
+                      hasShow: !!selectedVideo,
+                      episodesCount: manualEpisodes.length,
+                      isLoading: manualEpisodesLoading,
+                      showTitle: selectedVideo?.title
+                    })}
+                    <ShowDetails
+                      show={selectedVideo}
+                      episodes={manualEpisodes}
+                      onEpisodeSelect={handleVideoSelect}
+                      currentEpisode={selectedVideo}
+                    />
+                  </>
                 )}
               </div>
             ) : null}
