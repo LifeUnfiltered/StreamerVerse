@@ -1,0 +1,154 @@
+Feature Policy: Skipping unsupported feature name “accelerometer”. react-dom.development.js:798:14
+Feature Policy: Skipping unsupported feature name “autoplay”. react-dom.development.js:798:14
+Feature Policy: Skipping unsupported feature name “clipboard-write”. react-dom.development.js:798:14
+Feature Policy: Skipping unsupported feature name “encrypted-media”. react-dom.development.js:798:14
+Feature Policy: Skipping unsupported feature name “gyroscope”. react-dom.development.js:798:14
+Feature Policy: Skipping unsupported feature name “picture-in-picture”. react-dom.development.js:798:14
+Feature Policy: Skipping unsupported feature name “accelerometer”. react-dom.development.js:798:14
+Feature Policy: Skipping unsupported feature name “autoplay”. react-dom.development.js:798:14
+Feature Policy: Skipping unsupported feature name “clipboard-write”. react-dom.development.js:798:14
+Feature Policy: Skipping unsupported feature name “encrypted-media”. react-dom.development.js:798:14
+Feature Policy: Skipping unsupported feature name “gyroscope”. react-dom.development.js:798:14
+Feature Policy: Skipping unsupported feature name “picture-in-picture”. react-dom.development.js:798:14
+🎭 ShowDetails render: 
+Object { hasShow: true, hasCurrentEpisode: true, episodesCount: 0, showTitle: "The Tom and Jerry Show" }
+ShowDetails.tsx:31:11
+🎭 ShowDetails: No episodes available yet ShowDetails.tsx:47:13
+Feature Policy: Skipping unsupported feature name “accelerometer”. react-dom.development.js:11059:18
+Feature Policy: Skipping unsupported feature name “autoplay”. react-dom.development.js:11059:18
+Feature Policy: Skipping unsupported feature name “clipboard-write”. react-dom.development.js:11059:18
+Feature Policy: Skipping unsupported feature name “encrypted-media”. react-dom.development.js:11059:18
+Feature Policy: Skipping unsupported feature name “gyroscope”. react-dom.development.js:11059:18
+Feature Policy: Skipping unsupported feature name “picture-in-picture”. react-dom.development.js:11059:18
+Browser detection: 
+Object { userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:140.0) Gecko/20100101 Firefox/140.0", vendor: "", isChrome: false, isEdge: false, isFirefox: true, isChromiumBased: false }
+VideoPlayer.tsx:198:15
+Video metadata: 
+Object { imdbId: "tt3559124", type: "tv", tmdbId: 47480, firstAirDate: "2014-04-09", lastAirDate: "2021-02-15", voteAverage: 7.325, episodeRunTime: 7, contentRating: null, embedUrl: "https://vidsrc.xyz/embed/tv?imdb=tt3559124&season=1&episode=1", totalSeasons: 5, … }
+VideoPlayer.tsx:455:11
+Generated embed URL: https://vidsrc.xyz/embed/tv/tt3559124/1/1 VideoPlayer.tsx:456:11
+Video metadata: 
+Object { imdbId: "tt3559124", type: "tv", tmdbId: 47480, firstAirDate: "2014-04-09", lastAirDate: "2021-02-15", voteAverage: 7.325, episodeRunTime: 7, contentRating: null, embedUrl: "https://vidsrc.xyz/embed/tv?imdb=tt3559124&season=1&episode=1", totalSeasons: 5, … }
+VideoPlayer.tsx:455:11
+Generated embed URL: https://vidsrc.xyz/embed/tv/tt3559124/1/1 VideoPlayer.tsx:456:11
+Video metadata: 
+Object { imdbId: "tt3559124", type: "tv", tmdbId: 47480, firstAirDate: "2014-04-09", lastAirDate: "2021-02-15", voteAverage: 7.325, episodeRunTime: 7, contentRating: null, embedUrl: "https://vidsrc.xyz/embed/tv?imdb=tt3559124&season=1&episode=1", totalSeasons: 5, … }
+VideoPlayer.tsx:455:11
+Generated embed URL: https://vidsrc.xyz/embed/tv/tt3559124/1/1 VideoPlayer.tsx:456:11
+XHRPOST
+https://e40d9a9c-1259-4e32-ad81-5c082c1b9f61-00-df6zq69men6s.riker.replit.dev/api/watch-history/tt13392064
+[HTTP/1.1 401 Unauthorized 72ms]
+
+XHRPOST
+https://e40d9a9c-1259-4e32-ad81-5c082c1b9f61-00-df6zq69men6s.riker.replit.dev/api/watch-history/tt3559124
+[HTTP/1.1 401 Unauthorized 72ms]
+
+Failed to update watch progress: Error: 401: {"message":"Unauthorized"}
+    throwIfResNotOk queryClient.ts:6
+    apiRequest queryClient.ts:22
+    mutationFn VideoPlayer.tsx:316
+    fn mutation.ts:170
+    run retryer.ts:153
+    start retryer.ts:218
+    execute mutation.ts:208
+    mutate mutationObserver.ts:125
+    mutate useMutation.ts:52
+    VideoPlayer VideoPlayer.tsx:376
+    React 16
+    handleVideoSelect vidsrc.tsx:222
+    onClick VideoList.tsx:63
+    React 23
+    <anonymous> main.tsx:5
+VideoPlayer.tsx:334:17
+Referrer Policy: Ignoring the less restricted referrer policy “unsafe-url” for the cross-site request: https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-2/css/all.min.css all.min.css
+Failed to update watch progress: Error: 401: {"message":"Unauthorized"}
+    throwIfResNotOk queryClient.ts:6
+    apiRequest queryClient.ts:22
+    mutationFn VideoPlayer.tsx:316
+    fn mutation.ts:170
+    run retryer.ts:153
+    start retryer.ts:218
+    execute mutation.ts:208
+    mutate mutationObserver.ts:125
+    mutate useMutation.ts:52
+    VideoPlayer VideoPlayer.tsx:376
+    React 14
+    workLoop scheduler.development.js:266
+    flushWork scheduler.development.js:239
+    performWorkUntilDeadline scheduler.development.js:533
+    js scheduler.development.js:571
+    js scheduler.development.js:633
+    __require chunk-WOOG5QLI.js:12
+    js index.js:6
+    __require chunk-WOOG5QLI.js:12
+    React 2
+    __require chunk-WOOG5QLI.js:12
+    js React
+    __require chunk-WOOG5QLI.js:12
+    js React
+    __require chunk-WOOG5QLI.js:12
+    <anonymous> react-dom_client.js:38
+VideoPlayer.tsx:334:17
+Video metadata: 
+Object { imdbId: "tt3559124", type: "tv", tmdbId: 47480, firstAirDate: "2014-04-09", lastAirDate: "2021-02-15", voteAverage: 7.325, episodeRunTime: 7, contentRating: null, embedUrl: "https://vidsrc.xyz/embed/tv?imdb=tt3559124&season=1&episode=1", totalSeasons: 5, … }
+VideoPlayer.tsx:455:11
+Generated embed URL: https://vidsrc.xyz/embed/tv/tt3559124/1/1 VideoPlayer.tsx:456:11
+Referrer Policy: Ignoring the less restricted referrer policy “unsafe-url” for the cross-site request: https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js jquery.min.js
+Referrer Policy: Ignoring the less restricted referrer policy “unsafe-url” for the cross-site request: https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.16.0/js/md5.min.js md5.min.js
+Referrer Policy: Ignoring the less restricted referrer policy “unsafe-url” for the cross-site request: https://cdnjs.cloudflare.com/ajax/libs/js-cookie/3.0.5/js.cookie.min.js js.cookie.min.js
+Referrer Policy: Ignoring the less restricted referrer policy “unsafe-url” for the cross-site request: https://cdn.vidsrc.stream/disable-devtool@0.3.6/disable-devtool.min.js#/misdir.js disable-devtool.min.js
+XHRGET
+https://e40d9a9c-1259-4e32-ad81-5c082c1b9f61-00-df6zq69men6s.riker.replit.dev/api/continue-watching?limit=4
+[HTTP/1.1 401 Unauthorized 71ms]
+
+GET
+https://cdn.vidsrc.stream/disable-devtool@0.3.6/disable-devtool.min.js#/misdir.js
+NS_BINDING_ABORTED
+
+Continue watching error: Error: 401: {"message":"Unauthorized"}
+    throwIfResNotOk queryClient.ts:6
+    apiRequest queryClient.ts:22
+    queryFn ContinueWatching.tsx:33
+    fetchFn query.ts:434
+    run retryer.ts:153
+    start retryer.ts:218
+    fetch query.ts:546
+    promises queryClient.ts:405
+    promises queryClient.ts:404
+    batch notifyManager.ts:52
+    refetchQueries queryClient.ts:400
+    invalidateQueries queryClient.ts:371
+    batch notifyManager.ts:52
+    invalidateQueries queryClient.ts:363
+    onSuccess VideoPlayer.tsx:341
+    execute mutation.ts:218
+    mutate mutationObserver.ts:125
+    mutate useMutation.ts:52
+    VideoPlayer VideoPlayer.tsx:376
+    React 11
+ContinueWatching.tsx:42:17
+A resource is blocked by OpaqueResponseBlocking, please check browser console for details. disable-devtool.min.js
+Referrer Policy: Ignoring the less restricted referrer policy “unsafe-url” for the cross-site request: https://s10.histats.com/js15_as.js js15_as.js
+Referrer Policy: Ignoring the less restricted referrer policy “unsafe-url” for the cross-site request: https://cdn.vidsrc.stream/disable-devtool@0.3.6/disable-devtool.min.js#/misdir.js disable-devtool.min.js
+Referrer Policy: Ignoring the less restricted referrer policy “unsafe-url” for the cross-site request: https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-2/css/all.min.css all.min.css
+Referrer Policy: Ignoring the less restricted referrer policy “unsafe-url” for the cross-site request: https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js jquery.min.js
+Referrer Policy: Ignoring the less restricted referrer policy “unsafe-url” for the cross-site request: https://cdnjs.cloudflare.com/ajax/libs/jquery-cookie/1.4.1/jquery.cookie.min.js jquery.cookie.min.js
+GET
+https://cdn.vidsrc.stream/disable-devtool@0.3.6/disable-devtool.min.js#/misdir.js
+NS_BINDING_ABORTED
+
+GET
+https://cloudnestra.com/base64.js?t=
+[HTTP/3 404  55ms]
+
+Loading failed for the <script> with source “https://cloudnestra.com/base64.js?t=”. N2QzNjUxMjZhNTlkMjI1MzRkYTNhMmZiMzk3OWRjM2Q6YW5acVJrZzFjV3B3YmxKaGNqWlNOM1kzTTFCS0sxWklURlV2TUhsalJEazJNVXRwY2tNMVVYaEtOMnBaVURkaVdreFZaeTlTVWtsak1UbENaekpDZDA4emJGTkxXVWRGYkUwd2VtNUVNR05EUjBWTFVEVnpTV0Y0V0RsbU1IQndXa2h5ZGtaWlNEbGljblV6ZFZoelJGWjJZMHRyUkhSNVRFaExRbFJ3UlRaU1lXVkVlSG96YzNSRFRXcHNUVWxUY1VRdk9XVXpXRzlIVjBJMmQzbFhWMmhoV0ZoMFpYRkZiRFJLYTA5VlFUQXhXamxDU0c5eVpqQmxSaTlUTURkaFRrZFlLMWt6T0RrMlZuZEZhRkpHZFdoclVVSTJha2xKTkhFd1pXODVRVkJUTWpkdFUxbE1helZwYjFkVk1rUm1jSGRZWjFZeFowZEZOM3BSWW5aMU9VWndOMnM0UWtwdE4yaHZaamQwUm1GalYzQnhWVmRwVUdGRGFFTnJkbll4UzFNMlNYUkdPR1JYSzBzMFJFWkpWMHA0VTBWcE16QkpjMUZKV1dWTVRFWTVkMnBoWlVwWFpHUm1NVzlIWmxCRWMwbEZhazVSV0Roc1IwY3ZUWGsxSzNOUGRXSXdibEJ4WjJ4VFYxUk5ORTVCTjB3M2JIbFllRFZUVURSclR6aDJXSEp4T1hkYWEyaGxTRUYzTWtoTE0wMWlORXhGYWtsTlozVXlkbmhuTkM5M1EwcFZXbXh1YzA5UGF6aEdOV2xpVFhwNE5qTk5WMUZoV2xKYVdFZDFMM1ZOU1Rnek4zcENlVFkzWlZKUlMyaFJVM0ZPTUZkMk9WaGtNV3R5UzBsTmVsSkJVVlU0VEZOdlkwOUZXa1p1TTFJeWFuVkhaR3c0VjFac2NrNW1lbEZGU20wd1N6aFFOR0V2VlZWelRVSlhOa2cwT1ZjMFpVa3laVXd6V2trNE4yOHljak5EZUc5aVNqUnFjVTFuVGtwRWExSlVVbUl6V1dsUk5XMXlTakpaVTBwT2MyNHdZVUZuVnpaV01uVTBia3AyVmpaaWF6SkZSWFJET0hoaFlXTnJSWE0yZEhGNmFGbHdVMDlxY0hoMGNEaEtUVEJxTVdKQ2NucENNaXRVTVdGNmNFaHdWMVprZG1OdWFFaFpZemRtUTFjMVlXbzNXU3RtT1ZWck4yMXllVTgyTUVOb09XaDRRVEp1TUZscWQxaGhibUpDT1ZObWVEUkRNRFJLZFhSbmJWZDBVWFpKYW5aYWJHZElaaXMyV0hKQmVUTjVNR3A2V0dKS1IwMHhSM05GZEhsS1MwMWpVelZYVGpKdFIybDBOeXN2TVRVMVZ6WmtSVFZzYlZBemVucEtPVU5QVm1OWlQxbG5TelVyTVZCbWRsSjFSMEZNV0RWNll6TXlTR3hEWkhOb01HeDRNVUpwUm0xWFlsRXJUVWQwYTBGblEzVkhWV3AwWVU1dmRGWjRaSE5wVGt0cmVuVkRWbm8wYVZoaWIzbDFWVUpFTVRoalZXNVdkSFpMVWxaWEwwTjBZazlyTUdaS2JERjFiRXBaTjJ0RGJIaDRURkUwVjA5cloxZFVTRWRLU0VKNVltOUdlblF2UkVaUU9WRldlVE4yVVRKWWNqQXpOMnRyYUZadWVrVlpTVWxFTnpWVUsxaExkM2h5UWtOcFJGSndNbGRZWmtwVVVucEVhM0VyVlhrNFJuVTNOMkZ5Umtac1NFTnNNMDl0ZUZwbVExQlNOMUZvV1ZaTVdrRmpMeTh4TW5GNFYzbEplVWR6VDBsbFNVeGFkRVJVZHk5cmQySXlTMlV6Y3pOSmJqZEJNRWt6TTJ4VmJXRnlZa1ZCVXpBdlRITkdNVGwxTlRBMVlscDNiRU5ESzNaeWVpdFpWbE5VTW0xUE0zZGpOa3QzUVdreU5uQm1WMUJFYVU0MU1HZHhkVGhSV1haMWNtVlRMM1pVTkhkUFFsWkNTR1J4YUd4b1JGQnNTamh4U1VsVVdXaG9lVTQxZUhwcFIwdDZRbmRWTWtZMWREUlRSblJXYmpCbmFFVTViSE5GV1VSa1kxUTVaMUJZVTI5UVRVTmxRa2hMZWtSU1RqQlplRE01VjNjdlJYVXdOakZNVlVreWQyVXljVnBGYVc1U05tcDJhamR3T0VOWGJWVXZaMk5zY2tWaWFWWkRibVZUVVhCYVFsUmtTVUUwZDFWcFYwVk1Sa1pOTW1sdWMwRlRSMFUzUWpSbFluSmhjakJYZERselRsZHZUbEpYZUdSaU5XMVdVblI1VkZCVGJHaEhjV3huYUVKQlR6QktaRkJwWmpOVGQwMHJjbkJoZUROT2JsVTBNVXBrV21FNGJ6WkRVbGxuTkRGeU9XbE1PSE53T1U1QlZrdGhNbFJFVFVwTFVVaFJMelpDYzNCMVdEaHZWbU5FWVhkbk0wRnNSVVo2TlhSVlFreHljMHh1UlQwPQ--:51:33
+Source map error: Error: request failed with status 404
+Stack in the worker:networkRequest@resource://devtools/client/shared/source-map-loader/utils/network-request.js:43:9
+
+Resource URL: https://cdnjs.cloudflare.com/ajax/libs/blueimp-md5/2.16.0/js/md5.min.js
+Source Map URL: md5.min.js.map
+
+VidSrc health check: No working video after 5 seconds, cycling domain... VideoPlayer.tsx:133:23
+
+​
+

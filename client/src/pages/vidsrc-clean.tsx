@@ -130,23 +130,40 @@ export default function VidSrc() {
     episodesLoading
   });
 
-  // Debug logging in useEffect to avoid JSX issues
+  // MANUAL EPISODES FETCH - bypass React Query issues
+  const [manualEpisodes, setManualEpisodes] = useState<Video[]>([]);
+  const [manualEpisodesLoading, setManualEpisodesLoading] = useState(false);
+
   useEffect(() => {
     console.log('🎬 USE_EFFECT RUNNING:', { selectedVideo: !!selectedVideo, currentSource });
-    if (selectedVideo) {
-      const shouldFetchEpisodes = !!(selectedVideo?.metadata?.type === 'tv' && currentSource === 'vidsrc' && selectedVideo?.metadata?.imdbId);
-      console.log('🎬 EPISODES DEBUG:', {
-        selectedVideo: selectedVideo.title,
-        videoType: selectedVideo?.metadata?.type,
-        currentSource,
-        imdbId: selectedVideo?.metadata?.imdbId,
-        shouldFetchEpisodes,
-        episodesLength: episodes.length,
-        episodesLoading,
-        enabledCondition: shouldFetchEpisodes
+    if (selectedVideo?.metadata?.type === 'tv' && currentSource === 'vidsrc' && selectedVideo?.metadata?.imdbId) {
+      console.log('🚨 TRIGGERING MANUAL EPISODES FETCH FOR:', selectedVideo.metadata.imdbId);
+      setManualEpisodesLoading(true);
+      
+      fetch(`/api/videos/tv/${selectedVideo.metadata.imdbId}/episodes`)
+        .then(response => {
+          console.log('🎬 EPISODES FETCH RESPONSE:', response.status);
+          if (!response.ok) throw new Error('Failed to fetch episodes');
+          return response.json();
+        })
+        .then(data => {
+          console.log('🎬 EPISODES FETCHED SUCCESSFULLY:', data.length, 'episodes');
+          setManualEpisodes(data);
+          setManualEpisodesLoading(false);
+        })
+        .catch(error => {
+          console.error('🚫 EPISODES FETCH ERROR:', error);
+          setManualEpisodesLoading(false);
+        });
+    } else {
+      console.log('🎬 NO EPISODES FETCH:', {
+        isTV: selectedVideo?.metadata?.type === 'tv',
+        isVidsrc: currentSource === 'vidsrc',
+        hasImdbId: !!selectedVideo?.metadata?.imdbId
       });
+      setManualEpisodes([]);
     }
-  }, [selectedVideo, episodes.length, currentSource, episodesLoading]);
+  }, [selectedVideo, currentSource]);
 
   // Latest content queries
   const { data: movies, isLoading: moviesLoading, error: moviesError } = useQuery<Video[]>({
@@ -314,7 +331,7 @@ export default function VidSrc() {
                 {currentSource === 'vidsrc' && selectedVideo?.metadata?.type === 'tv' && (
                   <ShowDetails
                     show={selectedVideo}
-                    episodes={episodes}
+                    episodes={manualEpisodes}
                     onEpisodeSelect={handleVideoSelect}
                     currentEpisode={selectedVideo}
                   />
