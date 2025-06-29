@@ -100,31 +100,37 @@ export default function VidSrc() {
   });
 
   // Fetch episodes for the selected TV show
-  const { data: episodes = [] } = useQuery<Video[]>({
+  const { data: episodes = [], isLoading: episodesLoading, error: episodesError } = useQuery<Video[]>({
     queryKey: ['/api/videos/tv', selectedVideo?.metadata?.imdbId || selectedVideo?.sourceId, 'episodes'],
     queryFn: async () => {
       const imdbId = selectedVideo?.metadata?.imdbId || selectedVideo?.sourceId;
-      console.log('Fetching episodes for:', imdbId);
+      console.log('🎬 Fetching episodes for IMDB ID:', imdbId);
       const response = await apiRequest('GET', `/api/videos/tv/${imdbId}/episodes`);
-      return response.json();
+      const data = await response.json();
+      console.log('🎬 Episodes API returned:', data.length, 'episodes');
+      return data;
     },
-    enabled: selectedVideo?.metadata?.type === 'tv' && currentSource === 'vidsrc' && !!(selectedVideo?.metadata?.imdbId || selectedVideo?.sourceId),
+    enabled: !!(selectedVideo?.metadata?.type === 'tv' && currentSource === 'vidsrc' && (selectedVideo?.metadata?.imdbId || selectedVideo?.sourceId)),
     staleTime: 10 * 60 * 1000, // 10 minutes
   });
 
-  // Debug logging - always log this to see what's happening
-  if (selectedVideo) {
-    console.log('Episodes debug:', {
-      hasSelectedVideo: !!selectedVideo,
-      videoType: selectedVideo?.metadata?.type,
-      currentSource,
-      imdbId: selectedVideo?.metadata?.imdbId,
-      sourceId: selectedVideo?.sourceId,
-      episodesLength: episodes.length,
-      enabledCondition: selectedVideo?.metadata?.type === 'tv' && currentSource === 'vidsrc' && !!(selectedVideo?.metadata?.imdbId || selectedVideo?.sourceId),
-      showEpisodes: currentSource === 'vidsrc' && selectedVideo?.metadata?.type === 'tv'
-    });
-  }
+  // Debug logging in useEffect to avoid JSX issues
+  useEffect(() => {
+    if (selectedVideo) {
+      console.log('🎬 Episodes debug:', {
+        hasSelectedVideo: !!selectedVideo,
+        videoType: selectedVideo?.metadata?.type,
+        currentSource,
+        imdbId: selectedVideo?.metadata?.imdbId,
+        sourceId: selectedVideo?.sourceId,
+        episodesLength: episodes.length,
+        episodesLoading,
+        episodesError: episodesError?.message,
+        enabledCondition: selectedVideo?.metadata?.type === 'tv' && currentSource === 'vidsrc' && !!(selectedVideo?.metadata?.imdbId || selectedVideo?.sourceId),
+        showEpisodes: currentSource === 'vidsrc' && selectedVideo?.metadata?.type === 'tv'
+      });
+    }
+  }, [selectedVideo, episodes.length, currentSource, episodesLoading, episodesError]);
 
   // Latest content queries
   const { data: movies, isLoading: moviesLoading, error: moviesError } = useQuery<Video[]>({
@@ -288,6 +294,7 @@ export default function VidSrc() {
             {selectedVideo ? (
               <div className="space-y-6">
                 <VideoPlayer video={selectedVideo} />
+{/* Debug condition check */}
                 {currentSource === 'vidsrc' && selectedVideo?.metadata?.type === 'tv' && (
                   <ShowDetails
                     show={selectedVideo}
