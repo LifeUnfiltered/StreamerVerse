@@ -81,29 +81,43 @@ export default function VideoCard({
                 </h3>
                 
                 <div className="flex flex-wrap gap-1 mb-2">
-                  {video.metadata?.contentRating && (
+                  {video.source === 'vidsrc' && video.metadata?.contentRating && (
                     <Badge variant="outline" className="text-xs">
                       {video.metadata.contentRating}
                     </Badge>
                   )}
-                  {video.metadata?.voteAverage && (
+                  {video.source === 'vidsrc' && video.metadata?.voteAverage && (
                     <Badge variant="outline" className="text-xs border-primary/30 text-primary">
                       <Star className="h-3 w-3 mr-1 fill-current" />
                       {video.metadata.voteAverage.toFixed(1)}
+                    </Badge>
+                  )}
+                  {video.source === 'youtube' && (
+                    <Badge variant="outline" className="text-xs border-red-500/30 text-red-500">
+                      YouTube
                     </Badge>
                   )}
                 </div>
                 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3 text-xs text-muted-foreground">
-                    <div className="flex items-center space-x-1">
-                      <Eye className="h-3 w-3" />
-                      <span>1.2K</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Clock className="h-3 w-3" />
-                      <span>2h</span>
-                    </div>
+                    {video.source === 'youtube' && (
+                      <>
+                        <div className="flex items-center space-x-1">
+                          <Eye className="h-3 w-3" />
+                          <span>1.2K</span>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Clock className="h-3 w-3" />
+                          <span>2h</span>
+                        </div>
+                      </>
+                    )}
+                    {video.source === 'vidsrc' && video.metadata?.releaseDate && (
+                      <span className="text-xs text-muted-foreground">
+                        {new Date(video.metadata.releaseDate).getFullYear()}
+                      </span>
+                    )}
                   </div>
                   <WatchlistButton 
                     video={video} 

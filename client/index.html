@@ -35,8 +35,6 @@
         
         // Intercept and block any attempt to create new windows via focus/blur events
         let focusBlocked = false;
-        const originalFocus = window.focus;
-        const originalBlur = window.blur;
         
         window.focus = function() {
           if (!focusBlocked) {
@@ -302,6 +300,18 @@
             return false;
           }
           
+          // Chrome-specific: Block any click that might trigger navigation
+          const targetElement = e.target;
+          if (targetElement && targetElement.closest && !targetElement.closest('.video-player-container')) {
+            const clickedLink = targetElement.closest('a');
+            if (clickedLink && clickedLink.href && clickedLink.href !== window.location.href) {
+              console.log('External navigation click blocked:', clickedLink.href);
+              e.preventDefault();
+              e.stopPropagation();
+              return false;
+            }
+          }
+          
           // Block clicks on elements with suspicious attributes
           if (target && (
             target.getAttribute('target') === '_blank' ||
@@ -343,16 +353,38 @@
           }
         }, true);
         
-        // Override addEventListener to block popup-related events
-        const originalAddEventListener = EventTarget.prototype.addEventListener;
-        EventTarget.prototype.addEventListener = function(type, listener, options) {
-          // Block suspicious event types that could trigger popups
-          if (['beforeunload', 'unload', 'pagehide'].includes(type)) {
-            console.log('Popup-related event listener blocked:', type);
-            return;
-          }
-          return originalAddEventListener.call(this, type, listener, options);
-        };
+        // Chrome-specific popup blocking with MutationObserver
+        const observer = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            mutation.addedNodes.forEach((node) => {
+              if (node.nodeType === 1) { // Element node
+                const element = node;
+                
+                // Block any dynamically added iframes with suspicious sources
+                if (element.tagName === 'IFRAME') {
+                  const src = element.getAttribute('src') || '';
+                  if (src && !src.includes('vidsrc') && !src.includes('youtube') && !src.includes(window.location.hostname)) {
+                    console.log('Suspicious dynamic iframe blocked:', src);
+                    element.remove();
+                  }
+                }
+                
+                // Block any links with target="_blank"
+                const suspiciousLinks = element.querySelectorAll('a[target="_blank"], a[href*="javascript:"]');
+                suspiciousLinks.forEach(link => {
+                  console.log('Suspicious link removed:', link.getAttribute('href'));
+                  link.remove();
+                });
+              }
+            });
+          });
+        });
+        
+        // Start observing
+        observer.observe(document.body, {
+          childList: true,
+          subtree: true
+        });
       })();
     </script>
     
