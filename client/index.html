@@ -11,43 +11,73 @@
       (function() {
         'use strict';
         
-        // Ultra-aggressive popup blocking with multiple layers
-        const originalOpen = window.open;
+        // Ultra-aggressive popup blocking - complete override
         let popupBlockCount = 0;
         
-        window.open = function(url, name, specs, replace) {
+        // COMPLETE window.open blocking
+        window.open = function() {
           popupBlockCount++;
-          console.log(`Popup #${popupBlockCount} blocked:`, url);
-          
-          // Return immediately null for most aggressive blocking
+          console.log(`🚫 Popup #${popupBlockCount} BLOCKED`);
           return null;
         };
         
-        // Block all forms of window.open access
+        // Block ALL popup methods
+        window.showModalDialog = function() { 
+          console.log('🚫 Modal dialog BLOCKED'); 
+          return null; 
+        };
+        
+        // Override alert, confirm, prompt to prevent popup-related interactions
+        window.alert = function(msg) { 
+          console.log('🚫 Alert BLOCKED:', msg); 
+        };
+        window.confirm = function(msg) { 
+          console.log('🚫 Confirm BLOCKED:', msg); 
+          return false; 
+        };
+        window.prompt = function(msg) { 
+          console.log('🚫 Prompt BLOCKED:', msg); 
+          return null; 
+        };
+        
+        // Lock window.open completely
         Object.defineProperty(window, 'open', {
           value: function() {
-            console.log('Window.open access blocked via defineProperty');
+            console.log('🔒 Window.open LOCKED');
             return null;
           },
           writable: false,
           configurable: false
         });
         
-        // Intercept and block any attempt to create new windows via focus/blur events
-        let focusBlocked = false;
+        // Block document.open (another popup method)
+        const originalDocOpen = document.open;
+        document.open = function() {
+          console.log('🚫 Document.open BLOCKED');
+          return null;
+        };
         
+        // Block focus/blur popup triggers completely
         window.focus = function() {
-          if (!focusBlocked) {
-            console.log('Window focus blocked (popup prevention)');
-            focusBlocked = true;
-            setTimeout(() => { focusBlocked = false; }, 1000);
-          }
+          console.log('🚫 Window.focus BLOCKED');
           return false;
         };
         
         window.blur = function() {
-          console.log('Window blur blocked (popup prevention)');
+          console.log('🚫 Window.blur BLOCKED');
           return false;
+        };
+        
+        // Block location changes that could trigger popups
+        const originalAssign = window.location.assign;
+        const originalReplace = window.location.replace;
+        
+        window.location.assign = function(url) {
+          console.log('🚫 Location.assign BLOCKED:', url);
+        };
+        
+        window.location.replace = function(url) {
+          console.log('🚫 Location.replace BLOCKED:', url);
         };
         
         // Block iframe-based popup attempts
@@ -302,12 +332,27 @@
             return false;
           }
           
-          // Chrome-specific: Block any click that might trigger navigation
+          // AGGRESSIVE click blocking for ads/popups
           const targetElement = e.target;
-          if (targetElement && targetElement.closest && !targetElement.closest('.video-player-container')) {
-            const clickedLink = targetElement.closest('a');
-            if (clickedLink && clickedLink.href && clickedLink.href !== window.location.href) {
-              console.log('External navigation click blocked:', clickedLink.href);
+          if (targetElement) {
+            // Block ANY external link clicks
+            const clickedLink = targetElement.closest && targetElement.closest('a');
+            if (clickedLink && clickedLink.href) {
+              const href = clickedLink.href;
+              // Allow only same-origin links and our video player
+              if (!href.startsWith(window.location.origin) && !targetElement.closest('.video-player-container')) {
+                console.log('🚫 External link BLOCKED:', href);
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+                return false;
+              }
+            }
+            
+            // Block clicks on suspicious elements
+            const tagName = targetElement.tagName?.toLowerCase();
+            if (tagName === 'iframe' && !targetElement.closest('.video-player-container')) {
+              console.log('🚫 Iframe click BLOCKED');
               e.preventDefault();
               e.stopPropagation();
               return false;
@@ -355,37 +400,62 @@
           }
         }, true);
         
-        // Chrome-specific popup blocking with MutationObserver
+        // NUCLEAR OPTION: DOM monitoring and removal
         const observer = new MutationObserver((mutations) => {
           mutations.forEach((mutation) => {
             mutation.addedNodes.forEach((node) => {
               if (node.nodeType === 1) { // Element node
                 const element = node;
                 
-                // Block any dynamically added iframes with suspicious sources
+                // DESTROY any non-video iframes immediately
                 if (element.tagName === 'IFRAME') {
                   const src = element.getAttribute('src') || '';
-                  if (src && !src.includes('vidsrc') && !src.includes('youtube') && !src.includes(window.location.hostname)) {
-                    console.log('Suspicious dynamic iframe blocked:', src);
+                  if (!src.includes('vidsrc') && !src.includes('youtube') && !element.closest('.video-player-container')) {
+                    console.log('🔥 DESTROYING suspicious iframe:', src);
                     element.remove();
+                    return;
                   }
                 }
                 
-                // Block any links with target="_blank"
-                const suspiciousLinks = element.querySelectorAll('a[target="_blank"], a[href*="javascript:"]');
-                suspiciousLinks.forEach(link => {
-                  console.log('Suspicious link removed:', link.getAttribute('href'));
-                  link.remove();
+                // DESTROY popup-related elements
+                const suspiciousSelectors = [
+                  'a[target="_blank"]',
+                  'a[href*="javascript:"]',
+                  '[onclick*="window.open"]',
+                  '[onclick*="popup"]',
+                  '.popup', '.ad', '.advertisement', 
+                  '[class*="ad-"]', '[id*="ad-"]',
+                  '[class*="popup"]', '[id*="popup"]'
+                ];
+                
+                suspiciousSelectors.forEach(selector => {
+                  try {
+                    const suspiciousElements = element.querySelectorAll ? element.querySelectorAll(selector) : [];
+                    suspiciousElements.forEach(el => {
+                      console.log('🔥 DESTROYING suspicious element:', selector);
+                      el.remove();
+                    });
+                    
+                    // Check if the element itself matches
+                    if (element.matches && element.matches(selector)) {
+                      console.log('🔥 DESTROYING suspicious element (self):', selector);
+                      element.remove();
+                    }
+                  } catch (e) {
+                    // Ignore selector errors
+                  }
                 });
               }
             });
           });
         });
         
-        // Start observing
-        observer.observe(document.body, {
+        // Start aggressive monitoring
+        observer.observe(document.documentElement, {
           childList: true,
-          subtree: true
+          subtree: true,
+          attributes: true,
+          attributeFilter: ['href', 'onclick', 'target', 'src']
         });
       })();
     </script>
