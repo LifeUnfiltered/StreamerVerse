@@ -136,7 +136,14 @@ export default function VidSrc() {
   const [manualEpisodesLoading, setManualEpisodesLoading] = useState(false);
 
   useEffect(() => {
-    console.log('🎬 USE_EFFECT RUNNING:', { selectedVideo: !!selectedVideo, currentSource });
+    console.log('🎬 USE_EFFECT RUNNING:', { 
+      selectedVideo: !!selectedVideo, 
+      currentSource,
+      hasSelectedVideo: !!selectedVideo,
+      videoType: selectedVideo?.metadata?.type,
+      hasImdbId: !!selectedVideo?.metadata?.imdbId,
+      allConditions: selectedVideo?.metadata?.type === 'tv' && currentSource === 'vidsrc' && selectedVideo?.metadata?.imdbId
+    });
     if (selectedVideo?.metadata?.type === 'tv' && currentSource === 'vidsrc' && selectedVideo?.metadata?.imdbId) {
       console.log('🚨 TRIGGERING MANUAL EPISODES FETCH FOR:', selectedVideo.metadata.imdbId);
       setManualEpisodesLoading(true);
