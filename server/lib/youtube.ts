@@ -60,8 +60,12 @@ export async function searchYouTube(query: string): Promise<Video[]> {
       source: 'youtube',
       title: item.snippet.title,
       description: item.snippet.description,
-      thumbnail: item.snippet.thumbnails.high.url,
-      metadata: item.snippet,
+      thumbnail: item.snippet.thumbnails?.high?.url || item.snippet.thumbnails?.default?.url || null,
+      metadata: {
+        channelTitle: item.snippet.channelTitle,
+        publishedAt: item.snippet.publishedAt,
+        chapters: parseChaptersFromDescription(item.snippet.description)
+      },
       chapters
     };
   });

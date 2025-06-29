@@ -101,26 +101,10 @@ export default function VideoCard({
                 
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3 text-xs text-muted-foreground">
-                    {video.source === 'youtube' && (
-                      <>
-                        {video.metadata?.viewCount && (
-                          <div className="flex items-center space-x-1">
-                            <Eye className="h-3 w-3" />
-                            <span>{video.metadata.viewCount}</span>
-                          </div>
-                        )}
-                        {video.metadata?.duration && (
-                          <div className="flex items-center space-x-1">
-                            <Clock className="h-3 w-3" />
-                            <span>{video.metadata.duration}</span>
-                          </div>
-                        )}
-                        {video.metadata?.channelTitle && (
-                          <div className="flex items-center space-x-1">
-                            <span className="text-xs">{video.metadata.channelTitle}</span>
-                          </div>
-                        )}
-                      </>
+                    {video.source === 'youtube' && video.metadata?.channelTitle && (
+                      <span className="text-xs text-muted-foreground">
+                        {video.metadata.channelTitle}
+                      </span>
                     )}
                     {video.source === 'vidsrc' && video.metadata?.releaseDate && (
                       <span className="text-xs text-muted-foreground">
