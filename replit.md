@@ -17,6 +17,8 @@ A React-based streaming web application that provides access to movies and TV sh
 - **June 29, 2025**: SUCCESS: Nuclear-level ad blocking restored - all VidSrc popups/redirects blocked
 
 ## Current Issues
+- **CRITICAL: Episode Metadata Broken**: Video player only shows "Currently playing: [show name]" instead of detailed episode info (S1E1 titles, etc.) that was working perfectly before
+- **VidSrc Popups Still Present**: Nuclear popup blocking not completely effective - ads still appear when interacting with video controls
 - **Chrome Compatibility**: VidSrc videos need additional browser-specific fixes  
 - **Authentication**: User auth features currently disabled
 

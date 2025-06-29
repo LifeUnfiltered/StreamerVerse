@@ -120,45 +120,48 @@
           return element;
         };
         
-        // === PHASE 4: AGGRESSIVE CLICK PROTECTION ===
+        // === PHASE 4: TARGETED VIDSRC CLICK PROTECTION ===
         document.addEventListener('click', function(e) {
           const target = e.target;
           
-          // WHITELIST: Allow video player interactions
-          if (target && (
-            target.id === 'video-player-iframe' ||
-            target.closest('#video-player-iframe') ||
-            target.closest('.video-player-container') ||
-            target.closest('[class*="video-player"]')
-          )) {
-            return; // Safe video player click
-          }
+          // ONLY protect clicks within VidSrc iframes and suspicious ad elements
+          const isVidSrcIframe = target && (
+            target.closest('iframe[src*="vidsrc"]') ||
+            target.tagName === 'IFRAME' && target.src && target.src.includes('vidsrc')
+          );
           
-          // BLACKLIST: Block suspicious clicks
-          if (target) {
-            // Block external links completely
+          const isSuspiciousElement = target && (
+            target.closest('[onclick*="window.open"]') ||
+            target.closest('[onclick*="popup"]') ||
+            target.getAttribute('onclick')?.includes('window.open') ||
+            target.getAttribute('onclick')?.includes('popup')
+          );
+          
+          // Only block if it's a VidSrc iframe interaction OR suspicious popup element
+          if (isVidSrcIframe || isSuspiciousElement) {
+            // For VidSrc iframes, block external redirects
             const link = target.closest('a');
             if (link && link.href && !link.href.startsWith(window.location.origin)) {
-              console.log('🚫 External link NUKED:', link.href);
+              console.log('🚫 VidSrc external link BLOCKED:', link.href);
               e.preventDefault();
               e.stopImmediatePropagation();
               return false;
             }
             
-            // Block popup-related attributes
+            // Block popup-related attributes within VidSrc
             if (target.getAttribute('onclick') || 
                 target.getAttribute('target') === '_blank' ||
                 target.closest('[onclick]') ||
                 target.closest('[target="_blank"]')) {
-              console.log('🚫 Popup click NUKED');
+              console.log('🚫 VidSrc popup click BLOCKED');
               e.preventDefault();
               e.stopImmediatePropagation();
               return false;
             }
             
-            // Block middle/right clicks and key combinations
-            if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) {
-              console.log('🚫 Suspicious click combo NUKED');
+            // Block suspicious click combinations within VidSrc
+            if (e.button !== 0 || e.ctrlKey || e.metaKey) {
+              console.log('🚫 VidSrc suspicious click BLOCKED');
               e.preventDefault();
               e.stopImmediatePropagation();
               return false;
@@ -166,38 +169,34 @@
           }
         }, true);
         
-        // === PHASE 5: DOM DESTRUCTION ENGINE ===
-        function nukeAds() {
-          const suspiciousSelectors = [
-            // Direct popup/ad patterns
-            '[class*="popup"]:not(.video-player)',
-            '[id*="popup"]:not(.video-player)',
-            '[class*="overlay"]:not(.video-player)',
-            '[id*="overlay"]:not(.video-player)',
-            '[class*="ad"]:not(.video-player)',
-            '[id*="ad"]:not(.video-player)',
-            '.advertisement',
-            '.popup-overlay',
-            '.modal-backdrop',
+        // === PHASE 5: TARGETED AD DESTRUCTION ===
+        function nukeVidSrcAds() {
+          const vidsrcSpecificSelectors = [
+            // VidSrc specific ad patterns
+            'iframe[src*="vidsrc"] + div[class*="popup"]',
+            'iframe[src*="vidsrc"] + div[class*="overlay"]',
+            'iframe[src*="vidsrc"] + div[id*="popup"]',
             
-            // Suspicious iframes (not our video player)
+            // Suspicious iframes that aren't our video player
             'iframe[src*="ads"]:not(#video-player-iframe)',
-            'iframe[src*="doubleclick"]:not(#video-player-iframe)',
+            'iframe[src*="doubleclick"]:not(#video-player-iframe)', 
             'iframe[src*="googlesyndication"]:not(#video-player-iframe)',
             
-            // Click-based popups
+            // Popup elements with suspicious click handlers
             '[onclick*="window.open"]',
-            '[onclick*="popup"]',
-            'a[target="_blank"]:not(.video-player a)',
-            'a[href*="javascript:"]'
+            '[onclick*="popup"]'
           ];
           
           let nukedCount = 0;
-          suspiciousSelectors.forEach(selector => {
+          vidsrcSpecificSelectors.forEach(selector => {
             try {
               const elements = document.querySelectorAll(selector);
               elements.forEach(el => {
-                if (el.id !== 'video-player-iframe' && !el.closest('.video-player-container')) {
+                // Only remove if it's clearly not part of our main app
+                if (el.id !== 'video-player-iframe' && 
+                    !el.closest('.video-player-container') &&
+                    !el.closest('#root') || 
+                    el.closest('iframe[src*="vidsrc"]')) {
                   el.remove();
                   nukedCount++;
                 }
@@ -208,14 +207,14 @@
           });
           
           if (nukedCount > 0) {
-            console.log(`🔥 NUKED ${nukedCount} suspicious elements`);
+            console.log(`🚫 Removed ${nukedCount} VidSrc ad elements`);
           }
         }
         
         // === PHASE 6: CONTINUOUS MONITORING ===
-        // Initial destruction
-        setTimeout(nukeAds, 100);
-        setInterval(nukeAds, 1000); // Check every second
+        // Initial VidSrc ad cleanup
+        setTimeout(nukeVidSrcAds, 100);
+        setInterval(nukeVidSrcAds, 2000); // Check every 2 seconds
         
         // Real-time DOM monitoring
         if (window.MutationObserver) {
