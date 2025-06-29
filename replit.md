@@ -15,9 +15,15 @@ A React-based streaming web application that provides access to movies and TV sh
 - **June 29, 2025**: Enhanced video card UI with source-specific metadata display
 
 ## Current Issues
-- **JavaScript Syntax**: Fixed popup blocking script syntax errors
+- **CRITICAL: Popup Blocking Broken**: JavaScript syntax errors in client/index.html breaking all ad blocking
 - **Chrome Compatibility**: VidSrc videos need additional browser-specific fixes  
 - **Authentication**: User auth features currently disabled
+
+## Working Features
+- ✅ Video card hover effect covers full area
+- ✅ Navigation/back button functionality restored
+- ✅ VidSrc metadata displays properly (year, ratings)
+- ✅ YouTube metadata shows channel names (no dummy data)
 
 ## Project Architecture
 - **Frontend**: React with TypeScript, Vite build system
