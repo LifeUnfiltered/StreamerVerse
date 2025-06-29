@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import Header from "@/components/Header";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -100,37 +100,37 @@ export default function VidSrc() {
   });
 
   // Fetch episodes for the selected TV show
-  const { data: episodes = [], isLoading: episodesLoading, error: episodesError } = useQuery<Video[]>({
-    queryKey: ['/api/videos/tv', selectedVideo?.metadata?.imdbId || selectedVideo?.sourceId, 'episodes'],
+  const shouldFetchEpisodes = selectedVideo?.metadata?.type === 'tv' && currentSource === 'vidsrc' && selectedVideo?.metadata?.imdbId;
+  const { data: episodes = [], isLoading: episodesLoading } = useQuery<Video[]>({
+    queryKey: ['episodes', selectedVideo?.metadata?.imdbId],
     queryFn: async () => {
-      const imdbId = selectedVideo?.metadata?.imdbId || selectedVideo?.sourceId;
-      console.log('🎬 Fetching episodes for IMDB ID:', imdbId);
-      const response = await apiRequest('GET', `/api/videos/tv/${imdbId}/episodes`);
+      const imdbId = selectedVideo?.metadata?.imdbId;
+      console.log('🎬 FETCHING EPISODES FOR:', imdbId);
+      const response = await fetch(`/api/videos/tv/${imdbId}/episodes`);
+      if (!response.ok) throw new Error('Failed to fetch episodes');
       const data = await response.json();
-      console.log('🎬 Episodes API returned:', data.length, 'episodes');
+      console.log('🎬 EPISODES FETCHED:', data.length, 'episodes');
       return data;
     },
-    enabled: !!(selectedVideo?.metadata?.type === 'tv' && currentSource === 'vidsrc' && (selectedVideo?.metadata?.imdbId || selectedVideo?.sourceId)),
-    staleTime: 10 * 60 * 1000, // 10 minutes
+    enabled: shouldFetchEpisodes,
+    staleTime: 10 * 60 * 1000,
   });
 
   // Debug logging in useEffect to avoid JSX issues
   useEffect(() => {
     if (selectedVideo) {
-      console.log('🎬 Episodes debug:', {
-        hasSelectedVideo: !!selectedVideo,
+      console.log('🎬 EPISODES DEBUG:', {
+        selectedVideo: selectedVideo.title,
         videoType: selectedVideo?.metadata?.type,
         currentSource,
         imdbId: selectedVideo?.metadata?.imdbId,
-        sourceId: selectedVideo?.sourceId,
+        shouldFetchEpisodes,
         episodesLength: episodes.length,
         episodesLoading,
-        episodesError: episodesError?.message,
-        enabledCondition: selectedVideo?.metadata?.type === 'tv' && currentSource === 'vidsrc' && !!(selectedVideo?.metadata?.imdbId || selectedVideo?.sourceId),
-        showEpisodes: currentSource === 'vidsrc' && selectedVideo?.metadata?.type === 'tv'
+        showEpisodesCondition: currentSource === 'vidsrc' && selectedVideo?.metadata?.type === 'tv'
       });
     }
-  }, [selectedVideo, episodes.length, currentSource, episodesLoading, episodesError]);
+  }, [selectedVideo, episodes.length, currentSource, episodesLoading, shouldFetchEpisodes]);
 
   // Latest content queries
   const { data: movies, isLoading: moviesLoading, error: moviesError } = useQuery<Video[]>({

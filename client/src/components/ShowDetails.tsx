@@ -28,7 +28,7 @@ export default function ShowDetails({
   currentEpisode
 }: ShowDetailsProps) {
   // Debug logging
-  console.log('ShowDetails render:', { 
+  console.log('🎭 ShowDetails render:', { 
     hasShow: !!show, 
     hasCurrentEpisode: !!currentEpisode,
     episodesCount: episodes.length,
@@ -38,8 +38,18 @@ export default function ShowDetails({
   // If no show is provided but we have a currentEpisode, use that
   const displayShow = show || currentEpisode;
   if (!displayShow) {
-    console.log('ShowDetails: No display show available');
+    console.log('🎭 ShowDetails: No display show available');
     return null;
+  }
+  
+  // Force episodes to show if we have episodes data
+  if (episodes.length === 0) {
+    console.log('🎭 ShowDetails: No episodes available yet');
+    return (
+      <div className="p-4 bg-muted/50 rounded-lg">
+        <p className="text-muted-foreground">Loading episodes...</p>
+      </div>
+    );
   }
   const [selectedSeason, setSelectedSeason] = useState<number>(1);
   const [customSeason, setCustomSeason] = useState<string>('1');
