@@ -27,9 +27,18 @@ export default function ShowDetails({
   onEpisodeSelect,
   currentEpisode
 }: ShowDetailsProps) {
+  // Debug logging
+  console.log('ShowDetails render:', { 
+    hasShow: !!show, 
+    hasCurrentEpisode: !!currentEpisode,
+    episodesCount: episodes.length,
+    showTitle: show?.title || currentEpisode?.title
+  });
+  
   // If no show is provided but we have a currentEpisode, use that
   const displayShow = show || currentEpisode;
   if (!displayShow) {
+    console.log('ShowDetails: No display show available');
     return null;
   }
   const [selectedSeason, setSelectedSeason] = useState<number>(1);

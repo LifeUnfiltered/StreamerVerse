@@ -104,12 +104,27 @@ export default function VidSrc() {
     queryKey: ['/api/videos/tv', selectedVideo?.metadata?.imdbId || selectedVideo?.sourceId, 'episodes'],
     queryFn: async () => {
       const imdbId = selectedVideo?.metadata?.imdbId || selectedVideo?.sourceId;
+      console.log('Fetching episodes for:', imdbId);
       const response = await apiRequest('GET', `/api/videos/tv/${imdbId}/episodes`);
       return response.json();
     },
     enabled: selectedVideo?.metadata?.type === 'tv' && currentSource === 'vidsrc' && !!(selectedVideo?.metadata?.imdbId || selectedVideo?.sourceId),
     staleTime: 10 * 60 * 1000, // 10 minutes
   });
+
+  // Debug logging - always log this to see what's happening
+  if (selectedVideo) {
+    console.log('Episodes debug:', {
+      hasSelectedVideo: !!selectedVideo,
+      videoType: selectedVideo?.metadata?.type,
+      currentSource,
+      imdbId: selectedVideo?.metadata?.imdbId,
+      sourceId: selectedVideo?.sourceId,
+      episodesLength: episodes.length,
+      enabledCondition: selectedVideo?.metadata?.type === 'tv' && currentSource === 'vidsrc' && !!(selectedVideo?.metadata?.imdbId || selectedVideo?.sourceId),
+      showEpisodes: currentSource === 'vidsrc' && selectedVideo?.metadata?.type === 'tv'
+    });
+  }
 
   // Latest content queries
   const { data: movies, isLoading: moviesLoading, error: moviesError } = useQuery<Video[]>({
