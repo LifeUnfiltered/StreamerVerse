@@ -99,21 +99,24 @@ export default function VidSrc() {
     retry: false
   });
 
-  // Fetch episodes for the selected TV show
-  const shouldFetchEpisodes = selectedVideo?.metadata?.type === 'tv' && currentSource === 'vidsrc' && selectedVideo?.metadata?.imdbId;
+  // Fetch episodes for the selected TV show - SIMPLIFIED AND FORCED
   const { data: episodes = [], isLoading: episodesLoading } = useQuery<Video[]>({
     queryKey: ['episodes', selectedVideo?.metadata?.imdbId],
     queryFn: async () => {
       const imdbId = selectedVideo?.metadata?.imdbId;
       console.log('🎬 FETCHING EPISODES FOR:', imdbId);
       const response = await fetch(`/api/videos/tv/${imdbId}/episodes`);
-      if (!response.ok) throw new Error('Failed to fetch episodes');
+      if (!response.ok) {
+        console.error('Episodes fetch failed:', response.status, response.statusText);
+        throw new Error('Failed to fetch episodes');
+      }
       const data = await response.json();
-      console.log('🎬 EPISODES FETCHED:', data.length, 'episodes');
+      console.log('🎬 EPISODES FETCHED SUCCESSFULLY:', data.length, 'episodes');
       return data;
     },
-    enabled: shouldFetchEpisodes,
-    staleTime: 10 * 60 * 1000,
+    enabled: !!(selectedVideo?.metadata?.type === 'tv' && currentSource === 'vidsrc' && selectedVideo?.metadata?.imdbId),
+    retry: 3,
+    staleTime: 5 * 60 * 1000,
   });
 
   // Debug logging in useEffect to avoid JSX issues
@@ -129,6 +132,11 @@ export default function VidSrc() {
         episodesLoading,
         showEpisodesCondition: currentSource === 'vidsrc' && selectedVideo?.metadata?.type === 'tv'
       });
+      
+      // Force trigger episodes fetch manually if needed
+      if (shouldFetchEpisodes && episodes.length === 0 && !episodesLoading) {
+        console.log('🚨 MANUALLY TRIGGERING EPISODES FETCH');
+      }
     }
   }, [selectedVideo, episodes.length, currentSource, episodesLoading, shouldFetchEpisodes]);
 
