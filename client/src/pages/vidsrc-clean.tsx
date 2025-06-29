@@ -122,6 +122,7 @@ export default function VidSrc() {
   // Debug logging in useEffect to avoid JSX issues
   useEffect(() => {
     if (selectedVideo) {
+      const shouldFetchEpisodes = !!(selectedVideo?.metadata?.type === 'tv' && currentSource === 'vidsrc' && selectedVideo?.metadata?.imdbId);
       console.log('🎬 EPISODES DEBUG:', {
         selectedVideo: selectedVideo.title,
         videoType: selectedVideo?.metadata?.type,
@@ -130,15 +131,10 @@ export default function VidSrc() {
         shouldFetchEpisodes,
         episodesLength: episodes.length,
         episodesLoading,
-        showEpisodesCondition: currentSource === 'vidsrc' && selectedVideo?.metadata?.type === 'tv'
+        enabledCondition: shouldFetchEpisodes
       });
-      
-      // Force trigger episodes fetch manually if needed
-      if (shouldFetchEpisodes && episodes.length === 0 && !episodesLoading) {
-        console.log('🚨 MANUALLY TRIGGERING EPISODES FETCH');
-      }
     }
-  }, [selectedVideo, episodes.length, currentSource, episodesLoading, shouldFetchEpisodes]);
+  }, [selectedVideo, episodes.length, currentSource, episodesLoading]);
 
   // Latest content queries
   const { data: movies, isLoading: moviesLoading, error: moviesError } = useQuery<Video[]>({
