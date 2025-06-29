@@ -102,6 +102,11 @@ export default function VidSrc() {
   // Fetch episodes for the selected TV show
   const { data: episodes = [] } = useQuery<Video[]>({
     queryKey: ['/api/videos/tv', selectedVideo?.metadata?.imdbId || selectedVideo?.sourceId, 'episodes'],
+    queryFn: async () => {
+      const imdbId = selectedVideo?.metadata?.imdbId || selectedVideo?.sourceId;
+      const response = await apiRequest('GET', `/api/videos/tv/${imdbId}/episodes`);
+      return response.json();
+    },
     enabled: selectedVideo?.metadata?.type === 'tv' && currentSource === 'vidsrc' && !!(selectedVideo?.metadata?.imdbId || selectedVideo?.sourceId),
     staleTime: 10 * 60 * 1000, // 10 minutes
   });
