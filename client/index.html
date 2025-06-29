@@ -6,466 +6,281 @@
 
     <title>StreamFlex</title>
     
-    <!-- Enhanced Ad-Blocking and Anti-Popup Script -->
+    <!-- NUCLEAR-LEVEL Ad-Blocking and Anti-Popup Script -->
     <script>
       (function() {
         'use strict';
         
-        // Ultra-aggressive popup blocking - complete override
+        console.log('🚫 NUCLEAR POPUP BLOCKING ACTIVATED');
+        
+        // === PHASE 1: COMPLETE WINDOW CONTROL ===
         let popupBlockCount = 0;
         
-        // COMPLETE window.open blocking
-        window.open = function() {
-          popupBlockCount++;
-          console.log(`🚫 Popup #${popupBlockCount} BLOCKED`);
-          return null;
-        };
-        
-        // Block ALL popup methods
-        window.showModalDialog = function() { 
-          console.log('🚫 Modal dialog BLOCKED'); 
-          return null; 
-        };
-        
-        // Override alert, confirm, prompt to prevent popup-related interactions
-        window.alert = function(msg) { 
-          console.log('🚫 Alert BLOCKED:', msg); 
-        };
-        window.confirm = function(msg) { 
-          console.log('🚫 Confirm BLOCKED:', msg); 
-          return false; 
-        };
-        window.prompt = function(msg) { 
-          console.log('🚫 Prompt BLOCKED:', msg); 
-          return null; 
-        };
-        
-        // Lock window.open completely
+        // Lock window.open permanently
         Object.defineProperty(window, 'open', {
           value: function() {
-            console.log('🔒 Window.open LOCKED');
+            popupBlockCount++;
+            console.log(`🚫 Popup #${popupBlockCount} NUKED`);
             return null;
           },
           writable: false,
           configurable: false
         });
         
-        // Block document.open (another popup method)
-        const originalDocOpen = document.open;
-        document.open = function() {
-          console.log('🚫 Document.open BLOCKED');
-          return null;
-        };
+        // Block ALL dialog methods
+        window.alert = () => console.log('🚫 Alert NUKED');
+        window.confirm = () => (console.log('🚫 Confirm NUKED'), false);
+        window.prompt = () => (console.log('🚫 Prompt NUKED'), null);
+        window.showModalDialog = () => (console.log('🚫 Modal NUKED'), null);
         
-        // Block focus/blur popup triggers completely
-        window.focus = function() {
-          console.log('🚫 Window.focus BLOCKED');
-          return false;
-        };
+        // Block focus/blur manipulation
+        window.focus = () => (console.log('🚫 Focus steal BLOCKED'), false);
+        window.blur = () => (console.log('🚫 Blur BLOCKED'), false);
         
-        window.blur = function() {
-          console.log('🚫 Window.blur BLOCKED');
-          return false;
-        };
+        // === PHASE 2: NAVIGATION HIJACKING PREVENTION ===
+        let originalAssign, originalReplace;
+        try {
+          originalAssign = window.location.assign.bind(window.location);
+          originalReplace = window.location.replace.bind(window.location);
+        } catch (e) {
+          // Fallback for read-only assign/replace
+          originalAssign = function(url) { window.location.href = url; };
+          originalReplace = function(url) { window.location.href = url; };
+        }
         
-        // Block location changes that could trigger popups
-        if (!window.originalLocationMethods) {
-          window.originalLocationMethods = {
-            assign: window.location.assign,
-            replace: window.location.replace
-          };
-          
+        const originalPushState = history.pushState.bind(history);
+        const originalReplaceState = history.replaceState.bind(history);
+        
+        try {
           window.location.assign = function(url) {
-            console.log('🚫 Location.assign BLOCKED:', url);
-          };
-          
-          window.location.replace = function(url) {
-            console.log('🚫 Location.replace BLOCKED:', url);
-          };
-        }
-        
-        // Block iframe-based popup attempts
-        if (!window.originalCreateElement) {
-          window.originalCreateElement = document.createElement.bind(document);
-          document.createElement = function(tagName) {
-            const element = window.originalCreateElement(tagName);
-            
-            if (tagName.toLowerCase() === 'iframe') {
-              const originalSetSrc = Object.getOwnPropertyDescriptor(HTMLIFrameElement.prototype, 'src').set;
-              Object.defineProperty(element, 'src', {
-                set: function(value) {
-                  // Block suspicious iframe sources that could be popups
-                  if (value && (
-                    value.includes('popup') || 
-                    value.includes('redirect') ||
-                    value.includes('ads') ||
-                    (value.includes('http') && !value.includes('vidsrc') && !value.includes(window.location.hostname))
-                  )) {
-                    console.log('Suspicious iframe src blocked:', value);
-                    return;
-                  }
-                  originalSetSrc.call(this, value);
-                },
-                get: function() {
-                  return this.getAttribute('src');
-                }
-              });
+            if (url && (url.includes('ads') || url.includes('popup') || url.includes('redirect') || url.includes('promo'))) {
+              console.log('🚫 Location.assign NUKED:', url);
+              return;
             }
-            
-            return element;
+            return originalAssign(url);
           };
+        } catch (e) {
+          console.log('🚫 Location.assign override blocked (read-only)');
         }
         
-        // Block pushState navigation that opens ads
-        if (!window.originalHistoryMethods) {
-          window.originalHistoryMethods = {
-            pushState: history.pushState,
-            replaceState: history.replaceState
+        try {
+          window.location.replace = function(url) {
+            if (url && (url.includes('ads') || url.includes('popup') || url.includes('redirect') || url.includes('promo'))) {
+              console.log('🚫 Location.replace NUKED:', url);
+              return;
+            }
+            return originalReplace(url);
           };
-          
-          history.pushState = function(state, title, url) {
+        } catch (e) {
+          console.log('🚫 Location.replace override blocked (read-only)');
+        }
+        
+        history.pushState = function(state, title, url) {
           if (url && (url.includes('ads') || url.includes('popup') || url.includes('promo'))) {
-            console.log('Ad navigation blocked:', url);
+            console.log('🚫 PushState NUKED:', url);
             return;
           }
-          return originalPushState.call(this, state, title, url);
-        };
-
-        // Block all dialog types
-        window.alert = function(message) {
-          console.log('Alert blocked:', message);
-          return undefined;
+          return originalPushState(state, title, url);
         };
         
-        window.confirm = function(message) {
-          console.log('Confirm blocked:', message);
-          return false;
-        };
-        
-        window.prompt = function(message, defaultText) {
-          console.log('Prompt blocked:', message);
-          return null;
-        };
-
-        // Enhanced navigation blocking
-        const originalAssign = window.location.assign;
-        const originalReplace = window.location.replace;
-        const originalReload = window.location.reload;
-        
-        window.location.assign = function(url) {
-          if (url && (url.includes('ads') || url.includes('popup') || url.includes('redirect'))) {
-            console.log('Location.assign blocked to:', url);
-            return false;
+        history.replaceState = function(state, title, url) {
+          if (url && (url.includes('ads') || url.includes('popup') || url.includes('promo'))) {
+            console.log('🚫 ReplaceState NUKED:', url);
+            return;
           }
-          return originalAssign.call(this, url);
+          return originalReplaceState(state, title, url);
         };
         
-        window.location.replace = function(url) {
-          if (url && (url.includes('ads') || url.includes('popup') || url.includes('redirect'))) {
-            console.log('Location.replace blocked to:', url);
-            return false;
-          }
-          return originalReplace.call(this, url);
-        };
-
-        // Block common ad-related globals
-        window.gtag = function() { console.log('Google Analytics blocked'); };
-        window.dataLayer = window.dataLayer || [];
-        window._gaq = window._gaq || [];
-        
-        // Block focus stealing
-        const originalFocus = window.focus;
-        window.focus = function() {
-          console.log('Window focus steal blocked');
-          return false;
-        };
-
-        // Simplified ad element blocking focused on VidSrc
-        function blockAds() {
-          const adSelectors = [
-            // Focus on popup/overlay patterns that affect VidSrc
-            '[class*="popup"]:not(.video-player)', '[id*="popup"]:not(.video-player)',
-            '[class*="overlay"]:not(.video-player)', '[id*="overlay"]:not(.video-player)',
-            '[class*="interstitial"]', '[id*="interstitial"]',
-            '.advertisement', '.ad-container', '.popup-overlay', '.modal-backdrop',
-            
-            // Specific ad networks (but not our video iframe)
-            'iframe[src*="ads"]:not(#video-player-iframe)', 
-            'iframe[src*="doubleclick"]:not(#video-player-iframe)',
-            'iframe[src*="googlesyndication"]:not(#video-player-iframe)',
-            
-            // Elements with click handlers that open popups
-            '[onclick*="window.open"]', '[onclick*="popup"]'
-          ];
-          
-          adSelectors.forEach(selector => {
-            try {
-              const elements = document.querySelectorAll(selector);
-              elements.forEach(el => {
-                // Double check we're not targeting our video player
-                if (el.id === 'video-player-iframe' || el.classList.contains('video-player')) {
-                  return;
-                }
-                
-                // Remove the element
-                if (el.parentNode) {
-                  el.style.display = 'none';
-                  el.remove();
-                }
-              });
-            } catch (e) {
-              // Ignore selector errors
-            }
-          });
-        }
-
-        // Block event propagation for ad clicks
-        document.addEventListener('click', function(e) {
-          const target = e.target;
-          if (target && (
-            target.tagName === 'A' && target.href && (
-              target.href.includes('ads') || 
-              target.href.includes('popup') ||
-              target.href.includes('redirect')
-            )
-          )) {
-            console.log('Ad click blocked:', target.href);
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
-          }
-        }, true);
-
-        // Run ad blocking with reasonable frequency
-        blockAds();
-        setInterval(blockAds, 2000); // Check every 2 seconds
-        
-        // DOM observer for dynamic content
-        if (window.MutationObserver) {
-          const observer = new MutationObserver(function(mutations) {
-            let shouldBlock = false;
-            mutations.forEach(function(mutation) {
-              if (mutation.addedNodes.length > 0) {
-                shouldBlock = true;
-              }
-            });
-            if (shouldBlock) {
-              setTimeout(blockAds, 100); // Small delay to let content settle
-            }
-          });
-          
-          const observerConfig = {
-            childList: true,
-            subtree: true,
-            attributes: true,
-            attributeFilter: ['style', 'class', 'id', 'src']
-          };
-          
-          // Start observing when DOM is ready
-          if (document.body) {
-            observer.observe(document.body, observerConfig);
-          } else {
-            document.addEventListener('DOMContentLoaded', function() {
-              observer.observe(document.body, observerConfig);
-            });
-          }
-        }
-
-        // Block common iframe injection techniques
-        const originalCreateElement = document.createElement;
+        // === PHASE 3: IFRAME SECURITY ===
+        const originalCreateElement = document.createElement.bind(document);
         document.createElement = function(tagName) {
-          const element = originalCreateElement.call(this, tagName);
+          const element = originalCreateElement(tagName);
+          
           if (tagName.toLowerCase() === 'iframe') {
-            // Monitor iframe src changes
+            // Monitor iframe src for suspicious content
             Object.defineProperty(element, 'src', {
-              set: function(url) {
-                if (url && (url.includes('ads') || url.includes('popup') || url.includes('redirect'))) {
-                  console.log('Blocked iframe creation with ad URL:', url);
+              set: function(value) {
+                if (value && (
+                  value.includes('ads') || 
+                  value.includes('popup') || 
+                  value.includes('redirect') ||
+                  (value.includes('http') && !value.includes('vidsrc') && !value.includes(window.location.hostname))
+                )) {
+                  console.log('🚫 Suspicious iframe NUKED:', value);
                   return;
                 }
-                this.setAttribute('src', url);
+                this.setAttribute('src', value);
               },
               get: function() {
                 return this.getAttribute('src');
               }
             });
           }
+          
           return element;
         };
-
-        console.log('Enhanced ad blocking initialized');
-        // Enhanced click blocking for popup ads while preserving video functionality
-        let clickTimeout;
+        
+        // === PHASE 4: AGGRESSIVE CLICK PROTECTION ===
         document.addEventListener('click', function(e) {
           const target = e.target;
           
-          // Allow clicks on our video player iframe and its container
+          // WHITELIST: Allow video player interactions
           if (target && (
             target.id === 'video-player-iframe' ||
             target.closest('#video-player-iframe') ||
             target.closest('.video-player-container') ||
             target.closest('[class*="video-player"]')
           )) {
-            return; // Allow video player clicks
+            return; // Safe video player click
           }
           
-          // Block suspicious ad clicks
-          if (target && (
-            target.classList.toString().includes('ad') ||
-            target.id.includes('ad') ||
-            target.getAttribute('data-ad') ||
-            target.closest('[class*="ad"]') ||
-            target.closest('[id*="ad"]') ||
-            target.getAttribute('onclick') ||
-            target.closest('[onclick]')
-          )) {
-            console.log('Ad click blocked');
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            return false;
-          }
-          
-          // Detect rapid multiple clicks (often ad behavior)
-          clearTimeout(clickTimeout);
-          clickTimeout = setTimeout(() => {
-            // Reset click detection
-          }, 100);
-          
-          // Block ALL middle clicks and ctrl+clicks (common popup triggers)
-          if (e.ctrlKey || e.metaKey || e.button === 1 || e.button === 2) {
-            console.log('Middle/Ctrl click blocked (potential popup trigger)');
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            return false;
-          }
-          
-          // AGGRESSIVE click blocking for ads/popups
-          const targetElement = e.target;
-          if (targetElement) {
-            // Block ANY external link clicks
-            const clickedLink = targetElement.closest && targetElement.closest('a');
-            if (clickedLink && clickedLink.href) {
-              const href = clickedLink.href;
-              // Allow only same-origin links and our video player
-              if (!href.startsWith(window.location.origin) && !targetElement.closest('.video-player-container')) {
-                console.log('🚫 External link BLOCKED:', href);
-                e.preventDefault();
-                e.stopPropagation();
-                e.stopImmediatePropagation();
-                return false;
-              }
+          // BLACKLIST: Block suspicious clicks
+          if (target) {
+            // Block external links completely
+            const link = target.closest('a');
+            if (link && link.href && !link.href.startsWith(window.location.origin)) {
+              console.log('🚫 External link NUKED:', link.href);
+              e.preventDefault();
+              e.stopImmediatePropagation();
+              return false;
             }
             
-            // Block clicks on suspicious elements
-            const tagName = targetElement.tagName?.toLowerCase();
-            if (tagName === 'iframe' && !targetElement.closest('.video-player-container')) {
-              console.log('🚫 Iframe click BLOCKED');
+            // Block popup-related attributes
+            if (target.getAttribute('onclick') || 
+                target.getAttribute('target') === '_blank' ||
+                target.closest('[onclick]') ||
+                target.closest('[target="_blank"]')) {
+              console.log('🚫 Popup click NUKED');
               e.preventDefault();
-              e.stopPropagation();
+              e.stopImmediatePropagation();
+              return false;
+            }
+            
+            // Block middle/right clicks and key combinations
+            if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) {
+              console.log('🚫 Suspicious click combo NUKED');
+              e.preventDefault();
+              e.stopImmediatePropagation();
               return false;
             }
           }
+        }, true);
+        
+        // === PHASE 5: DOM DESTRUCTION ENGINE ===
+        function nukeAds() {
+          const suspiciousSelectors = [
+            // Direct popup/ad patterns
+            '[class*="popup"]:not(.video-player)',
+            '[id*="popup"]:not(.video-player)',
+            '[class*="overlay"]:not(.video-player)',
+            '[id*="overlay"]:not(.video-player)',
+            '[class*="ad"]:not(.video-player)',
+            '[id*="ad"]:not(.video-player)',
+            '.advertisement',
+            '.popup-overlay',
+            '.modal-backdrop',
+            
+            // Suspicious iframes (not our video player)
+            'iframe[src*="ads"]:not(#video-player-iframe)',
+            'iframe[src*="doubleclick"]:not(#video-player-iframe)',
+            'iframe[src*="googlesyndication"]:not(#video-player-iframe)',
+            
+            // Click-based popups
+            '[onclick*="window.open"]',
+            '[onclick*="popup"]',
+            'a[target="_blank"]:not(.video-player a)',
+            'a[href*="javascript:"]'
+          ];
           
-          // Block clicks on elements with suspicious attributes
-          if (target && (
-            target.getAttribute('target') === '_blank' ||
-            target.closest('[target="_blank"]') ||
-            target.getAttribute('href')?.includes('javascript:') ||
-            target.closest('[href*="javascript:"]')
-          )) {
-            console.log('Suspicious link click blocked');
-            e.preventDefault();
-            e.stopPropagation();
-            e.stopImmediatePropagation();
-            return false;
-          }
-        }, true);
-        
-        // Block context menu on ads and iframes
-        document.addEventListener('contextmenu', function(e) {
-          const target = e.target;
-          if (target && (
-            target.classList.toString().includes('ad') ||
-            target.tagName === 'IFRAME'
-          )) {
-            console.log('Context menu blocked on ad/iframe');
-            e.preventDefault();
-            return false;
-          }
-        }, true);
-        
-        // Block mousedown events that could trigger popups
-        document.addEventListener('mousedown', function(e) {
-          // Block any mousedown that isn't on our video player
-          if (e.target && !e.target.closest('#video-player-iframe') && !e.target.closest('.video-player-container')) {
-            if (e.button !== 0) { // Not left click
-              console.log('Non-left click blocked');
-              e.preventDefault();
-              e.stopPropagation();
-              return false;
+          let nukedCount = 0;
+          suspiciousSelectors.forEach(selector => {
+            try {
+              const elements = document.querySelectorAll(selector);
+              elements.forEach(el => {
+                if (el.id !== 'video-player-iframe' && !el.closest('.video-player-container')) {
+                  el.remove();
+                  nukedCount++;
+                }
+              });
+            } catch (e) {
+              // Ignore selector errors
             }
+          });
+          
+          if (nukedCount > 0) {
+            console.log(`🔥 NUKED ${nukedCount} suspicious elements`);
           }
-        }, true);
+        }
         
-        // NUCLEAR OPTION: DOM monitoring and removal
-        if (!window.adBlockObserver) {
-          window.adBlockObserver = new MutationObserver((mutations) => {
-              mutation.addedNodes.forEach((node) => {
+        // === PHASE 6: CONTINUOUS MONITORING ===
+        // Initial destruction
+        setTimeout(nukeAds, 100);
+        setInterval(nukeAds, 1000); // Check every second
+        
+        // Real-time DOM monitoring
+        if (window.MutationObserver) {
+          const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+              mutation.addedNodes.forEach(function(node) {
                 if (node.nodeType === 1) { // Element node
                   const element = node;
                   
-                  // DESTROY any non-video iframes immediately
+                  // Immediately destroy suspicious iframes
                   if (element.tagName === 'IFRAME') {
                     const src = element.getAttribute('src') || '';
-                    if (!src.includes('vidsrc') && !src.includes('youtube') && !element.closest('.video-player-container')) {
-                      console.log('🔥 DESTROYING suspicious iframe:', src);
+                    if (!src.includes('vidsrc') && 
+                        !src.includes('youtube') && 
+                        !element.closest('.video-player-container') &&
+                        element.id !== 'video-player-iframe') {
+                      console.log('🔥 INSTANT IFRAME DESTRUCTION:', src);
                       element.remove();
                       return;
                     }
                   }
                   
-                  // DESTROY popup-related elements
-                  const suspiciousSelectors = [
-                    'a[target="_blank"]',
-                    'a[href*="javascript:"]',
-                    '[onclick*="window.open"]',
-                    '[onclick*="popup"]',
-                    '.popup', '.ad', '.advertisement', 
-                    '[class*="ad-"]', '[id*="ad-"]',
-                    '[class*="popup"]', '[id*="popup"]'
-                  ];
-                  
-                  suspiciousSelectors.forEach(selector => {
-                    try {
-                      const suspiciousElements = element.querySelectorAll ? element.querySelectorAll(selector) : [];
-                      suspiciousElements.forEach(el => {
-                        console.log('🔥 DESTROYING suspicious element:', selector);
-                        el.remove();
-                      });
-                      
-                      // Check if the element itself matches
-                      if (element.matches && element.matches(selector)) {
-                        console.log('🔥 DESTROYING suspicious element (self):', selector);
-                        element.remove();
-                      }
-                    } catch (e) {
-                      // Ignore selector errors
+                  // Check for popup-related patterns
+                  if (element.matches && (
+                    element.matches('[class*="popup"]') ||
+                    element.matches('[id*="popup"]') ||
+                    element.matches('[class*="ad"]') ||
+                    element.matches('[onclick*="window.open"]') ||
+                    element.matches('a[target="_blank"]')
+                  )) {
+                    if (!element.closest('.video-player-container')) {
+                      console.log('🔥 INSTANT ELEMENT DESTRUCTION');
+                      element.remove();
                     }
-                  });
+                  }
                 }
               });
             });
+          });
           
           // Start aggressive monitoring
-          window.adBlockObserver.observe(document.documentElement, {
+          observer.observe(document.documentElement, {
             childList: true,
             subtree: true,
             attributes: true,
-            attributeFilter: ['href', 'onclick', 'target', 'src']
+            attributeFilter: ['href', 'onclick', 'target', 'src', 'class', 'id']
           });
         }
+        
+        // === PHASE 7: ANTI-CIRCUMVENTION ===
+        // Block common ad globals
+        window.gtag = () => console.log('🚫 Google Analytics NUKED');
+        window.dataLayer = [];
+        window._gaq = [];
+        
+        // Block context menus on suspicious elements
+        document.addEventListener('contextmenu', function(e) {
+          if (e.target && e.target.tagName === 'IFRAME' && e.target.id !== 'video-player-iframe') {
+            console.log('🚫 Iframe context menu BLOCKED');
+            e.preventDefault();
+          }
+        }, true);
+        
+        console.log('🚫 NUCLEAR AD BLOCKING: ALL SYSTEMS ARMED AND READY');
+        
       })();
     </script>
     
