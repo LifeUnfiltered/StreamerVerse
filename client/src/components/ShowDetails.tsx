@@ -233,11 +233,30 @@ export default function ShowDetails({
     }
   };
 
+  // Debug logging for episodes and seasons
+  console.log('🎭 ShowDetails DEBUG:', {
+    totalEpisodes: episodes.length,
+    selectedSeason,
+    episodesWithSeasonData: episodes.filter(ep => ep.metadata?.season).length,
+    seasonNumbers: episodes.map(ep => ep.metadata?.season).filter(Boolean),
+    sampleEpisode: episodes[0]?.metadata
+  });
+
   // Get all seasons available
   const availableSeasons = Array.from(new Set(episodes.map(ep => ep.metadata?.season || 1))).sort((a, b) => a - b);
   
   // Get episodes for the selected season
   const seasonEpisodes = episodes.filter(ep => ep.metadata?.season === selectedSeason).sort((a, b) => (a.metadata?.episode || 0) - (b.metadata?.episode || 0));
+
+  console.log('🎭 ShowDetails FILTERING:', {
+    availableSeasons,
+    selectedSeason,
+    seasonEpisodesCount: seasonEpisodes.length,
+    allSeasonsCount: availableSeasons.map(s => ({ 
+      season: s, 
+      count: episodes.filter(ep => ep.metadata?.season === s).length 
+    }))
+  });
 
   return (
     <div className="space-y-4">
@@ -281,7 +300,7 @@ export default function ShowDetails({
                 
                 return (
                   <Card 
-                    key={episode.sourceId} 
+                    key={`episode-${episode.metadata?.season}-${episode.metadata?.episode}-${episode.sourceId}`} 
                     className={`cursor-pointer transition-colors hover:bg-muted/50 ${isCurrentEpisode ? 'bg-primary/10 border-primary' : ''}`}
                     onClick={() => onEpisodeSelect(episode)}
                   >
@@ -293,6 +312,11 @@ export default function ShowDetails({
                             <Badge variant="outline" className="text-xs">
                               S{episode.metadata?.season}E{episode.metadata?.episode}
                             </Badge>
+                            {episode.metadata?.voteAverage && (
+                              <Badge variant="secondary" className="text-xs">
+                                ⭐ {episode.metadata.voteAverage.toFixed(1)}
+                              </Badge>
+                            )}
                             {isCurrentEpisode && (
                               <Badge variant="default" className="text-xs">
                                 Now Playing
@@ -302,6 +326,14 @@ export default function ShowDetails({
                           <h4 className="font-medium text-sm mb-1 line-clamp-2">
                             {cachedTitle || extractEpisodeTitle(episode.title) || `Episode ${episode.metadata?.episode}`}
                           </h4>
+                          <div className="flex items-center gap-3 text-xs text-muted-foreground mb-1">
+                            {episode.metadata?.airDate && (
+                              <span>{new Date(episode.metadata.airDate).toLocaleDateString()}</span>
+                            )}
+                            {episode.metadata?.runtime && (
+                              <span>{episode.metadata.runtime} min</span>
+                            )}
+                          </div>
                           {(cachedDescription || episode.description) && (
                             <p className="text-xs text-muted-foreground line-clamp-3">
                               {cachedDescription || episode.description}
@@ -341,17 +373,47 @@ export default function ShowDetails({
                 </div>
               </div>
               
-              {displayShow.metadata?.firstAirDate && (
+              <div className="grid grid-cols-2 gap-4">
+                {displayShow.metadata?.airDate && (
+                  <div>
+                    <h4 className="font-medium mb-1">First Air Date</h4>
+                    <p className="text-sm text-muted-foreground">{new Date(displayShow.metadata.airDate).toLocaleDateString()}</p>
+                  </div>
+                )}
+                
+                {displayShow.metadata?.voteAverage && (
+                  <div>
+                    <h4 className="font-medium mb-1">Rating</h4>
+                    <p className="text-sm text-muted-foreground">⭐ {displayShow.metadata.voteAverage}/10</p>
+                  </div>
+                )}
+              </div>
+
+              {displayShow.metadata?.cast && displayShow.metadata.cast.length > 0 && (
                 <div>
-                  <h4 className="font-medium mb-1">First Air Date</h4>
-                  <p className="text-sm text-muted-foreground">{displayShow.metadata.firstAirDate}</p>
+                  <h4 className="font-medium mb-2">Cast</h4>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    {displayShow.metadata.cast.slice(0, 6).map((actor: any, index: number) => (
+                      <div key={`cast-${actor.id || index}`} className="flex justify-between">
+                        <span className="font-medium">{actor.name}</span>
+                        <span className="text-muted-foreground">{actor.character}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
-              
-              {displayShow.metadata?.voteAverage && (
+
+              {displayShow.metadata?.crew && displayShow.metadata.crew.length > 0 && (
                 <div>
-                  <h4 className="font-medium mb-1">Rating</h4>
-                  <p className="text-sm text-muted-foreground">{displayShow.metadata.voteAverage}/10</p>
+                  <h4 className="font-medium mb-2">Crew</h4>
+                  <div className="grid grid-cols-2 gap-2 text-sm">
+                    {displayShow.metadata.crew.slice(0, 4).map((crewMember: any, index: number) => (
+                      <div key={`crew-${crewMember.id || index}`} className="flex justify-between">
+                        <span className="font-medium">{crewMember.name}</span>
+                        <span className="text-muted-foreground">{crewMember.job}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </CardContent>
