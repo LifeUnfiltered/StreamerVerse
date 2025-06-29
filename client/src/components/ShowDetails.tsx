@@ -27,10 +27,12 @@ export default function ShowDetails({
   onEpisodeSelect,
   currentEpisode
 }: ShowDetailsProps) {
-  // State declarations MUST be at the top (Rules of Hooks)
+  // ALL HOOKS MUST BE AT THE VERY TOP (Rules of Hooks)
   const [selectedSeason, setSelectedSeason] = useState<number>(1);
   const [customSeason, setCustomSeason] = useState<string>('1');
   const [customEpisode, setCustomEpisode] = useState<string>('1');
+  const episodeTitleCacheRef = useRef<EpisodeTitleCache>({});
+  const episodeDescriptionCacheRef = useRef<EpisodeTitleCache>({});
   
   // Debug logging
   console.log('🎭 ShowDetails render:', { 
@@ -57,9 +59,7 @@ export default function ShowDetails({
     );
   }
   
-  // Create a persistent cache for episode titles and descriptions
-  const episodeTitleCacheRef = useRef<EpisodeTitleCache>({});
-  const episodeDescriptionCacheRef = useRef<EpisodeTitleCache>({});
+  console.log('🎭 ShowDetails: RENDERING EPISODES INTERFACE with', episodes.length, 'episodes');
   
   // Helper function to get a key for the cache
   const getEpisodeKey = (showId: string, season: number, episode: number) => {
