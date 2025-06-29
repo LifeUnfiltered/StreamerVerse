@@ -65,6 +65,7 @@ interface GenreItem {
 }
 
 export default function VidSrc() {
+  console.log('🔥 VIDSRC COMPONENT RENDERING');
   const [selectedVideo, setSelectedVideo] = useState<Video | null>(null);
   const [isAuthDialogOpen, setIsAuthDialogOpen] = useState(false);
   const [page, setPage] = useState(1);
@@ -285,6 +286,13 @@ export default function VidSrc() {
   };
 
   const handleVideoSelect = (video: Video) => {
+    console.log('🚨 SELECTED VIDEO CHANGED:', {
+      title: video.title,
+      type: video.metadata?.type,
+      imdbId: video.metadata?.imdbId,
+      currentSource,
+      fullVideo: video
+    });
     setSelectedVideo(video);
     setNavigation({ 
       view: 'video',
