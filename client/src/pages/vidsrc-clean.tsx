@@ -99,6 +99,13 @@ export default function VidSrc() {
     retry: false
   });
 
+  // Fetch episodes for the selected TV show
+  const { data: episodes = [] } = useQuery<Video[]>({
+    queryKey: ['/api/videos/tv', selectedVideo?.metadata?.imdbId || selectedVideo?.sourceId, 'episodes'],
+    enabled: selectedVideo?.metadata?.type === 'tv' && currentSource === 'vidsrc' && !!(selectedVideo?.metadata?.imdbId || selectedVideo?.sourceId),
+    staleTime: 10 * 60 * 1000, // 10 minutes
+  });
+
   // Latest content queries
   const { data: movies, isLoading: moviesLoading, error: moviesError } = useQuery<Video[]>({
     queryKey: ['/api/videos/vidsrc/latest/movies', page],
@@ -261,10 +268,10 @@ export default function VidSrc() {
             {selectedVideo ? (
               <div className="space-y-6">
                 <VideoPlayer video={selectedVideo} />
-                {currentSource === 'vidsrc' && (
+                {currentSource === 'vidsrc' && selectedVideo?.metadata?.type === 'tv' && (
                   <ShowDetails
-                    show={selectedVideo?.metadata?.type === 'tv' ? selectedVideo : undefined}
-                    episodes={[]}
+                    show={selectedVideo}
+                    episodes={episodes}
                     onEpisodeSelect={handleVideoSelect}
                     currentEpisode={selectedVideo}
                   />

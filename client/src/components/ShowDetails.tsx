@@ -15,7 +15,7 @@ interface EpisodeTitleCache {
 }
 
 interface ShowDetailsProps {
-  show: Video;
+  show?: Video;
   episodes: Video[];
   onEpisodeSelect: (episode: Video) => void;
   currentEpisode?: Video;
