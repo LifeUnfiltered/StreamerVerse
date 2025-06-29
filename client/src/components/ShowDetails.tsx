@@ -308,7 +308,7 @@ export default function ShowDetails({
                 <div className="p-4 text-center text-muted-foreground">
                   No episodes found for Season {selectedSeason}
                 </div>
-              ) : 
+              ) : (
                 seasonEpisodes.map((episode, index) => {
                   const isCurrentEpisode = currentEpisode?.sourceId === episode.sourceId;
                   const showId = displayShow.metadata?.imdbId || displayShow.sourceId || 'unknown';
@@ -325,48 +325,48 @@ export default function ShowDetails({
                       className={`cursor-pointer transition-colors hover:bg-muted/50 ${isCurrentEpisode ? 'bg-primary/10 border-primary' : ''}`}
                       onClick={() => onEpisodeSelect(episode)}
                     >
-                    <CardContent className="p-4">
-                      <div className="flex items-start gap-3">
-                        <PlayCircle className="h-8 w-8 text-primary mt-1 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
-                            <Badge variant="outline" className="text-xs">
-                              S{episode.metadata?.season}E{episode.metadata?.episode}
-                            </Badge>
-                            {episode.metadata?.voteAverage && (
-                              <Badge variant="secondary" className="text-xs">
-                                ⭐ {episode.metadata.voteAverage.toFixed(1)}
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-3">
+                          <PlayCircle className="h-8 w-8 text-primary mt-1 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Badge variant="outline" className="text-xs">
+                                S{episode.metadata?.season}E{episode.metadata?.episode}
                               </Badge>
-                            )}
-                            {isCurrentEpisode && (
-                              <Badge variant="default" className="text-xs">
-                                Now Playing
-                              </Badge>
+                              {episode.metadata?.voteAverage && (
+                                <Badge variant="secondary" className="text-xs">
+                                  ⭐ {episode.metadata.voteAverage.toFixed(1)}
+                                </Badge>
+                              )}
+                              {isCurrentEpisode && (
+                                <Badge variant="default" className="text-xs">
+                                  Now Playing
+                                </Badge>
+                              )}
+                            </div>
+                            <h4 className="font-medium text-sm mb-1 line-clamp-2">
+                              {cachedTitle || extractEpisodeTitle(episode.title) || `Episode ${episode.metadata?.episode}`}
+                            </h4>
+                            <div className="flex items-center gap-3 text-xs text-muted-foreground mb-1">
+                              {episode.metadata?.airDate && (
+                                <span>{new Date(episode.metadata.airDate).toLocaleDateString()}</span>
+                              )}
+                              {episode.metadata?.runtime && (
+                                <span>{episode.metadata.runtime} min</span>
+                              )}
+                            </div>
+                            {(cachedDescription || episode.description) && (
+                              <p className="text-xs text-muted-foreground line-clamp-3">
+                                {cachedDescription || episode.description}
+                              </p>
                             )}
                           </div>
-                          <h4 className="font-medium text-sm mb-1 line-clamp-2">
-                            {cachedTitle || extractEpisodeTitle(episode.title) || `Episode ${episode.metadata?.episode}`}
-                          </h4>
-                          <div className="flex items-center gap-3 text-xs text-muted-foreground mb-1">
-                            {episode.metadata?.airDate && (
-                              <span>{new Date(episode.metadata.airDate).toLocaleDateString()}</span>
-                            )}
-                            {episode.metadata?.runtime && (
-                              <span>{episode.metadata.runtime} min</span>
-                            )}
-                          </div>
-                          {(cachedDescription || episode.description) && (
-                            <p className="text-xs text-muted-foreground line-clamp-3">
-                              {cachedDescription || episode.description}
-                            </p>
-                          )}
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                );
+                      </CardContent>
+                    </Card>
+                  );
                 })
-              }
+              )}
             </div>
           </ScrollArea>
         </TabsContent>
