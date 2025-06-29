@@ -537,7 +537,23 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle className="line-clamp-1">{video.title}</CardTitle>
+          <CardTitle className="line-clamp-1">
+            {(() => {
+              // For TV shows with episode data, format properly
+              if (video.metadata?.type === 'tv' && video.metadata.season && video.metadata.episode) {
+                // Extract show name and episode title from the full title
+                const showName = video.title.split(' - ')[0] || video.title;
+                const episodeTitle = video.title.includes(' - ') ? video.title.split(' - ').slice(1).join(' - ') : '';
+                
+                // Format: "Show Name S1E1 - Episode Title" or just "Show Name S1E1" if no episode title
+                const seasonEpisode = `S${video.metadata.season}E${video.metadata.episode}`;
+                return episodeTitle ? `${showName} ${seasonEpisode} - ${episodeTitle}` : `${showName} ${seasonEpisode}`;
+              }
+              
+              // For movies and regular content, show title as-is
+              return video.title;
+            })()}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center text-muted-foreground">
@@ -552,7 +568,23 @@ export default function VideoPlayer({ video }: VideoPlayerProps) {
     <div className="w-full">
       <Card>
         <CardHeader>
-          <CardTitle className="line-clamp-1">{video.title}</CardTitle>
+          <CardTitle className="line-clamp-1">
+            {(() => {
+              // For TV shows with episode data, format properly
+              if (video.metadata?.type === 'tv' && video.metadata.season && video.metadata.episode) {
+                // Extract show name and episode title from the full title
+                const showName = video.title.split(' - ')[0] || video.title;
+                const episodeTitle = video.title.includes(' - ') ? video.title.split(' - ').slice(1).join(' - ') : '';
+                
+                // Format: "Show Name S1E1 - Episode Title" or just "Show Name S1E1" if no episode title
+                const seasonEpisode = `S${video.metadata.season}E${video.metadata.episode}`;
+                return episodeTitle ? `${showName} ${seasonEpisode} - ${episodeTitle}` : `${showName} ${seasonEpisode}`;
+              }
+              
+              // For movies and regular content, show title as-is
+              return video.title;
+            })()}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-4" ref={containerRef}>
