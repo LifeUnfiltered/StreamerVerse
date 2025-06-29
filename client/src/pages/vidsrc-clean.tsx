@@ -143,12 +143,12 @@ export default function VidSrc() {
       
       fetch(`/api/videos/tv/${selectedVideo.metadata.imdbId}/episodes`)
         .then(response => {
-          console.log('🎬 EPISODES FETCH RESPONSE:', response.status);
-          if (!response.ok) throw new Error('Failed to fetch episodes');
+          console.log('🎬 EPISODES FETCH RESPONSE:', response.status, response.ok);
+          if (!response.ok) throw new Error(`Failed to fetch episodes: ${response.status}`);
           return response.json();
         })
         .then(data => {
-          console.log('🎬 EPISODES FETCHED SUCCESSFULLY:', data.length, 'episodes');
+          console.log('🎬 EPISODES FETCHED SUCCESSFULLY:', data.length, 'episodes', data.slice(0, 3));
           setManualEpisodes(data);
           setManualEpisodesLoading(false);
         })
