@@ -304,19 +304,27 @@ export default function ShowDetails({
           
           <ScrollArea className="h-96 w-full">
             <div className="grid gap-2">
-              {seasonEpisodes.map(episode => {
-                const isCurrentEpisode = currentEpisode?.sourceId === episode.sourceId;
-                const showId = displayShow.metadata?.imdbId || displayShow.sourceId;
-                const episodeKey = getEpisodeKey(showId, episode.metadata?.season || 1, episode.metadata?.episode || 1);
-                const cachedTitle = episodeTitleCacheRef.current[episodeKey];
-                const cachedDescription = episodeDescriptionCacheRef.current[episodeKey];
-                
-                return (
-                  <Card 
-                    key={episode.sourceId || `ep-${episode.metadata?.season || 1}-${episode.metadata?.episode || 1}`} 
-                    className={`cursor-pointer transition-colors hover:bg-muted/50 ${isCurrentEpisode ? 'bg-primary/10 border-primary' : ''}`}
-                    onClick={() => onEpisodeSelect(episode)}
-                  >
+              {seasonEpisodes.length === 0 ? (
+                <div className="p-4 text-center text-muted-foreground">
+                  No episodes found for Season {selectedSeason}
+                </div>
+              ) : 
+                seasonEpisodes.map((episode, index) => {
+                  const isCurrentEpisode = currentEpisode?.sourceId === episode.sourceId;
+                  const showId = displayShow.metadata?.imdbId || displayShow.sourceId || 'unknown';
+                  const episodeKey = getEpisodeKey(showId, episode.metadata?.season || 1, episode.metadata?.episode || 1);
+                  const cachedTitle = episodeTitleCacheRef.current[episodeKey];
+                  const cachedDescription = episodeDescriptionCacheRef.current[episodeKey];
+                  
+                  // Create stable key to prevent React DOM conflicts
+                  const stableKey = `${showId}-s${selectedSeason}e${episode.metadata?.episode || index + 1}-${episode.sourceId}`;
+                  
+                  return (
+                    <Card 
+                      key={stableKey}
+                      className={`cursor-pointer transition-colors hover:bg-muted/50 ${isCurrentEpisode ? 'bg-primary/10 border-primary' : ''}`}
+                      onClick={() => onEpisodeSelect(episode)}
+                    >
                     <CardContent className="p-4">
                       <div className="flex items-start gap-3">
                         <PlayCircle className="h-8 w-8 text-primary mt-1 flex-shrink-0" />
@@ -357,7 +365,8 @@ export default function ShowDetails({
                     </CardContent>
                   </Card>
                 );
-              })}
+                })
+              }
             </div>
           </ScrollArea>
         </TabsContent>
