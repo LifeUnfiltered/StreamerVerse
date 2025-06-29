@@ -135,22 +135,22 @@ export default function VideoCard({
     >
       <Card 
         className={cn(
-          "group cursor-pointer transition-all duration-500 ease-out",
+          "group cursor-pointer transition-all duration-500 ease-out overflow-hidden",
           "hover:shadow-2xl hover:shadow-primary/20 border-border/50 hover:border-primary/40",
-          "bg-gradient-to-br from-card to-card/90 overflow-hidden",
+          "bg-gradient-to-br from-card to-card/90",
           isSelected && "ring-2 ring-primary shadow-xl shadow-primary/30"
         )}
       >
-        <CardContent className="p-0">
-          <div className="relative overflow-hidden">
-            <div className="aspect-video relative">
+        <CardContent className="p-0 overflow-hidden">
+          <div className="relative">
+            <div className="aspect-video relative overflow-hidden">
               <img
                 src={video.thumbnail || ''}
                 alt={video.title}
                 className="w-full h-full object-cover transition-all duration-500 group-hover:scale-110 group-hover:brightness-110"
               />
               
-              {/* Premium Gradient Overlay */}
+              {/* Full Card Hover Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 opacity-0 group-hover:opacity-100 transition-all duration-500" />
               
               {/* Central Play Button */}
@@ -237,14 +237,12 @@ export default function VideoCard({
               
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                  <div className="flex items-center space-x-1.5">
-                    <Eye className="h-4 w-4" />
-                    <span className="font-medium">1.2K views</span>
-                  </div>
-                  <div className="flex items-center space-x-1.5">
-                    <Clock className="h-4 w-4" />
-                    <span>2 hours ago</span>
-                  </div>
+                  {video.source === 'youtube' && video.metadata?.channelTitle && (
+                    <span className="font-medium">{video.metadata.channelTitle}</span>
+                  )}
+                  {video.source === 'vidsrc' && video.metadata?.releaseDate && (
+                    <span className="font-medium">{new Date(video.metadata.releaseDate).getFullYear()}</span>
+                  )}
                 </div>
                 
                 <div className="flex items-center space-x-2">
@@ -254,8 +252,8 @@ export default function VideoCard({
                       <span className="text-sm font-semibold">{video.metadata.voteAverage.toFixed(1)}</span>
                     </div>
                   )}
-                  <Badge variant="outline" className="text-xs border-primary/30 text-primary">
-                    Premium
+                  <Badge className={`text-xs ${getSourceGradient(video.source)} text-white`}>
+                    {video.source.toUpperCase()}
                   </Badge>
                 </div>
               </div>
