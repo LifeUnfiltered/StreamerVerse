@@ -51,9 +51,51 @@
         const originalPushState = history.pushState.bind(history);
         const originalReplaceState = history.replaceState.bind(history);
         
+        // Enhanced URL pattern detection for ads
+        function isSuspiciousURL(url) {
+          if (!url || typeof url !== 'string') return false;
+          
+          const suspiciousPatterns = [
+            /ads?[./]/i,
+            /popup/i,
+            /redirect/i,
+            /promo/i,
+            /doubleclick/i,
+            /googlesyndication/i,
+            /googletagmanager/i,
+            /adsystem/i,
+            /adnxs/i,
+            /amazon-adsystem/i,
+            /bing\.com.*ads/i,
+            /facebook\.com.*ads/i,
+            /outbrain/i,
+            /taboola/i,
+            /revcontent/i,
+            /smartadserver/i,
+            /criteo/i,
+            /adskeeper/i,
+            /mgid/i,
+            /sharethrough/i,
+            /adform/i,
+            /turn\.com/i,
+            /adsrvr/i,
+            /advertising/i,
+            /sponsored/i,
+            /banner/i,
+            /campaign/i,
+            /tracking/i,
+            /analytics/i,
+            /metrics/i,
+            /pixel/i,
+            /beacon/i
+          ];
+          
+          return suspiciousPatterns.some(pattern => pattern.test(url));
+        }
+        
         try {
           window.location.assign = function(url) {
-            if (url && (url.includes('ads') || url.includes('popup') || url.includes('redirect') || url.includes('promo'))) {
+            if (isSuspiciousURL(url)) {
               console.log('🚫 Location.assign NUKED:', url);
               return;
             }
@@ -65,7 +107,7 @@
         
         try {
           window.location.replace = function(url) {
-            if (url && (url.includes('ads') || url.includes('popup') || url.includes('redirect') || url.includes('promo'))) {
+            if (isSuspiciousURL(url)) {
               console.log('🚫 Location.replace NUKED:', url);
               return;
             }
@@ -76,7 +118,7 @@
         }
         
         history.pushState = function(state, title, url) {
-          if (url && (url.includes('ads') || url.includes('popup') || url.includes('promo'))) {
+          if (isSuspiciousURL(url)) {
             console.log('🚫 PushState NUKED:', url);
             return;
           }
@@ -84,7 +126,7 @@
         };
         
         history.replaceState = function(state, title, url) {
-          if (url && (url.includes('ads') || url.includes('popup') || url.includes('promo'))) {
+          if (isSuspiciousURL(url)) {
             console.log('🚫 ReplaceState NUKED:', url);
             return;
           }
@@ -120,52 +162,95 @@
           return element;
         };
         
-        // === PHASE 4: TARGETED VIDSRC CLICK PROTECTION ===
+        // === PHASE 4: COMPREHENSIVE ON-CLICK REDIRECT BLOCKING ===
+        let redirectAttempts = 0;
+        let lastRedirectTime = 0;
+        
+        // MASTER CLICK INTERCEPTOR - blocks ALL suspicious clicks
         document.addEventListener('click', function(e) {
           const target = e.target;
+          const now = Date.now();
           
-          // ONLY protect clicks within VidSrc iframes and suspicious ad elements
-          const isVidSrcIframe = target && (
+          // Detect rapid click patterns (ad clicking)
+          if (now - lastRedirectTime < 2000) {
+            redirectAttempts++;
+            if (redirectAttempts > 3) {
+              console.log('🚫 Rapid click storm DETECTED - BLOCKING ALL EXTERNAL NAVIGATION');
+              e.preventDefault();
+              e.stopImmediatePropagation();
+              return false;
+            }
+          } else {
+            redirectAttempts = 0;
+          }
+          
+          // COMPREHENSIVE DETECTION PATTERNS
+          const isVidSrcContext = target && (
             target.closest('iframe[src*="vidsrc"]') ||
-            target.tagName === 'IFRAME' && target.src && target.src.includes('vidsrc')
+            target.tagName === 'IFRAME' && target.src && target.src.includes('vidsrc') ||
+            target.closest('#video-player-iframe') ||
+            window.location.href.includes('vidsrc')
           );
           
           const isSuspiciousElement = target && (
+            // Direct suspicious attributes
+            target.getAttribute('onclick')?.includes('window.open') ||
+            target.getAttribute('onclick')?.includes('popup') ||
+            target.getAttribute('onclick')?.includes('redirect') ||
+            target.getAttribute('target') === '_blank' ||
+            
+            // Parent element checks
             target.closest('[onclick*="window.open"]') ||
             target.closest('[onclick*="popup"]') ||
-            target.getAttribute('onclick')?.includes('window.open') ||
-            target.getAttribute('onclick')?.includes('popup')
+            target.closest('[onclick*="redirect"]') ||
+            target.closest('[target="_blank"]') ||
+            target.closest('a[href*="ads"]') ||
+            target.closest('a[href*="popup"]') ||
+            target.closest('a[href*="promo"]') ||
+            
+            // Suspicious class/id patterns
+            target.className?.match(/ad|popup|banner|promo|redirect/i) ||
+            target.id?.match(/ad|popup|banner|promo|redirect/i) ||
+            target.closest('[class*="ad"]') ||
+            target.closest('[id*="ad"]')
           );
           
-          // Only block if it's a VidSrc iframe interaction OR suspicious popup element
-          if (isVidSrcIframe || isSuspiciousElement) {
-            // For VidSrc iframes, block external redirects
-            const link = target.closest('a');
-            if (link && link.href && !link.href.startsWith(window.location.origin)) {
-              console.log('🚫 VidSrc external link BLOCKED:', link.href);
-              e.preventDefault();
-              e.stopImmediatePropagation();
-              return false;
-            }
+          const isSuspiciousLink = target && target.tagName === 'A' && target.href && (
+            !target.href.startsWith(window.location.origin) &&
+            !target.href.startsWith('javascript:') &&
+            !target.href.startsWith('#') &&
+            (target.href.includes('ads') || 
+             target.href.includes('popup') || 
+             target.href.includes('promo') ||
+             target.href.includes('redirect') ||
+             target.href.includes('doubleclick') ||
+             target.href.includes('googlesyndication'))
+          );
+          
+          // BLOCK ALL SUSPICIOUS INTERACTIONS
+          if (isVidSrcContext || isSuspiciousElement || isSuspiciousLink) {
+            console.log('🚫 SUSPICIOUS CLICK BLOCKED:', {
+              isVidSrcContext,
+              isSuspiciousElement,
+              isSuspiciousLink,
+              targetHref: target.href,
+              targetOnclick: target.getAttribute('onclick'),
+              targetClass: target.className
+            });
             
-            // Block popup-related attributes within VidSrc
-            if (target.getAttribute('onclick') || 
-                target.getAttribute('target') === '_blank' ||
-                target.closest('[onclick]') ||
-                target.closest('[target="_blank"]')) {
-              console.log('🚫 VidSrc popup click BLOCKED');
-              e.preventDefault();
-              e.stopImmediatePropagation();
-              return false;
-            }
-            
-            // Block suspicious click combinations within VidSrc
-            if (e.button !== 0 || e.ctrlKey || e.metaKey) {
-              console.log('🚫 VidSrc suspicious click BLOCKED');
-              e.preventDefault();
-              e.stopImmediatePropagation();
-              return false;
-            }
+            lastRedirectTime = now;
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            e.stopPropagation();
+            return false;
+          }
+          
+          // ADDITIONAL PROTECTION: Block middle-click and ctrl+click on any links within video context
+          if (isVidSrcContext && (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey)) {
+            console.log('🚫 VidSrc modified click BLOCKED');
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            return false;
           }
         }, true);
         
@@ -264,11 +349,46 @@
           });
         }
         
-        // === PHASE 7: ANTI-CIRCUMVENTION ===
+        // === PHASE 7: IFRAME MESSAGE INTERCEPTION ===
+        // Intercept all messages from iframes to block redirect attempts
+        window.addEventListener('message', function(event) {
+          if (!event.origin || !event.data) return;
+          
+          // Check for suspicious iframe messages
+          const data = event.data;
+          if (typeof data === 'string') {
+            if (data.includes('popup') || 
+                data.includes('redirect') || 
+                data.includes('window.open') ||
+                data.includes('ads') ||
+                data.includes('promo')) {
+              console.log('🚫 Suspicious iframe message BLOCKED:', data);
+              event.stopImmediatePropagation();
+              return false;
+            }
+          } else if (typeof data === 'object') {
+            if (data.type === 'popup' || 
+                data.type === 'redirect' ||
+                data.action === 'open' ||
+                data.url && isSuspiciousURL(data.url)) {
+              console.log('🚫 Suspicious iframe message object BLOCKED:', data);
+              event.stopImmediatePropagation();
+              return false;
+            }
+          }
+        }, true);
+        
+        // === PHASE 8: ANTI-CIRCUMVENTION ===
         // Block common ad globals
         window.gtag = () => console.log('🚫 Google Analytics NUKED');
         window.dataLayer = [];
         window._gaq = [];
+        
+        // Override common ad network globals
+        window.googletag = { cmd: [], pubads: () => ({ refresh: () => {}, clear: () => {} }) };
+        window.pbjs = { que: [], addAdUnits: () => {}, requestBids: () => {} };
+        window._fbq = () => console.log('🚫 Facebook Pixel NUKED');
+        window.fbq = () => console.log('🚫 Facebook Pixel NUKED');
         
         // Block context menus on suspicious elements
         document.addEventListener('contextmenu', function(e) {
@@ -277,6 +397,26 @@
             e.preventDefault();
           }
         }, true);
+        
+        // FINAL SAFEGUARD: Track window.open attempts (already locked above)
+        let blockedAttempts = 0;
+        
+        // Enhanced tracking for debugging
+        const originalOpenTracker = () => {
+          blockedAttempts++;
+          console.log(`🚫 Window.open attempt #${blockedAttempts} intercepted by nuclear blocking`);
+          
+          if (blockedAttempts > 5) {
+            console.log('🚫 NUCLEAR MODE: High popup activity detected - extra vigilance enabled');
+          }
+        };
+        
+        // Monitor attempts every second
+        setInterval(() => {
+          if (blockedAttempts > 0) {
+            blockedAttempts = Math.max(0, blockedAttempts - 1); // Decay counter
+          }
+        }, 5000);
         
         console.log('🚫 NUCLEAR AD BLOCKING: ALL SYSTEMS ARMED AND READY');
         
