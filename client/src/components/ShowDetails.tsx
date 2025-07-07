@@ -302,8 +302,8 @@ export default function ShowDetails({
             </div>
           </div>
           
-          <ScrollArea className="h-96 w-full">
-            <div className="grid gap-2">
+          <ScrollArea className="h-96 w-full" key={`season-${selectedSeason}`}>
+            <div className="grid gap-2" key={`episodes-${selectedSeason}`}>
               {seasonEpisodes.length === 0 ? (
                 <div className="p-4 text-center text-muted-foreground">
                   No episodes found for Season {selectedSeason}
@@ -317,7 +317,7 @@ export default function ShowDetails({
                   const cachedDescription = episodeDescriptionCacheRef.current[episodeKey];
                   
                   // Create stable key to prevent React DOM conflicts
-                  const stableKey = `${showId}-s${selectedSeason}e${episode.metadata?.episode || index + 1}-${episode.sourceId}`;
+                  const stableKey = `episode-${episode.sourceId}-s${episode.metadata?.season || 1}e${episode.metadata?.episode || index + 1}`;
                   
                   return (
                     <Card 
