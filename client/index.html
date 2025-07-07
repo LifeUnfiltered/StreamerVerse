@@ -197,22 +197,25 @@
             target.getAttribute('onclick')?.includes('window.open') ||
             target.getAttribute('onclick')?.includes('popup') ||
             target.getAttribute('onclick')?.includes('redirect') ||
-            target.getAttribute('target') === '_blank' ||
+            (target.getAttribute('target') === '_blank' && 
+             target.href && 
+             !target.href.startsWith(window.location.origin)) ||
             
-            // Parent element checks
+            // Parent element checks - only for actual popup/redirect attributes
             target.closest('[onclick*="window.open"]') ||
             target.closest('[onclick*="popup"]') ||
             target.closest('[onclick*="redirect"]') ||
-            target.closest('[target="_blank"]') ||
-            target.closest('a[href*="ads"]') ||
-            target.closest('a[href*="popup"]') ||
-            target.closest('a[href*="promo"]') ||
+            target.closest('a[href*="doubleclick"]') ||
+            target.closest('a[href*="googlesyndication"]') ||
+            target.closest('a[href*="googletagmanager"]') ||
             
-            // Suspicious class/id patterns
-            target.className?.match(/ad|popup|banner|promo|redirect/i) ||
-            target.id?.match(/ad|popup|banner|promo|redirect/i) ||
-            target.closest('[class*="ad"]') ||
-            target.closest('[id*="ad"]')
+            // Only match obvious ad-specific patterns (not generic "ad" substring)
+            target.className?.match(/\b(popup|banner|advertisement|adsense|advert)\b/i) ||
+            target.id?.match(/\b(popup|banner|advertisement|adsense|advert)\b/i) ||
+            target.closest('[class*="popup"]') ||
+            target.closest('[class*="advertisement"]') ||
+            target.closest('[id*="popup"]') ||
+            target.closest('[id*="advertisement"]')
           );
           
           const isSuspiciousLink = target && target.tagName === 'A' && target.href && (
@@ -227,15 +230,15 @@
              target.href.includes('googlesyndication'))
           );
           
-          // BLOCK ALL SUSPICIOUS INTERACTIONS
-          if (isVidSrcContext || isSuspiciousElement || isSuspiciousLink) {
-            console.log('🚫 SUSPICIOUS CLICK BLOCKED:', {
+          // ONLY BLOCK when we have a legitimate video player AND suspicious interaction
+          if ((isVidSrcContext && (isSuspiciousElement || isSuspiciousLink)) || 
+              (isSuspiciousElement && (target.closest('#video-player-iframe') || target.closest('.video-player-container')))) {
+            console.log('🚫 VIDEO PLAYER CLICK BLOCKED:', {
               isVidSrcContext,
               isSuspiciousElement,
               isSuspiciousLink,
               targetHref: target.href,
-              targetOnclick: target.getAttribute('onclick'),
-              targetClass: target.className
+              targetOnclick: target.getAttribute('onclick')
             });
             
             lastRedirectTime = now;
